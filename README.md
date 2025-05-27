@@ -2,7 +2,7 @@
 
 ## Independent, Vehicle-based Observations & Analysis
 
-This repository presents field observations and analyses from surface data collected during vehicle-based intercepts of landfalling hurricanes during the 2024 Atlantic hurricane season. All data were recorded using a **Davis Vantage Pro 2** weather station mounted on a **custom-built apparatus affixed to the truck**, designed to withstand hurricane-force conditions and collect reliable in-situ meteorological data.
+This repository presents field observations and analyses from surface data collected during vehicle-based intercepts of landfalling hurricanes during the 2024 Atlantic hurricane season. All data were recorded using a **Davis Vantage Pro 2** weather station mounted on a **custom-built apparatus affixed to the vehicle**, designed to withstand hurricane-force conditions and collect reliable in-situ meteorological data.
 
 The station was configured to log high-resolution observations at **1-minute intervals** during landfall. These observations were later used to produce detailed visualizations capturing storm evolution and intensity.
 
@@ -77,7 +77,7 @@ The observations captured are documented through detailed plots for each interce
 
 ## Methods
 
-All observations were recorded using a **Davis Vantage Pro 2** weather station mounted on a **custom-built vehicle mount**. Measurements were wirelessly transmitted to a data logging console located inside the vehicle, which subsequently pushed data packets to a connected computer running Davis WeatherLink software. This enabled real-time monitoring and archival of the observations.
+All observations were recorded using a Davis Vantage Pro 2 weather station mounted on a custom-built vehicle mount. Measurements were wirelessly transmitted to a data logging console located inside the vehicle, which subsequently pushed data packets to a connected computer running Davis WeatherLink software. This enabled real-time monitoring and archival of the observations.
 
 The instrumentation suite included:
 
@@ -87,6 +87,7 @@ The instrumentation suite included:
 - **Tipping-Bucket Rain Gauge**: Recorded rainfall rates and cumulative precipitation totals.
 
 The station logged data at **1-minute intervals**. Pressure tendencies were computed using backward finite differences across multiple temporal intervals. All visualizations were generated using Python (`pandas`, `numpy`, `matplotlib`).
+
 
 ---
 
