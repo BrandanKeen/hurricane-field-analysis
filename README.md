@@ -19,7 +19,7 @@ The observations captured are documented through detailed plots for each interce
 ## Hurricane Milton (October 9, 2024) – Sarasota, FL
 
 <div align="center">
-  <img src="Images/Milton/Milton_animated_resize.GIF" alt="Milton Radar Loop" height="600" style="display: inline-block; margin-right: 10px;">
+  <img src="Images/Milton/Milton_animated_resized.GIF" alt="Milton Radar Loop" height="600" style="display: inline-block; margin-right: 10px;">
   <img src="Images/Milton/Milton_eye_resize.png" alt="Milton Eye Photo" height="600" style="display: inline-block;">
 </div>
 
