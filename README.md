@@ -32,7 +32,7 @@ The observations captured are documented through detailed plots for each interce
 
 ![Multi-Panel Summary](Images/Milton/Hurricane_Milton_MultiPanel.png)
 
-### Available Plots:
+### Plots:
 
 - [Pressure Time Series](Images/Milton/Hurricane_Milton_MSLP.png)
   
@@ -65,7 +65,7 @@ The observations captured are documented through detailed plots for each interce
 
 ![Multi-Panel Summary](Images/Helene/Hurricane_Helene_MultiPanel.png)
 
-### Available Plots:
+### Plots:
 
 - [Pressure Time Series](Images/Helene/Hurricane_Helene_MSLP.png)
 - Pressure Tendencies:
