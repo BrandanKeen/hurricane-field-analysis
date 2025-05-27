@@ -86,10 +86,15 @@ The observations captured are documented through detailed plots for each interce
 
 All observations were recorded using a Davis Vantage Pro 2 weather station mounted on a custom-built vehicle mount. Measurements were wirelessly transmitted to a data logging console connected to a computer running Davis WeatherLink software. This enabled real-time monitoring and archival of the observations from inside the vehicle.
 
-<a href="https://youtube.com/shorts/FWOdxVycSVQ" target="_blank">
-  <img src="Images/logger_computer.png" alt="Watch Station Setup Video" width="250">
-</a><br>
-</a><br>
+<p align="center">
+  <a href="https://youtube.com/shorts/FWOdxVycSVQ?si=eooDoXEakciPfw9Q" target="_blank">
+    <img src="Images/logger_computer.png" alt="Watch Station Setup Video" width="250">
+  </a>
+  <br>
+  <em style="font-size:smaller;">Click to watch a short video of the station and logging setup prior to Hurricane Milton.</em>
+</p>
+
+
 
 The instrumentation suite included:
 
