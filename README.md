@@ -18,19 +18,27 @@ The observations captured are documented through detailed plots for each interce
 
 ## Hurricane Milton (October 9, 2024) – Sarasota, FL
 
-- ![Multi-Panel Summary](Images/Milton/Hurricane_Milton_MultiPanel.png)
+<div align="center">
+  <img src="Images/Milton/Milton_animated_resize.GIF" alt="Milton Radar Loop" height="600" style="display: inline-block; margin-right: 10px;">
+  <img src="Images/Milton/Milton_eye_resize.png" alt="Milton Eye Photo" height="600" style="display: inline-block;">
+</div>
+
+---
+
+![Multi-Panel Summary](Images/Milton/Hurricane_Milton_MultiPanel.png)
 
 ### Available Plots:
 
-- [Pressure Time Series](Images//Milton/Hurricane_Milton_MSLP.png)
+- [Pressure Time Series](Images/Milton/Hurricane_Milton_MSLP.png)
 - Pressure Tendencies:
-  - [5-minute](Images/Hurricane_Milton_PTendency_5min.png)
-  - [10-minute](Images/Hurricane_Milton_PTendency_10min.png)
-  - [15-minute](Images/Hurricane_Milton_PTendency_15min.png)
-  - [30-minute](Images/Hurricane_Milton_PTendency_30min.png)
-- [Wind Speed and Gusts](Images/Hurricane_Milton_WindSpeed.png)
-- [Temperature and Dewpoint](Images/Hurricane_Milton_Temp_Dew.png)
-- [Rain Rate and Accumulation](Images/Hurricane_Milton_RainRate.png)
+  - [5-minute](Images/Milton/Hurricane_Milton_PTendency_5min.png)
+  - [10-minute](Images/Milton/Hurricane_Milton_PTendency_10min.png)
+  - [15-minute](Images/Milton/Hurricane_Milton_PTendency_15min.png)
+  - [30-minute](Images/Milton/Hurricane_Milton_PTendency_30min.png)
+  - [1-hour](Images/Milton/Hurricane_Milton_PTendency_1hour.png)
+- [Wind Speed and Gusts](Images/Milton/Hurricane_Milton_WindSpeed.png)
+- [Temperature and Dewpoint](Images/Milton/Hurricane_Milton_Temp_Dew.png)
+- [Rain Rate and Accumulation](Images/Milton/Hurricane_Milton_RainRate.png)
 
 ---
 
