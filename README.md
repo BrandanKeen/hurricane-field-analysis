@@ -2,7 +2,7 @@
 
 ## Independent, Vehicle-based Observations & Analysis
 
-This repository presents field observations and analyses from surface data collected during vehicle-based intercepts of landfalling hurricanes during the 2024 Atlantic hurricane season. All data were recorded using a **Davis Vantage Pro 2** weather station mounted on a **custom-built apparatus affixed to the vehicle**, designed to withstand hurricane-force conditions and collect reliable in-situ meteorological data.
+This repository presents field observations and analyses from surface data collected during vehicle-based intercepts of landfalling hurricanes during the 2024 Atlantic hurricane season. All data were recorded using a **Davis Vantage Pro 2** weather station mounted on a **custom-built mount secured to the vehicle**, designed to withstand hurricane-force conditions and collect reliable in-situ meteorological data.
 
 The station was configured to log high-resolution observations at **1-minute intervals** during landfall. These observations were later used to produce detailed visualizations capturing storm evolution and intensity.
 
