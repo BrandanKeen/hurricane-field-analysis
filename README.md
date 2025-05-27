@@ -23,6 +23,11 @@ The observations captured are documented through detailed plots for each interce
   <img src="Images/Milton/Milton_eye.png" alt="Milton Eye Photo" width="500" height="" style="display: inline-block;">
 </div>
 
+<p align="center" style="font-size:smaller;"><em><strong>Left:</strong> Reflectivity of Hurricane Milton during intercept; crosshairs mark vehicle location. <strong>Right:</strong> Vehicle and station in the eye.</em></p>
+
+
+
+
 ---
 
 ![Multi-Panel Summary](Images/Milton/Hurricane_Milton_MultiPanel.png)
@@ -53,6 +58,8 @@ The observations captured are documented through detailed plots for each interce
   <img src="Images/Helene/Helene_animated.gif" alt="Helene Radar Loop" height="600" style="display: inline-block; margin-right: 10px;">
   <img src="Images/Helene/Helene_eye_resize.png" alt="Helene Eye Photo" height="600" style="display: inline-block;">
 </div>
+
+<p align="center" style="font-size:smaller;"><em><strong>Left:</strong> Reflectivity of Hurricane Helene during intercept; crosshairs mark vehicle location. <strong>Right:</strong> Vehicle and station in the eye.</em></p>
 
 ---
 
