@@ -72,15 +72,16 @@ The observations captured are documented through detailed plots for each interce
 
 ## Methods
 
-All field observations were recorded using a **Davis Vantage Pro 2** weather station mounted on a **custom-fabricated vehicle platform**. This mobile setup enabled close-range storm intercepts and consistent exposure to the hurricane core.
+All field observations were recorded using a **Davis Vantage Pro 2** weather station mounted on a **custom-built vehicle mount**. The station transmitted measurements wirelessly to a data logging console inside the vehicle, which subsequently transferred the data to a computer equipped with Davis WeatherLink software for real-time monitoring and archival.
 
-The sensor suite includes:
-- Barometric pressure sensor
-- Temperature and humidity sensors
-- Anemometer for wind speed and gust measurements
-- Tipping-bucket rain gauge for precipitation rate and accumulation
+The instrumentation suite included:
 
-The station was configured to log data at **1-minute intervals**. Pressure tendencies were computed using centered finite differences over varying intervals. All figures were generated using Python (`pandas`, `numpy`, `matplotlib`).
+- **Barometric Pressure Sensor**: Adjusted to account for the station’s elevation above mean sea level (MSL).
+- **Temperature and Humidity Sensor**: Provided ambient air temperature and humidity data.
+- **Anemometer**: Captured sustained wind speeds and peak wind gusts.
+- **Tipping-Bucket Rain Gauge**: Recorded rainfall rates and cumulative precipitation totals.
+
+The station logged data at **1-minute intervals**. Pressure tendencies were computed using backward finite differences across multiple temporal intervals. All visualizations were generated using Python (`pandas`, `numpy`, `matplotlib`).
 
 ---
 
