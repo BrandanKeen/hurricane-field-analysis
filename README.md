@@ -40,7 +40,7 @@ The observations captured are documented through detailed plots for each interce
 
 ### Available Plots:
 
-- [Pressure Time Series](Images/Hurricane_Helene_MSLP.png)
+- [Pressure Time Series](Images/Helene/Hurricane_Helene_MSLP.png)
 - Pressure Tendencies:
   - [5-minute](Images/Helene/Hurricane_Helene_PTendency_5min.png)
   - [10-minute](Images/Helene/Hurricane_Helene_PTendency_10min.png)
