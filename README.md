@@ -20,7 +20,7 @@ The observations captured are documented through detailed plots for each interce
 
 <div align="center">
   <img src="Images/Milton/Milton_animated.GIF" alt="Milton Radar Loop" height="600"  style="display: inline-block; margin-right: 10px;">
-  <img src="Images/Milton/Milton_eye.png" alt="Milton Eye Photo" width="550" height="" style="display: inline-block;">
+  <img src="Images/Milton/Milton_eye.png" alt="Milton Eye Photo" width="500" height="" style="display: inline-block;">
 </div>
 
 ---
