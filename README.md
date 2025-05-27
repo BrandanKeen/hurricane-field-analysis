@@ -6,7 +6,7 @@ This repository presents field observations and analyses from surface data colle
 
 The station was configured to log high-resolution observations at **1-minute intervals** during landfall. These observations were later used to produce detailed visualizations capturing storm evolution and intensity.
 
-The primary focus of these analyses includes:
+The analyses include:
 - Surface pressure and pressure tendencies at multiple temporal resolutions
 - Sustained wind speeds and gust observations
 - Rainfall rates and total accumulations
