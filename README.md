@@ -123,7 +123,7 @@ Planned expansions and enhancements to this project are already underway, with s
 </p>
 
 
-- **Real-Time Data Transmission**: Future versions of each station may incorporate cellular or satellite-based communication modules, enabling **live data transmission** to cloud-based platforms. This capability would allow real-time surface condition monitoring by emergency management officials, researchers, and the public as hurricanes make landfall.
+- **Real-Time Data Transmission**: Future versions of each station may incorporate cellular or satellite-based communication modules, enabling live data transmission to cloud-based platforms. This capability would allow real-time surface condition monitoring by emergency management officials, researchers, and the public as hurricanes make landfall.
 
 - **Balloon-Based Profiling** *(Planned)*:  
   Future efforts may include launching instrumented weather balloons from within the eye or near-core regions of landfalling hurricanes. These profiles would capture upper-air measurements typically unavailable during landfall, as aircraft reconnaissance flights are generally suspended at this stage due to hazardous turbulence. Combined with surface observations, this dataset could significantly enhance hurricane modeling and improve short-term intensity forecasts.
