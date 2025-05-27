@@ -2,9 +2,9 @@
 
 ## Independent, Vehicle-based Observations & Analysis
 
-This repository presents field observations and comprehensive analyses collected during vehicle-based intercepts of landfalling hurricanes during the 2024 Atlantic hurricane season. All data were recorded using a **Davis Vantage Pro 2** weather station mounted on a **custom-fabricated platform affixed to a truck**, designed to withstand hurricane-force conditions and collect reliable in-situ meteorological data.
+This repository presents field observations and analyses from surface data collected during vehicle-based intercepts of landfalling hurricanes during the 2024 Atlantic hurricane season. All data were recorded using a **Davis Vantage Pro 2** weather station mounted on a **custom-built apparatus affixed to the truck**, designed to withstand hurricane-force conditions and collect reliable in-situ meteorological data.
 
-The station was configured to log high-resolution observations at **1-minute intervals** during landfall. These observations were used to produce detailed visualizations capturing storm evolution and intensity.
+The station was configured to log high-resolution observations at **1-minute intervals** during landfall. These observations were later used to produce detailed visualizations capturing storm evolution and intensity.
 
 The primary focus of these analyses includes:
 - Surface pressure and pressure tendencies at multiple temporal resolutions
@@ -12,7 +12,7 @@ The primary focus of these analyses includes:
 - Rainfall rates and total accumulations
 - Temperature and dewpoint trends
 
-The observations captured are documented through detailed plots for each intercepted storm event, presented below chronologically with the most recent hurricane first.
+The observations captured are documented through detailed plots for each intercepted storm, presented below chronologically with the most recent hurricane first.
 
 ---
 
@@ -62,7 +62,9 @@ The observations captured are documented through detailed plots for each interce
   - [15-minute](Images/Helene/Hurricane_Helene_PTendency_15min.png)
   - [30-minute](Images/Helene/Hurricane_Helene_PTendency_30min.png)
   - [1-hour](Images/Helene/Hurricane_Helene_PTendency_1hour.png)
-- [Wind Speed and Gusts](Images/Helene/Hurricane_Helene_WindSpeed.png)
+- [Wind Speed and Gusts](Images/Helene/Hurricane_Helene_WindSpeed.png)  
+  <p style="font-size:smaller;"><em>Note: Wind data during part of eye passage was omitted due to relocation of the vehicle, which skewed wind measurements.</em></p>
+
 - [Temperature and Dewpoint](Images/Helene/Hurricane_Helene_Temp_Dew.png)
 - [Rain Rate and Accumulation](Images/Helene/Hurricane_Helene_RainRate.png)
 
