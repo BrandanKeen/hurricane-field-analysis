@@ -36,10 +36,11 @@ The observations captured are documented through detailed plots for each interce
 
 ## Hurricane Helene (September 26, 2024) – Perry, FL
 
-<p align="center">
-  <img src="Images/Helene/Helene_animated.gif" alt="Helene Radar Loop" height="750" style="margin-right: 2%;">
-  <img src="Images/Helene/Helene_eye_resize.png" alt="Helene Eye Photo" height="750">
-</p>
+<div align="center">
+  <img src="Images/Helene/Helene_animated.gif" alt="Helene Radar Loop" height="750" style="display: inline-block; margin-right: 10px;">
+  <img src="Images/Helene/Helene_eye_resize.png" alt="Helene Eye Photo" height="750" style="display: inline-block;">
+</div>
+
 
 
 ---
