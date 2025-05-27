@@ -75,7 +75,7 @@ The observations captured are documented through detailed plots for each interce
   - [30-minute](Images/Helene/Hurricane_Helene_PTendency_30min.png)
   - [1-hour](Images/Helene/Hurricane_Helene_PTendency_1hour.png)
 - [Wind Speed and Gusts](Images/Helene/Hurricane_Helene_WindSpeed.png)  
-  <p style="font-size:smaller;"><em>Note: Wind data during part of eye passage was omitted due to relocation of the vehicle, which skewed wind measurements.</em></p>
+  <p style="font-size:smaller;"><em>Note: Wind data during part of eye passage was omitted due to relocation of the vehicle.</em></p>
 
 - [Temperature and Dewpoint](Images/Helene/Hurricane_Helene_Temp_Dew.png)
 - [Rain Rate and Accumulation](Images/Helene/Hurricane_Helene_RainRate.png)
