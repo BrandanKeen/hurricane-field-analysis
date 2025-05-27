@@ -30,15 +30,20 @@ The observations captured are documented through detailed plots for each interce
 ### Available Plots:
 
 - [Pressure Time Series](Images/Milton/Hurricane_Milton_MSLP.png)
+  
 - Pressure Tendencies:
-  - [5-minute](Images/Milton/Hurricane_Milton_PTendency_5min.png)
+  - [5-minute](Images/Milton/Hurricane_Milton_PTendency_5min.png) 
   - [10-minute](Images/Milton/Hurricane_Milton_PTendency_10min.png)
   - [15-minute](Images/Milton/Hurricane_Milton_PTendency_15min.png)
   - [30-minute](Images/Milton/Hurricane_Milton_PTendency_30min.png)
   - [1-hour](Images/Milton/Hurricane_Milton_PTendency_1hour.png)
+    
 - [Wind Speed and Gusts](Images/Milton/Hurricane_Milton_WindSpeed.png)
+  
 - [Temperature and Dewpoint](Images/Milton/Hurricane_Milton_Temp_Dew.png)
+  
 - [Rain Rate and Accumulation](Images/Milton/Hurricane_Milton_RainRate.png)
+
 
 ---
 
@@ -72,7 +77,7 @@ The observations captured are documented through detailed plots for each interce
 
 ## Methods
 
-All field observations were recorded using a **Davis Vantage Pro 2** weather station mounted on a **custom-built vehicle mount**. The station transmitted measurements wirelessly to a data logging console inside the vehicle, which subsequently transferred the data to a computer equipped with Davis WeatherLink software for real-time monitoring and archival.
+All observations were recorded using a **Davis Vantage Pro 2** weather station mounted on a **custom-built vehicle mount**. Measurements were wirelessly transmitted to a data logging console located inside the vehicle, which subsequently pushed data packets to a connected computer running Davis WeatherLink software. This enabled real-time monitoring and archival of the observations.
 
 The instrumentation suite included:
 
@@ -87,16 +92,21 @@ The station logged data at **1-minute intervals**. Pressure tendencies were comp
 
 ## Future Work
 
-Planned expansions and improvements:
-- Deployment of three additional autonomous weather stations for simultaneous multi-site data collection.
-- A reinforced apparatus to elevate the anemometer to a height of approximately 25–30 feet to standardize wind measurements.
-- Further intercepts of tropical cyclones in future hurricane seasons to expand the dataset.
+Planned expansions and enhancements to this project are already underway, with several key components actively being implemented:
 
-**Note on Data Accessibility**: Raw observational datasets are currently restricted due to evolving meteorological data sharing policies. Figures are shared here for documentation purposes, with dataset access potentially available upon request for academic collaboration.
+- **Multi-Station Deployment**: Three additional Davis Vantage Pro 2 weather stations, along with the necessary data logging hardware, have been acquired and are being prepared for operational deployment. These units will be strategically positioned during future hurricane intercepts to enable simultaneous, multi-location surface observations and improved spatial resolution of storm impacts.
+
+- **Adjustable Station Mount**: A reinforced and adjustable mounting apparatus has been fully developed to elevate the anemometer between 10 and 35 feet. This enhancement allows for WMO standardized wind measurements and improves the accuracy of peak wind and gust recordings for the vehicle-based station.
+
+- **Real-Time Data Transmission**: Future versions of each station may incorporate cellular or satellite-based communication modules, enabling **live data transmission** to cloud-based platforms. This capability would allow real-time surface condition monitoring by emergency management officials, researchers, and the public as hurricanes make landfall.
+
+- **Balloon-Based Profiling** *(Planned)*:  
+  Future efforts may include launching instrumented weather balloons into the eye or near-core regions of landfalling hurricanes. These profiles would capture upper-air measurements typically unavailable during landfall, as aircraft reconnaissance flights are generally suspended at this stage due to hazardous turbulence. Combined with surface observations, this dataset could significantly enhance hurricane modeling and improve short-term intensity forecasts.
+
 
 ---
 
 ## License
 
 This repository is provided under the MIT License. Figures and methodologies may be used for research and educational purposes with appropriate attribution.
-"""
+
