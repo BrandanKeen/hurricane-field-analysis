@@ -79,6 +79,11 @@ The observations captured are documented through detailed plots for each interce
 
 All observations were recorded using a Davis Vantage Pro 2 weather station mounted on a custom-built vehicle mount. Measurements were wirelessly transmitted to a data logging console located inside the vehicle, which subsequently pushed data packets to a connected computer running Davis WeatherLink software. This enabled real-time monitoring and archival of the observations.
 
+<a href="https://youtube.com/shorts/FWOdxVycSVQ" target="_blank">
+  <img src="Images/logger_computer.png" alt="Watch Station Setup Video" width="250">
+</a><br>
+</a><br>
+
 The instrumentation suite included:
 
 - **Barometric Pressure Sensor**: Adjusted to account for the station’s elevation above mean sea level (MSL).
