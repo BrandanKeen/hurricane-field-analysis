@@ -3,7 +3,9 @@ readme_content = """
 
 ## Independent, Vehicle-based Observations & Analysis
 
-This repository presents field observations and comprehensive analyses collected during vehicle-based intercepts of landfalling hurricanes during the 2024 Atlantic hurricane season. All data were recorded using a custom-built, truck-mounted weather station logging meteorological conditions at high resolution (1-minute intervals).
+This repository presents field observations and comprehensive analyses collected during vehicle-based intercepts of landfalling hurricanes during the 2024 Atlantic hurricane season. All data were recorded using a **Davis Vantage Pro 2** weather station mounted on a **custom-fabricated platform affixed to a truck**, designed to withstand hurricane-force conditions and collect reliable in-situ meteorological data.
+
+The station was configured to log high-resolution observations at **1-minute intervals** during landfall. These observations were used to produce detailed visualizations capturing storm evolution and intensity.
 
 The primary focus of these analyses includes:
 - Surface pressure and pressure tendencies at multiple temporal resolutions
@@ -54,13 +56,15 @@ The observations captured are documented through detailed plots for each interce
 
 ## Methods
 
-The observational platform comprises:
-- A barometric pressure sensor
-- Temperature and humidity sensors
-- An anemometer mounted at an elevation for minimal wind interference
-- A rain gauge capable of high-resolution precipitation measurements
+All field observations were recorded using a **Davis Vantage Pro 2** weather station mounted on a **custom-fabricated vehicle platform**. This mobile setup enabled close-range storm intercepts and consistent exposure to the hurricane core.
 
-All observations were logged continuously at 1-minute intervals. Data analyses and visualizations were performed using Python (pandas, numpy, matplotlib), generating comprehensive time-series analyses, pressure tendency calculations, and multi-parameter visualizations.
+The sensor suite includes:
+- Barometric pressure sensor
+- Temperature and humidity sensors
+- Anemometer for wind speed and gust measurements
+- Tipping-bucket rain gauge for precipitation rate and accumulation
+
+The station was configured to log data at **1-minute intervals**. Pressure tendencies were computed using centered finite differences over varying intervals. All figures were generated using Python (`pandas`, `numpy`, `matplotlib`).
 
 ---
 
