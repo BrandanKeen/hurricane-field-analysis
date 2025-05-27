@@ -1,4 +1,3 @@
-readme_content = """
 # Hurricane Intercept & Field Data Analysis
 
 ## Independent, Vehicle-based Observations & Analysis
@@ -19,10 +18,10 @@ The observations captured are documented through detailed plots for each interce
 
 ## Hurricane Milton (October 9, 2024) – Sarasota, FL
 
-**Minimum Recorded Pressure**: 961.4 mb (8:34 PM EDT)
+- ![Multi-Panel Summary](Images/Milton/Hurricane_Milton_MultiPanel.png)
 
 ### Available Plots:
-- ![Multi-Panel Summary](Images/Milton/Hurricane_Milton_MultiPanel.png)
+
 - [Pressure Time Series](Images//Milton/Hurricane_Milton_MSLP.png)
 - Pressure Tendencies:
   - [5-minute](Images/Hurricane_Milton_PTendency_5min.png)
@@ -37,10 +36,10 @@ The observations captured are documented through detailed plots for each interce
 
 ## Hurricane Helene (September 26, 2024) – Perry, FL
 
-**Minimum Recorded Pressure**: 947.9 mb (11:33 PM EDT)
+![Multi-Panel Summary](Images/Helene/Hurricane_Helene_MultiPanel.png)
 
 ### Available Plots:
-![Multi-Panel Summary](Images/Helene/Hurricane_Helene_MultiPanel.png)
+
 - [Pressure Time Series](Images/Hurricane_Helene_MSLP.png)
 - Pressure Tendencies:
   - [5-minute](Images/Helene/Hurricane_Helene_PTendency_5min.png)
