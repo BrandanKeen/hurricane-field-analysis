@@ -22,8 +22,8 @@ The observations captured are documented through detailed plots for each interce
 **Minimum Recorded Pressure**: 961.4 mb (8:34 PM EDT)
 
 ### Available Plots:
-- ![Multi-Panel Summary](Images/Hurricane_Milton_MultiPanel.png)
-- [Pressure Time Series](Images/Hurricane_Milton_MSLP.png)
+- ![Multi-Panel Summary](Images/Milton/Hurricane_Milton_MultiPanel.png)
+- [Pressure Time Series](Images//Milton/Hurricane_Milton_MSLP.png)
 - Pressure Tendencies:
   - [5-minute](Images/Hurricane_Milton_PTendency_5min.png)
   - [10-minute](Images/Hurricane_Milton_PTendency_10min.png)
