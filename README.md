@@ -116,6 +116,13 @@ Planned expansions and enhancements to this project are already underway, with s
 
 - **Adjustable Station Mount**: A reinforced and adjustable mounting apparatus has been fully developed to elevate the anemometer between 10 and 35 feet. This enhancement allows for WMO standardized wind measurements and improves the accuracy of peak wind and gust recordings for the vehicle-based station.
 
+<p align="center">
+  <img src="Images/new_station_mount.png" alt="Adjustable Station Mount" width="900">
+  <br>
+  <em style="font-size:smaller;"><strong>Figure:</strong> Adjustable mount developed for vehicle-based anemometer, extendable from 10 to 35 feet and secured using 1/8&quot; steel guy wires.</em>
+</p>
+
+
 - **Real-Time Data Transmission**: Future versions of each station may incorporate cellular or satellite-based communication modules, enabling **live data transmission** to cloud-based platforms. This capability would allow real-time surface condition monitoring by emergency management officials, researchers, and the public as hurricanes make landfall.
 
 - **Balloon-Based Profiling** *(Planned)*:  
