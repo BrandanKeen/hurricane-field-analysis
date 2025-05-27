@@ -41,13 +41,6 @@ The observations captured are documented through detailed plots for each interce
   <img src="Images/Helene/Helene_eye_resize.png" alt="Helene Eye Photo" height="600" style="display: inline-block;">
 </div>
 
-<div align="center">
-  <img src="Images/Helene/Helene_animated.gif" alt="Helene Radar Loop" height="750" style="display: inline-block; margin-right: 10px;">
-  <img src="Images/Helene/Helene_eye_resize.png" alt="Helene Eye Photo" height="750" style="display: inline-block;">
-</div>
-
-
-
 ---
 
 ![Multi-Panel Summary](Images/Helene/Hurricane_Helene_MultiPanel.png)
