@@ -91,7 +91,7 @@ All observations were recorded using a Davis Vantage Pro 2 weather station mount
     <img src="Images/logger_computer.png" alt="Watch Station Setup Video" width="250">
   </a>
   <br>
-  <em style="font-size:smaller;">Click to watch a short video of the station and logging setup prior to Hurricane Milton.</em>
+  <em style="font-size:smaller;">Click to watch a short clip of the station and logging setup prior to Hurricane Milton.</em>
 </p>
 
 
