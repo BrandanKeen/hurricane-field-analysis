@@ -77,7 +77,7 @@ The observations captured are documented through detailed plots for each interce
 
 ## Methods
 
-All observations were recorded using a Davis Vantage Pro 2 weather station mounted on a custom-built vehicle mount. Measurements were wirelessly transmitted to a data logging console located inside the vehicle, which subsequently pushed data packets to a connected computer running Davis WeatherLink software. This enabled real-time monitoring and archival of the observations.
+All observations were recorded using a Davis Vantage Pro 2 weather station mounted on a custom-built vehicle mount. Measurements were wirelessly transmitted to a data logging console connected to a computer running Davis WeatherLink software. This enabled real-time monitoring and archival of the observations from inside the vehicle.
 
 <a href="https://youtube.com/shorts/FWOdxVycSVQ" target="_blank">
   <img src="Images/logger_computer.png" alt="Watch Station Setup Video" width="250">
@@ -107,7 +107,7 @@ Planned expansions and enhancements to this project are already underway, with s
 - **Real-Time Data Transmission**: Future versions of each station may incorporate cellular or satellite-based communication modules, enabling **live data transmission** to cloud-based platforms. This capability would allow real-time surface condition monitoring by emergency management officials, researchers, and the public as hurricanes make landfall.
 
 - **Balloon-Based Profiling** *(Planned)*:  
-  Future efforts may include launching instrumented weather balloons into the eye or near-core regions of landfalling hurricanes. These profiles would capture upper-air measurements typically unavailable during landfall, as aircraft reconnaissance flights are generally suspended at this stage due to hazardous turbulence. Combined with surface observations, this dataset could significantly enhance hurricane modeling and improve short-term intensity forecasts.
+  Future efforts may include launching instrumented weather balloons from within the eye or near-core regions of landfalling hurricanes. These profiles would capture upper-air measurements typically unavailable during landfall, as aircraft reconnaissance flights are generally suspended at this stage due to hazardous turbulence. Combined with surface observations, this dataset could significantly enhance hurricane modeling and improve short-term intensity forecasts.
 
 
 ---
