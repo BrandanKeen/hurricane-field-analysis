@@ -40,17 +40,17 @@ The observations captured are documented through detailed plots for each interce
 **Minimum Recorded Pressure**: 947.9 mb (11:33 PM EDT)
 
 ### Available Plots:
-- ![Multi-Panel Summary](Images/Hurricane_Helene_MultiPanel.png)
+![Multi-Panel Summary](Images/Helene/Hurricane_Helene_MultiPanel.png)
 - [Pressure Time Series](Images/Hurricane_Helene_MSLP.png)
 - Pressure Tendencies:
-  - [5-minute](Images/Hurricane_Helene_PTendency_5min.png)
-  - [10-minute](Images/Hurricane_Helene_PTendency_10min.png)
-  - [15-minute](Images/Hurricane_Helene_PTendency_15min.png)
-  - [30-minute](Images/Hurricane_Helene_PTendency_30min.png)
-  - [1-hour](Images/Hurricane_Helene_PTendency_1hour.png)
-- [Wind Speed and Gusts](Images/Hurricane_Helene_WindSpeed.png)
-- [Temperature and Dewpoint](Images/Hurricane_Helene_Temp_Dew.png)
-- [Rain Rate and Accumulation](Images/Hurricane_Helene_RainRate.png)
+  - [5-minute](Images/Helene/Hurricane_Helene_PTendency_5min.png)
+  - [10-minute](Images/Helene/Hurricane_Helene_PTendency_10min.png)
+  - [15-minute](Images/Helene/Hurricane_Helene_PTendency_15min.png)
+  - [30-minute](Images/Helene/Hurricane_Helene_PTendency_30min.png)
+  - [1-hour](Images/Helene/Hurricane_Helene_PTendency_1hour.png)
+- [Wind Speed and Gusts](Images/Helene/Hurricane_Helene_WindSpeed.png)
+- [Temperature and Dewpoint](Images/Helene/Hurricane_Helene_Temp_Dew.png)
+- [Rain Rate and Accumulation](Images/Helene/Hurricane_Helene_RainRate.png)
 
 ---
 
