@@ -103,7 +103,7 @@ The instrumentation suite included:
 - **Anemometer**: Captured sustained wind speeds and peak wind gusts.
 - **Tipping-Bucket Rain Gauge**: Recorded rainfall rates and cumulative precipitation totals.
 
-The station logged data at **1-minute intervals**. Pressure tendencies were computed using backward finite differences across multiple temporal intervals. All visualizations were generated using Python (`pandas`, `numpy`, `matplotlib`).
+The station logged data at **1-minute intervals**. Pressure tendencies were computed using backward finite differencing. All visualizations were generated using Python (`pandas`, `numpy`, `matplotlib`).
 
 
 ---
@@ -112,7 +112,7 @@ The station logged data at **1-minute intervals**. Pressure tendencies were comp
 
 Planned expansions and enhancements to this project are already underway, with several key components actively being implemented:
 
-- **Multi-Station Deployment**: Three additional Davis Vantage Pro 2 weather stations, along with the necessary data logging hardware, have been acquired and are being prepared for operational deployment. These units will be strategically positioned during future hurricane intercepts to enable simultaneous, multi-location surface observations and improved spatial resolution of storm impacts.
+- **Multi-Station Deployment**: Three additional Davis Vantage Pro 2 weather stations, along with the necessary data logging hardware, have been acquired and are being prepared for operational deployment. These units will be strategically positioned during future hurricane intercepts to enable simultaneous, multi-location surface observations and improved spatial capture of storm impacts.
 
 - **Adjustable Station Mount**: A reinforced and adjustable mounting apparatus has been fully developed to elevate the anemometer between 10 and 35 feet. This enhancement allows for WMO standardized wind measurements and improves the accuracy of peak wind and gust recordings for the vehicle-based station.
 
@@ -123,11 +123,10 @@ Planned expansions and enhancements to this project are already underway, with s
 </p>
 
 
-- **Real-Time Data Transmission**: Future versions of each station may incorporate cellular or satellite-based communication modules, enabling live data transmission to cloud-based platforms. This capability would allow real-time surface condition monitoring by emergency management officials, researchers, and the public as hurricanes make landfall.
+- **Real-Time Data Transmission** *(Planned)*: Future versions of each station may incorporate cellular or satellite-based communication modules, enabling live data transmission to cloud-based platforms. This capability would allow real-time surface condition monitoring by emergency management officials,cresearchers, and the public as hurricanes make landfall.
 
 - **Balloon-Based Profiling** *(Planned)*:  
-  Future efforts may include launching instrumented weather balloons from within the eye or near-core regions of landfalling hurricanes. These profiles would capture upper-air measurements typically unavailable during landfall, as aircraft reconnaissance flights are generally suspended at this stage due to hazardous turbulence. Combined with surface observations, this dataset could significantly enhance hurricane modeling and improve short-term intensity forecasts.
-
+  Future efforts may include launching instrumented weather balloons or drones from within the eye or near-core regions of landfalling hurricanes. Combined with aircraft reconnaissance dropsonde data and surface observations, these vertical profiles could significantly enhance hurricane modeling and improve short-term intensity forecasts
 
 ---
 
