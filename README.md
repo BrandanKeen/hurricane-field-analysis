@@ -2,7 +2,7 @@
 
 ## Independent, Vehicle-based Observations & Analysis
 
-This repository presents field observations and analyses from surface data collected during vehicle-based intercepts of landfalling hurricanes during the 2024 Atlantic hurricane season. Data was recorded using a **Davis Vantage Pro 2** weather station mounted on a custom-built mount secured to the vehicle, designed to withstand hurricane-force conditions and collect reliable in-situ meteorological data.
+This repository presents field observations from surface data collected during vehicle-based intercepts of landfalling hurricanes during the 2024 Atlantic hurricane season. Data was recorded using a **Davis Vantage Pro 2** weather station mounted on a custom-built mount secured to the vehicle, designed to withstand hurricane-force conditions and collect reliable in-situ meteorological data.
 
 The station was configured to log high-resolution observations at **1-minute intervals** during landfall. These observations were later used to produce detailed visualizations capturing storm evolution and intensity.
 
@@ -116,13 +116,18 @@ Planned expansions and enhancements to this project are already underway, with s
 
      - ***Update — August 11, 2025***: All three VP2 stations and data logging hardware/shelters have been completed and are ready for deployment. See images and short video below.
 
-    <p align="center">
-      <a href="https://youtube.com/shorts/5Y_rzp0XOUs?si=vvUOBHzTGN_1odu3" target="_blank" rel="noopener noreferrer">
-        <img src="assets/multi-station/2025-08/stations.jpg" alt="Watch Multi-Station VP2 readiness walk-through (Aug 2025)" width="300">
-      </a>
-      <br>
-      <em style="font-size:smaller;">Click to see an example of one of the VP2 stations & logger/shelter.</em>
-    </p>
+  <p align="center">
+    <a href="https://youtube.com/shorts/5Y_rzp0XOUs?si=vvUOBHzTGN_1odu3" target="_blank" rel="noopener noreferrer">
+      <img src="Images/Deplyable_Station2.JPEG" alt="Watch Multi-Station VP2 readiness walk-through (Aug 2025)" width="300">
+    </a>
+    <br>
+    <em style="font-size:smaller;">Click to watch a short clip of the three VP2 stations & data loggers ready for deployment.</em>
+  </p>
+
+  <p align="center">
+    <img src="Images/Deplyable_Station1.JPEG" alt="VP2 Deployable Station 1 (Aug 2025)" width="45%">
+  </p>
+
 
 
 - **Adjustable Station Mount**: A reinforced and adjustable mounting apparatus has been fully developed to elevate the anemometer between 10 and 35 feet. This enhancement allows for WMO standardized wind measurements and improves the accuracy of peak wind and gust recordings for the vehicle-based station.
