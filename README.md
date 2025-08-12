@@ -84,7 +84,7 @@ Observations captured are presented below chronologically with the most recent h
 
 ## Methods
 
-All observations are recorded using a Davis Vantage Pro 2 weather station mounted on a custom-built vehicle mount. Measurements are wirelessly transmitted to a data logging console connected to a computer running Davis WeatherLink software. This enables real-time monitoring and archival of the observations from inside the vehicle.
+All observations were recorded using a Davis Vantage Pro 2 weather station mounted on a custom-built vehicle mount. Measurements were wirelessly transmitted to a data logging console connected to a computer running Davis WeatherLink software. This enables real-time monitoring and archival of the observations from inside the vehicle.
 
 <p align="center">
   <a href="https://youtube.com/shorts/FWOdxVycSVQ?si=eooDoXEakciPfw9Q" target="_blank">
@@ -113,6 +113,17 @@ The station logged data at **1-minute intervals**. Pressure tendencies were comp
 Planned expansions and enhancements to this project are already underway, with several key components actively being implemented:
 
 - **Multi-Station Deployment**: Three additional Davis Vantage Pro 2 weather stations, along with the necessary data logging hardware, have been acquired and are being prepared for operational deployment. These units will be strategically positioned during future hurricane intercepts to enable simultaneous, multi-location surface observations and improved spatial capture of storm impacts.
+
+     - ***Update — August 11, 2025***: All three VP2 stations and data logging hardware/shelters have been completed and are ready for deployment. See images and short video below.
+
+    <p align="center">
+      <a href="https://youtube.com/shorts/5Y_rzp0XOUs?si=vvUOBHzTGN_1odu3" target="_blank" rel="noopener noreferrer">
+        <img src="assets/multi-station/2025-08/stations.jpg" alt="Watch Multi-Station VP2 readiness walk-through (Aug 2025)" width="300">
+      </a>
+      <br>
+      <em style="font-size:smaller;">Click to see an example of one of the VP2 stations & logger/shelter.</em>
+    </p>
+
 
 - **Adjustable Station Mount**: A reinforced and adjustable mounting apparatus has been fully developed to elevate the anemometer between 10 and 35 feet. This enhancement allows for WMO standardized wind measurements and improves the accuracy of peak wind and gust recordings for the vehicle-based station.
 
