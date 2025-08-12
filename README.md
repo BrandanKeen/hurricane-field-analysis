@@ -111,38 +111,44 @@ The station logged data at **1-minute intervals**. Pressure tendencies were comp
 ## Future Work
 
 Planned expansions and enhancements to this project are already underway, with several key components actively being implemented:
+<br><br>
 
-- **Multi-Station Deployment**: Three additional Davis Vantage Pro 2 weather stations, along with the necessary data logging hardware, have been acquired and are being prepared for operational deployment. These units will be strategically positioned during future hurricane intercepts to enable simultaneous, multi-location surface observations and improved spatial capture of storm impacts.
+- **Multi-Station Deployment**:\
+  Three additional Davis Vantage Pro 2 weather stations, along with the necessary data logging hardware, have been acquired and are being prepared for operational deployment. These units will be strategically positioned during future hurricane intercepts to enable simultaneous, multi-location surface observations and improved spatial capture of storm impacts.
 
-     - ***Update — August 11, 2025***: All three VP2 stations and data logging hardware/shelters have been completed and are ready for deployment. See images and short video below.
+     - ***Update — August 11, 2025***: All three VP2 stations and data logging hardware/shelters have been completed and are ready for deployment. See video below.
 
   <p align="center">
     <a href="https://youtube.com/shorts/5Y_rzp0XOUs?si=vvUOBHzTGN_1odu3" target="_blank" rel="noopener noreferrer">
       <img src="Images/Deplyable_Station2.JPEG" alt="Watch Multi-Station VP2 readiness walk-through (Aug 2025)" width="300">
     </a>
     <br>
-    <em style="font-size:smaller;">Click to watch a short clip of the three VP2 stations & data loggers ready for deployment.</em>
+    <em style="font-size:smaller;">Click to see an example of the VP2 station data logging hardware/shelter.</em>
   </p>
 
-  <p align="center">
-    <img src="Images/Deplyable_Station1.JPEG" alt="VP2 Deployable Station 1 (Aug 2025)" width="45%">
-  </p>
+<br><br>
 
+- **Adjustable Station Mount**:\
+  Reinforced, height-adjustable mast raises the anemometer 10–40 ft (3–12.2 m), enabling WMO 10 m–standard wind measurements and improving peak wind/gust capture on the vehicle-based station.
 
-
-- **Adjustable Station Mount**: A reinforced and adjustable mounting apparatus has been fully developed to elevate the anemometer between 10 and 35 feet. This enhancement allows for WMO standardized wind measurements and improves the accuracy of peak wind and gust recordings for the vehicle-based station.
 
 <p align="center">
   <img src="Images/new_station_mount.png" alt="Adjustable Station Mount" width="900">
   <br>
-  <em style="font-size:smaller;"><strong>Figure:</strong> Adjustable mount developed for vehicle-based anemometer, extendable from 10 to 35 feet and secured using 1/8&quot; steel guy wires.</em>
+  <em style="font-size:smaller;"><strong>Figure:</strong> Adjustable mount developed for vehicle-based anemometer, extendable from 10 to 40 feet and secured using 1/8&quot; steel guy wires.</em>
 </p>
 
+<br>
 
-- **Real-Time Data Transmission** *(Planned)*: Future versions of each station may incorporate cellular or satellite-based communication modules, enabling live data transmission to cloud-based platforms. This capability would allow real-time surface condition monitoring by emergency management officials, researchers, and the public as hurricanes make landfall.
+- **Real-Time Data Transmission** *(Planned)*:\
+  Add LTE/5G or satellite modules for live uploads to a cloud endpoint, enabling real-time surface monitoring by emergency managers, researchers, and the public during landfall. Includes store-and-forward when offline with auto-resume.
 
-- **Balloon-Based Profiling** *(Planned)*:  
-  Future efforts may include launching instrumented weather balloons or drones from within the eye or near-core regions of landfalling hurricanes. Combined with aircraft reconnaissance dropsonde data and surface observations, these vertical profiles could significantly enhance hurricane modeling and improve short-term intensity forecasts
+
+<br>
+
+- **Balloon/Drone-Based Profiling** *(Planned)*:  
+Deploy instrumented weather balloons and sUAS within the eye and near-core at landfall to collect high-frequency profiles of pressure, temperature, humidity, and wind. Combined with aircraft recon dropsondes and surface data, these soundings will improve boundary-layer representation and short-term intensity forecasts through better data assimilation.
+
 
 ---
 
