@@ -84,7 +84,7 @@ Observations captured are presented below chronologically with the most recent h
 
 ## Methods
 
-All observations were recorded using a Davis Vantage Pro 2 weather station mounted on a custom-built vehicle mount. Measurements were wirelessly transmitted to a data logging console connected to a computer running Davis WeatherLink software. This enabled real-time monitoring and archival of the observations from inside the vehicle.
+All observations are recorded using a Davis Vantage Pro 2 weather station mounted on a custom-built vehicle mount. Measurements are wirelessly transmitted to a data logging console connected to a computer running Davis WeatherLink software. This enables real-time monitoring and archival of the observations from inside the vehicle.
 
 <p align="center">
   <a href="https://youtube.com/shorts/FWOdxVycSVQ?si=eooDoXEakciPfw9Q" target="_blank">
