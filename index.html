@@ -1,0 +1,27 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>wxmanbran — README</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="https://unpkg.com/github-markdown-css@5.5.1/github-markdown.css">
+<style>body{margin:0;background:#fff}
+.container{max-width:900px;margin:2rem auto;padding:0 1rem}
+.markdown-body{box-sizing:border-box;padding:0}</style>
+
+<div class="container">
+  <article class="markdown-body" id="app">Loading…</article>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script>
+(async () => {
+  try {
+    const res = await fetch('README.md'); // README must be in the same folder as this file
+    if (!res.ok) throw new Error('README.md not found');
+    const md = await res.text();
+    document.getElementById('app').innerHTML = marked.parse(md);
+  } catch (e) {
+    document.getElementById('app').textContent =
+      'Could not load README.md. Make sure it is in the same folder as index.html.';
+  }
+})();
+</script>
