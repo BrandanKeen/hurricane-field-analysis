@@ -34,11 +34,22 @@
 </head>
 <body>
   <div class="container">
-    <!-- Hero image -->
-    <img class="hero"
-         src="/Images/WxManBran_Logo.png"
-         alt="Two red hurricane warning flags blowing in strong wind"
-         loading="lazy">
+    <!-- Hero image (iPhone Safari-friendly: no lazy, responsive srcset) -->
+    <picture>
+      <!-- Optional modern format (add these files if you have them) -->
+      <source type="image/webp"
+              srcset="/Images/WxManBran_Logo_840.webp 840w, /Images/WxManBran_Logo_1680.webp 1680w">
+      <!-- PNG sources (required) -->
+      <source type="image/png"
+              srcset="/Images/WxManBran_Logo_840.png 840w, /Images/WxManBran_Logo_1680.png 1680w">
+      <img class="hero"
+           src="/Images/WxManBran_Logo.png"
+           srcset="/Images/WxManBran_Logo_840.png 840w, /Images/WxManBran_Logo_1680.png 1680w"
+           sizes="(max-width: 900px) 55vw, 420px"
+           alt="Two red hurricane warning flags blowing in strong wind"
+           decoding="async"
+           fetchpriority="high">
+    </picture>
 
     <article class="markdown-body" id="app">Loading…</article>
   </div>
