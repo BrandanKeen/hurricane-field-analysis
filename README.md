@@ -18,7 +18,7 @@ Observations captured are presented below chronologically with the most recent h
 
 ## Hurricane Milton (October 9, 2024) – Sarasota, FL
 
-<div<div align="center" style="display:flex;justify-content:center;gap:12px;flex-wrap:wrap;">
+<div align="center" style="display:flex;justify-content:center;gap:12px;flex-wrap:wrap;">
   <a href="Images/Milton/Milton_animated.GIF" target="_blank" rel="noopener"
      style="display:block;width:48%;min-width:320px">
     <img src="Images/Milton/Milton_animated.GIF" alt="Milton Radar Loop"
@@ -65,10 +65,20 @@ Observations captured are presented below chronologically with the most recent h
 
 ## Hurricane Helene (September 26, 2024) – Perry, FL
 
-<div align="center">
-  <img src="Images/Helene/Helene_animated.gif" alt="Helene Radar Loop" height="600" style="display: inline-block; margin-right: 10px;">
-  <img src="Images/Helene/Helene_eye_resize.png" alt="Helene Eye Photo" height="600" style="display: inline-block;">
+<div align="center" style="display:flex;justify-content:center;gap:12px;flex-wrap:wrap;">
+  <a href="Images/Helene/Helene_animated.gif" target="_blank" rel="noopener"
+     style="display:block;width:48%;min-width:320px">
+    <img src="Images/Helene/Helene_animated.gif" alt="Helene Radar Loop"
+         style="display:block;width:100%;height:auto">
+  </a>
+
+  <a href="Images/Helene/Helene_eye_resize.png" target="_blank" rel="noopener"
+     style="display:block;width:48%;min-width:320px">
+    <img src="Images/Helene/Helene_eye_resize.png" alt="Helene Eye Photo"
+         style="display:block;width:100%;height:auto">
+  </a>
 </div>
+
 
 <p align="center" style="font-size:smaller;"><em><strong>Top:</strong> Reflectivity of Hurricane Helene during intercept; crosshairs mark vehicle location. <strong>Bottom:</strong> Vehicle and station in the eye.</em></p>
 
