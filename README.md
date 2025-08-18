@@ -172,7 +172,11 @@ Deploy instrumented weather balloons and sUAS within the eye and near-core at la
 
 <br>
 
-- **Website Development** *(Planned)*: 
+  - **Website Development** *(In Progress)*:  
+  This site will expand to include model data (global/regional), satellite imagery, radar products, and other useful resources. Live components include:
+    - Live video streaming during intercepts.
+    - Real-time weather station data streamed from the vehicle (and eventually deployed VP2 sites) with instantaneous updates and auto-refreshing plots.
+
 
 ---
 
