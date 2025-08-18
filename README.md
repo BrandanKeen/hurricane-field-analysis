@@ -23,7 +23,7 @@ Observations captured are presented below chronologically with the most recent h
   <img src="Images/Milton/Milton_eye.png" alt="Milton Eye Photo" width="500" height="" style="display: inline-block;">
 </div>
 
-<p align="center" style="font-size:smaller;"><em><strong>Left:</strong> Reflectivity of Hurricane Milton during intercept; crosshairs mark vehicle location. <strong>Right:</strong> Vehicle and station in the eye.</em></p>
+<p align="center" style="font-size:smaller;"><em><strong>Top:</strong> Reflectivity of Hurricane Milton during intercept; crosshairs mark vehicle location. <strong>Bottom:</strong> Vehicle and station in the eye.</em></p>
 
 
 
@@ -59,7 +59,7 @@ Observations captured are presented below chronologically with the most recent h
   <img src="Images/Helene/Helene_eye_resize.png" alt="Helene Eye Photo" height="600" style="display: inline-block;">
 </div>
 
-<p align="center" style="font-size:smaller;"><em><strong>Left:</strong> Reflectivity of Hurricane Helene during intercept; crosshairs mark vehicle location. <strong>Right:</strong> Vehicle and station in the eye.</em></p>
+<p align="center" style="font-size:smaller;"><em><strong>Top:</strong> Reflectivity of Hurricane Helene during intercept; crosshairs mark vehicle location. <strong>Bottom:</strong> Vehicle and station in the eye.</em></p>
 
 ---
 
