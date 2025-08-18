@@ -161,17 +161,6 @@ Planned expansions and enhancements to this project are already underway, with s
 
 <br>
 
-- **Real-Time Data Transmission** *(Planned)*:\
-  Add LTE/5G or satellite modules for live uploads to a cloud endpoint, enabling real-time surface monitoring by emergency managers, researchers, and the public during landfall. Includes store-and-forward when offline with auto-resume.
-
-
-<br>
-
-- **Balloon/Drone-Based Profiling** *(Planned)*:  
-Deploy instrumented weather balloons and sUAS within the eye and near-core at landfall to collect high-frequency profiles of pressure, temperature, humidity, and wind. Combined with aircraft recon dropsondes and surface data, these soundings will improve boundary-layer representation and short-term intensity forecasts through better data assimilation.
-
-<br>
-
   - **Website Development** *(In Progress)*:  
   This site will expand to include model data (global/regional), satellite imagery, radar products, and other useful resources. Live components include:
 
