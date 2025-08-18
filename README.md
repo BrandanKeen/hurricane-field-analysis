@@ -172,8 +172,7 @@ Deploy instrumented weather balloons and sUAS within the eye and near-core at la
 
 <br>
 
-- **Website Development** *(Planned)*:
-- 
+- **Website Development** *(Planned)*: 
 
 ---
 
