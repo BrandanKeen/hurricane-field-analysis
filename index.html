@@ -1,46 +1,49 @@
 <!doctype html>
-<meta charset="utf-8">
-<title>Weatherman Bran</title>
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<link rel="icon" type="image/svg+xml" href="/favicon.svg">
-<link rel="icon" href="/favicon.ico" sizes="any">
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
-<link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png">
-<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
-<link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png">
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Weatherman Bran</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#e11d48">
 
-<meta name="theme-color" content="#e11d48">
+  <!-- Favicons -->
+  <link rel="icon" type="image/svg+xml" href="/Images/favicon.svg">
+  <link rel="apple-touch-icon" href="/Images/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/Images/icon-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/Images/icon-512.png">
 
-<link rel="stylesheet" href="https://unpkg.com/github-markdown-css@5.5.1/github-markdown.css">
-<style>
-  body{margin:0;background:#fff}
-  .container{max-width:900px;margin:2rem auto;padding:0 1rem}
-  .markdown-body{box-sizing:border-box;padding:0}
-  /* center and size the hero image */
-  .hero{display:block;margin:0 auto 1rem auto;max-width:420px;width:55%;min-width:240px;height:auto}
-</style>
+  <link rel="stylesheet" href="https://unpkg.com/github-markdown-css@5.5.1/github-markdown.css">
+  <style>
+    body{margin:0;background:#fff}
+    .container{max-width:900px;margin:2rem auto;padding:0 1rem}
+    .markdown-body{box-sizing:border-box;padding:0}
+    .hero{display:block;margin:0 auto 1rem auto;max-width:420px;width:55%;min-width:240px;height:auto}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Hero image -->
+    <img class="hero"
+         src="/Images/WxManBran_Logo.png"
+         alt="Two red hurricane warning flags blowing in strong wind"
+         loading="lazy">
 
-<div class="container">
-  <!-- 👇 Added image -->
-  <img class="hero"
-       src="/WxManBran_Logo.png"
-       alt="Two red hurricane warning flags blowing in strong wind">
+    <article class="markdown-body" id="app">Loading…</article>
+  </div>
 
-  <article class="markdown-body" id="app">Loading…</article>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-<script>
-(async () => {
-  try {
-    const res = await fetch('README.md'); // README must be in the same folder as this file
-    if (!res.ok) throw new Error('README.md not found');
-    const md = await res.text();
-    document.getElementById('app').innerHTML = marked.parse(md);
-  } catch (e) {
-    document.getElementById('app').textContent =
-      'Could not load README.md. Make sure it is in the same folder as index.html.';
-  }
-})();
-</script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script>
+  (async () => {
+    try {
+      const res = await fetch('README.md'); // README must be in the same folder as this file
+      if (!res.ok) throw new Error('README.md not found');
+      const md = await res.text();
+      document.getElementById('app').innerHTML = marked.parse(md);
+    } catch (e) {
+      document.getElementById('app').textContent =
+        'Could not load README.md. Make sure it is in the same folder as index.html.';
+    }
+  })();
+  </script>
+</body>
+</html>
