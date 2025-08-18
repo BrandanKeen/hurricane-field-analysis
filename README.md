@@ -18,10 +18,15 @@ Observations captured are presented below chronologically with the most recent h
 
 ## Hurricane Milton (October 9, 2024) – Sarasota, FL
 
-<div align="center">
-  <img src="Images/Milton/Milton_animated.GIF" alt="Milton Radar Loop" height="600"  style="display: inline-block; margin-right: 10px;">
-  <img src="Images/Milton/Milton_eye.png" alt="Milton Eye Photo" width="500" height="" style="display: inline-block;">
+<div align="center" style="display:flex;justify-content:center;gap:12px;flex-wrap:wrap;">
+  <img src="Images/Milton/Milton_animated.GIF"
+       alt="Milton Radar Loop"
+       style="display:block;height:600px;width:auto;">
+  <img src="Images/Milton/Milton_eye.png"
+       alt="Milton Eye Photo"
+       style="display:block;height:600px;width:auto;">
 </div>
+
 
 <p align="center" style="font-size:smaller;"><em><strong>Top:</strong> Reflectivity of Hurricane Milton during intercept; crosshairs mark vehicle location. <strong>Bottom:</strong> Vehicle and station in the eye.</em></p>
 
