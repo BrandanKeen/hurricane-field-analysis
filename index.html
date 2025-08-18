@@ -18,6 +18,8 @@
     .container{max-width:900px;margin:2rem auto;padding:0 1rem}
     .markdown-body{box-sizing:border-box;padding:0}
     .hero{display:block;margin:0 auto 1rem auto;max-width:420px;width:55%;min-width:240px;height:auto}
+    /* make images from README show a zoom cursor */
+    .markdown-body img{cursor:zoom-in}
   </style>
 </head>
 <body>
@@ -35,10 +37,23 @@
   <script>
   (async () => {
     try {
-      const res = await fetch('README.md'); // README must be in the same folder as this file
+      const res = await fetch('README.md'); // README must be alongside index.html
       if (!res.ok) throw new Error('README.md not found');
       const md = await res.text();
-      document.getElementById('app').innerHTML = marked.parse(md);
+
+      const container = document.getElementById('app');
+      container.innerHTML = marked.parse(md);
+
+      // Make ALL images clickable (open the same image in a new tab)
+      container.querySelectorAll('img').forEach(img => {
+        if (img.closest('a')) return; // skip if already linked
+        const a = document.createElement('a');
+        a.href = img.getAttribute('src');
+        a.target = '_blank';
+        a.rel = 'noopener';
+        img.replaceWith(a);
+        a.appendChild(img);
+      });
     } catch (e) {
       document.getElementById('app').textContent =
         'Could not load README.md. Make sure it is in the same folder as index.html.';
