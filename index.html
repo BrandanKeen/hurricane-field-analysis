@@ -24,7 +24,7 @@
     /* README images: scale to container, show zoom cursor */
     .markdown-body img{max-width:100%;height:auto;cursor:zoom-in}
 
-    /* Auto-shrink big plot/chart images on the page; click still opens full size */
+    /* Auto-shrink big plot/chart/graph images on the page; click still opens full size */
     .markdown-body img.shrink{max-width:520px}
 
     /* Responsive 16:9 YouTube embeds */
@@ -45,7 +45,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script>
-  // Convert t or start param (e.g., ?t=90 or ?t=1m30s) to seconds
+  // --- helpers ---
   function timeToSeconds(t){
     if(!t) return 0;
     if(/^\d+$/.test(t)) return parseInt(t,10);
@@ -56,7 +56,6 @@
     return s||0;
   }
 
-  // Build a privacy-friendly embed URL from a YouTube link
   function toYouTubeEmbed(href){
     try{
       const u = new URL(href, window.location.origin);
@@ -67,4 +66,74 @@
         id = u.pathname.slice(1).split('/')[0];
         start = timeToSeconds(u.searchParams.get('t'));
       } else if (host === 'youtube.com' || host === 'youtube-nocookie.com') {
-        if (u.pathname.startsWith
+        if (u.pathname.startsWith('/watch')) {
+          id = u.searchParams.get('v');
+          start = timeToSeconds(u.searchParams.get('t') || u.searchParams.get('start'));
+          list = u.searchParams.get('list');
+        } else if (u.pathname.startsWith('/shorts/')) {
+          id = u.pathname.split('/shorts/')[1].split('/')[0];
+        } else if (u.pathname.startsWith('/embed/')) {
+          id = u.pathname.split('/embed/')[1].split('/')[0];
+        }
+      }
+
+      if (!id) return null;
+      const params = new URLSearchParams({rel:'0',modestbranding:'1',playsinline:'1'});
+      if (start>0) params.set('start', String(start));
+      if (list) params.set('list', list);
+      return `https://www.youtube-nocookie.com/embed/${id}?${params.toString()}`;
+    }catch(e){ return null; }
+  }
+
+  (async () => {
+    const container = document.getElementById('app');
+    try {
+      const res = await fetch('README.md'); // README must be alongside index.html
+      if (!res.ok) throw new Error('README.md not found');
+      const md = await res.text();
+
+      // Render markdown
+      container.innerHTML = marked.parse(md);
+
+      // 1) Turn plain YouTube links into embedded iframes
+      container.querySelectorAll('a[href]').forEach(a => {
+        const href = a.getAttribute('href');
+        const embedURL = toYouTubeEmbed(href);
+        if (!embedURL) return;
+
+        const wrap = document.createElement('div');
+        wrap.className = 'yt-embed';
+        const iframe = document.createElement('iframe');
+        iframe.src = embedURL;
+        iframe.title = 'YouTube video';
+        iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+        iframe.referrerPolicy = 'origin-when-cross-origin';
+        iframe.allowFullscreen = true;
+        wrap.appendChild(iframe);
+        a.replaceWith(wrap);
+      });
+
+      // 2) Make ALL remaining images clickable (open same image in new tab)
+      container.querySelectorAll('img').forEach(img => {
+        // shrink plots/charts/graphs on-page
+        const src = (img.getAttribute('src') || '').toLowerCase();
+        if (/(plot|chart|graph)/.test(src)) img.classList.add('shrink');
+
+        if (img.closest('a')) return; // skip if already linked
+        const a = document.createElement('a');
+        a.href = img.getAttribute('src');
+        a.target = '_blank';
+        a.rel = 'noopener';
+        img.replaceWith(a);
+        a.appendChild(img);
+      });
+
+    } catch (e) {
+      console.error(e);
+      container.textContent =
+        'Could not load README.md. Make sure it is in the same folder as index.html.';
+    }
+  })();
+  </script>
+</body>
+</html>
