@@ -12,14 +12,19 @@
   <link rel="icon" type="image/png" sizes="192x192" href="/Images/icon-192.png">
   <link rel="icon" type="image/png" sizes="512x512" href="/Images/icon-512.png">
 
-  <link rel="stylesheet" href="https://unpkg.com/github-markdown-css@5.5.1/github-markdown.css">
+  <link rel="stylesheet" href="https://unpkg.com/github-markdown-css@5.5.1/github-markdown-css.min.css">
   <style>
     body{margin:0;background:#fff}
     .container{max-width:900px;margin:2rem auto;padding:0 1rem}
     .markdown-body{box-sizing:border-box;padding:0}
     .hero{display:block;margin:0 auto 1rem auto;max-width:420px;width:55%;min-width:240px;height:auto}
-    /* make images from README show a zoom cursor */
+
+    /* Make README images show zoom cursor */
     .markdown-body img{cursor:zoom-in}
+
+    /* Responsive 16:9 YouTube embeds */
+    .yt-embed{position:relative;padding-bottom:56.25%;height:0;margin:1.25rem 0;background:#000;border-radius:12px;overflow:hidden}
+    .yt-embed iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
   </style>
 </head>
 <body>
@@ -35,6 +40,47 @@
 
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script>
+  // Convert t or start param (e.g., ?t=90 or ?t=1m30s) to seconds
+  function timeToSeconds(t){
+    if(!t) return 0;
+    if(/^\d+$/.test(t)) return parseInt(t,10);
+    let s=0, m;
+    m=t.match(/(\d+)h/); if(m) s+=parseInt(m[1],10)*3600;
+    m=t.match(/(\d+)m/); if(m) s+=parseInt(m[1],10)*60;
+    m=t.match(/(\d+)s/); if(m) s+=parseInt(m[1],10);
+    return s||0;
+  }
+
+  // Build a privacy-friendly embed URL from a YouTube link
+  function toYouTubeEmbed(href){
+    try{
+      const u = new URL(href, window.location.origin);
+      const host = u.hostname.replace(/^www\./,'');
+      let id=null, start=0, list=null;
+
+      if (host === 'youtu.be') {
+        id = u.pathname.slice(1).split('/')[0];
+        start = timeToSeconds(u.searchParams.get('t'));
+      } else if (host === 'youtube.com' || host === 'youtube-nocookie.com') {
+        if (u.pathname.startsWith('/watch')) {
+          id = u.searchParams.get('v');
+          start = timeToSeconds(u.searchParams.get('t') || u.searchParams.get('start'));
+          list = u.searchParams.get('list');
+        } else if (u.pathname.startsWith('/shorts/')) {
+          id = u.pathname.split('/shorts/')[1].split('/')[0];
+        } else if (u.pathname.startsWith('/embed/')) {
+          id = u.pathname.split('/embed/')[1].split('/')[0];
+        }
+      }
+
+      if (!id) return null;
+      const params = new URLSearchParams({rel:'0',modestbranding:'1',playsinline:'1'});
+      if (start>0) params.set('start', String(start));
+      if (list) params.set('list', list);
+      return `https://www.youtube-nocookie.com/embed/${id}?${params.toString()}`;
+    }catch(e){ return null; }
+  }
+
   (async () => {
     try {
       const res = await fetch('README.md'); // README must be alongside index.html
@@ -44,7 +90,24 @@
       const container = document.getElementById('app');
       container.innerHTML = marked.parse(md);
 
-      // Make ALL images clickable (open the same image in a new tab)
+      // 1) Turn plain YouTube links into embedded iframes
+      container.querySelectorAll('a[href]').forEach(a => {
+        const embedURL = toYouTubeEmbed(a.getAttribute('href'));
+        if (!embedURL) return;
+
+        const wrap = document.createElement('div');
+        wrap.className = 'yt-embed';
+        const iframe = document.createElement('iframe');
+        iframe.src = embedURL;
+        iframe.title = 'YouTube video';
+        iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+        iframe.referrerPolicy = 'origin-when-cross-origin';
+        iframe.allowFullscreen = true;
+        wrap.appendChild(iframe);
+        a.replaceWith(wrap);
+      });
+
+      // 2) Make ALL remaining images clickable (open same image in new tab)
       container.querySelectorAll('img').forEach(img => {
         if (img.closest('a')) return; // skip if already linked
         const a = document.createElement('a');
@@ -54,6 +117,7 @@
         img.replaceWith(a);
         a.appendChild(img);
       });
+
     } catch (e) {
       document.getElementById('app').textContent =
         'Could not load README.md. Make sure it is in the same folder as index.html.';
