@@ -158,5 +158,5 @@ Deploy instrumented weather balloons and sUAS within the eye and near-core at la
 
 ## License
 
-This repository is provided under the MIT License. Figures and methodologies may be used for research and educational purposes with appropriate attribution.
+Figures and methodologies may be used for research and educational purposes with appropriate attribution.
 
