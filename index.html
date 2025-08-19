@@ -5,6 +5,7 @@
   <title>Weatherman Bran</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#e11d48">
+  <!-- v-fast-poll -->
 
   <!-- Favicons -->
   <link rel="icon" type="image/svg+xml" href="/Images/favicon.svg">
@@ -44,7 +45,7 @@
          alt="Two red hurricane warning flags blowing in strong wind"
          loading="lazy">
 
-    <!-- LIVE VALUE PLACEHOLDERS (C1) -->
+    <!-- LIVE VALUE PLACEHOLDERS -->
     <div class="panel">
       <h3>ISS (Station 0)</h3>
       <div>Temp: <span id="iss_temp">--</span> °F</div>
@@ -86,13 +87,11 @@
       m=t.match(/(\d+)s/); if(m) s+=parseInt(m[1],10);
       return s||0;
     }
-
     function toYouTubeEmbed(href){
       try{
         const u = new URL(href, window.location.origin);
         const host = u.hostname.replace(/^www\./,'');
         let id=null, start=0, list=null;
-
         if (host === 'youtu.be') {
           id = u.pathname.slice(1).split('/')[0];
           start = timeToSeconds(u.searchParams.get('t'));
@@ -107,7 +106,6 @@
             id = u.pathname.split('/embed/')[1].split('/')[0];
           }
         }
-
         if (!id) return null;
         const params = new URLSearchParams({rel:'0',modestbranding:'1',playsinline:'1'});
         if (start>0) params.set('start', String(start));
@@ -115,23 +113,18 @@
         return `https://www.youtube-nocookie.com/embed/${id}?${params.toString()}`;
       }catch(e){ return null; }
     }
-
     (async () => {
       const container = document.getElementById('app');
       try {
         const res = await fetch('README.md'); // README must be alongside index.html
         if (!res.ok) throw new Error('README.md not found');
         const md = await res.text();
-
-        // Render markdown
         container.innerHTML = marked.parse(md);
-
-        // 1) Turn plain YouTube links into embedded iframes
+        // embed YouTube & link images
         container.querySelectorAll('a[href]').forEach(a => {
           const href = a.getAttribute('href');
           const embedURL = toYouTubeEmbed(href);
           if (!embedURL) return;
-
           const wrap = document.createElement('div');
           wrap.className = 'yt-embed';
           const iframe = document.createElement('iframe');
@@ -143,43 +136,36 @@
           wrap.appendChild(iframe);
           a.replaceWith(wrap);
         });
-
-        // 2) Make ALL remaining images clickable (open same image in new tab)
         container.querySelectorAll('img').forEach(img => {
-          // shrink plots/charts/graphs on-page
           const src = (img.getAttribute('src') || '').toLowerCase();
           if (/(plot|chart|graph)/.test(src)) img.classList.add('shrink');
-
-          if (img.closest('a')) return; // skip if already linked
+          if (img.closest('a')) return;
           const a = document.createElement('a');
-          a.href = img.getAttribute('src');
-          a.target = '_blank';
-          a.rel = 'noopener';
-          img.replaceWith(a);
-          a.appendChild(img);
+          a.href = img.getAttribute('src'); a.target = '_blank'; a.rel = 'noopener';
+          img.replaceWith(a); a.appendChild(img);
         });
-
       } catch (e) {
         console.error(e);
-        container.textContent =
-          'Could not load README.md. Make sure it is in the same folder as index.html.';
+        container.textContent = 'Could not load README.md. Make sure it is in the same folder as index.html.';
       }
     })();
   </script>
 
-  <!-- LIVE CLIENT SCRIPT (C2) — WS disabled by default; polling has no CORS preflight -->
+  <!-- LIVE CLIENT SCRIPT (Polling only, tuned for speed) -->
   <script>
     (() => {
-      // Build URLs safely
-      const API_BASE_OBJ = new URL("https://api.wxmanbran.com");
-      const LATEST_URL   = new URL("/latest", API_BASE_OBJ).href;
+      const API_BASE = new URL("https://api.wxmanbran.com");
+      const LATEST_URL = new URL("/latest", API_BASE).href;
 
-      const WS_URL_OBJ   = new URL("/live", API_BASE_OBJ);
-      WS_URL_OBJ.protocol = "wss:";
-      const WS_URL = WS_URL_OBJ.href;
+      // Allow override via ?p=ms (e.g., ?p=750). Defaults to 1000ms. Clamped 300–5000.
+      const qp = new URLSearchParams(location.search);
+      const reqMs = parseInt(qp.get("p") || "1000", 10);
+      const BASE_POLL_MS = Math.min(5000, Math.max(300, isFinite(reqMs) ? reqMs : 1000));
 
-      // Toggle WebSocket explicitly with ?ws=1 (default OFF to avoid 404 noise)
-      const USE_WS = /(\?|&)ws=1(?:&|$)/.test(location.search);
+      // Adaptive: slow down if tab hidden; back off briefly on errors.
+      let backoffMs = 0;
+      let lastTs = 0;
+      let inFlight = null;
 
       const FIELDS = [
         ["iss_temp","iss_temp_F",v=>fmt(v,1)],
@@ -216,43 +202,6 @@
         }
       }
 
-      class LiveClient{
-        constructor(){
-          this.ws=null; this.backoff=1000; this.maxBackoff=15000;
-          this.pollTimer=null; this.connectedOnce=false; this.start();
-        }
-        start(){
-          if (!USE_WS) { this.startPolling(); return; }
-          try{ this.ws=new WebSocket(WS_URL); }catch(e){ this.startPolling(); return; }
-          this.ws.addEventListener("open",()=>{ this.backoff=1000; });
-          this.ws.addEventListener("message",(e)=>{ render(JSON.parse(e.data)); this.connectedOnce=true; });
-          this.ws.addEventListener("close",()=>this.reconnect());
-          this.ws.addEventListener("error",()=>this.reconnect());
-        }
-        reconnect(){
-          if (this.ws){ try{ this.ws.close(); }catch{} this.ws=null; }
-          if (!this.connectedOnce) this.startPolling();
-          if (!USE_WS) return;
-          setTimeout(()=>this.start(), this.backoff);
-          this.backoff=Math.min(this.backoff*2, this.maxBackoff);
-        }
-        startPolling(){
-          if (this.pollTimer) return;
-          const poll = async ()=>{
-            try{
-              // No custom headers -> no CORS preflight
-              const res = await fetch(LATEST_URL, { cache: "no-store" });
-              if (res.ok){
-                const d = await res.json();
-                if (d && Object.keys(d).length>0) render(d);
-              }
-            }catch(e){}
-          };
-          poll();
-          this.pollTimer = setInterval(poll, 5000);
-        }
-      }
-
       function fmt(v,d){ return Number.isFinite(v)?v.toFixed(d):"--"; }
       function degFmt(v){ if(!Number.isFinite(v)) return "--"; return `${Math.round(v)}° (${toCardinal(v)})`; }
       function toCardinal(deg){
@@ -261,7 +210,44 @@
         return dirs[idx];
       }
 
-      new LiveClient();
+      function sleep(ms){ return new Promise(r=>setTimeout(r, ms)); }
+      function desiredInterval(){
+        const visSlow = document.hidden ? Math.max(BASE_POLL_MS*5, 3000) : BASE_POLL_MS;
+        return visSlow + backoffMs;
+      }
+
+      async function pollLoop(){
+        // cancel any overlapping fetch
+        if (inFlight) try{ inFlight.abort(); }catch{}
+        const controller = new AbortController();
+        inFlight = controller;
+
+        try{
+          const res = await fetch(LATEST_URL, { cache:"no-store", signal: controller.signal });
+          if (res.ok){
+            const d = await res.json();
+            // Update only if new timestamp or first run
+            const ts = (typeof d.ts === "number" && d.ts>0) ? d.ts : (typeof d.received_at === "number" ? d.received_at : 0);
+            if (ts && ts !== lastTs){ lastTs = ts; render(d); }
+            backoffMs = 0; // success -> clear backoff
+          }else{
+            backoffMs = Math.min(8000, (backoffMs||500)*2);
+          }
+        }catch(_){
+          backoffMs = Math.min(8000, (backoffMs||500)*2);
+        }finally{
+          inFlight = null;
+          await sleep(desiredInterval());
+          pollLoop();
+        }
+      }
+
+      // Kick off
+      pollLoop();
+      // If visibility changes, adjust immediately
+      document.addEventListener("visibilitychange", () => {
+        if (!inFlight) pollLoop();
+      });
     })();
   </script>
 
