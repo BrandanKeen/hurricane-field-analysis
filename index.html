@@ -30,95 +30,11 @@
     /* Responsive 16:9 YouTube embeds */
     .yt-embed{position:relative;padding-bottom:56.25%;height:0;margin:1.25rem 0;background:#000;border-radius:12px;overflow:hidden}
     .yt-embed iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+
+    /* Simple cards for live values */
+    .panel{border:1px solid #e5e7eb;border-radius:12px;padding:12px 14px;box-shadow:0 1px 2px rgba(0,0,0,.04);margin:1rem 0}
   </style>
 </head>
-
-  <script>
-(() => {
-  const API_BASE = "https://api.wxmanbran.com";
-  const WS_URL = API_BASE.replace("https", "wss") + "/live";
-  const LATEST_URL = API_BASE + "/latest";
-
-  const FIELDS = [
-    ["iss_temp","iss_temp_F",v=>fmt(v,1)],
-    ["iss_rh","iss_rh",v=>fmt(v,0)],
-    ["iss_dew","iss_dew_F",v=>fmt(v,1)],
-    ["iss_hi","iss_hi_F",v=>fmt(v,1)],
-    ["iss_wc","iss_wc_F",v=>fmt(v,1)],
-    ["iss_slp","iss_slp_inHg",v=>fmt(v,3)],
-    ["iss_rainrate","iss_rainrate_inphr",v=>fmt(v,2)],
-    ["iss_raintoday","iss_raintoday_in",v=>fmt(v,2)],
-    ["iss_solar","iss_solar_wm2",v=>fmt(v,0)],
-    ["iss_uv","iss_uv",v=>fmt(v,1)],
-    ["iss_wspd","iss_wind_mph",v=>fmt(v,1)],
-    ["iss_wdir","iss_wdir_deg",v=>degFmt(v)],
-    ["iss_wavg","iss_wavg_mph",v=>fmt(v,1)],
-    ["iss_wgst","iss_wgust10_mph",v=>fmt(v,1)],
-    ["an2_wspd","an2_wind_mph",v=>fmt(v,1)],
-    ["an2_wdir","an2_wdir_deg",v=>degFmt(v)],
-    ["an2_wavg","an2_wavg_mph",v=>fmt(v,1)],
-    ["an2_wgst","an2_wgust10_mph",v=>fmt(v,1)],
-  ];
-
-  function render(d){
-    for (const [id,key,format] of FIELDS){
-      const el=document.getElementById(id);
-      if (!el) continue;
-      const val=d[key];
-      el.textContent=(typeof val==="number" && Number.isFinite(val))?format(val):"--";
-    }
-    const asof=document.getElementById("asof");
-    if (asof){
-      const t=(typeof d.ts==="number" && d.ts>0)?d.ts:(typeof d.received_at==="number"?d.received_at:Date.now());
-      asof.textContent=new Date(t).toLocaleString();
-    }
-  }
-
-  class LiveClient{
-    constructor(){
-      this.ws=null; this.backoff=1000; this.maxBackoff=15000;
-      this.pollTimer=null; this.connectedOnce=false; this.start();
-    }
-    start(){
-      try{ this.ws=new WebSocket(WS_URL); }catch(e){ this.startPolling(); return; }
-      this.ws.addEventListener("open",()=>{ this.backoff=1000; });
-      this.ws.addEventListener("message",(e)=>{ render(JSON.parse(e.data)); this.connectedOnce=true; });
-      this.ws.addEventListener("close",()=>this.reconnect());
-      this.ws.addEventListener("error",()=>this.reconnect());
-    }
-    reconnect(){
-      if (this.ws){ try{ this.ws.close(); }catch{} this.ws=null; }
-      if (!this.connectedOnce) this.startPolling();
-      setTimeout(()=>this.start(), this.backoff);
-      this.backoff=Math.min(this.backoff*2, this.maxBackoff);
-    }
-    startPolling(){
-      if (this.pollTimer) return;
-      const poll=async ()=>{
-        try{
-          const res=await fetch(LATEST_URL,{ headers:{ "cache-control":"no-cache" } });
-          if (res.ok){
-            const d=await res.json();
-            if (d && Object.keys(d).length>0) render(d);
-          }
-        }catch(e){}
-      };
-      poll();
-      this.pollTimer=setInterval(poll,5000);
-    }
-  }
-
-  function fmt(v,d){ return Number.isFinite(v)?v.toFixed(d):"--"; }
-  function degFmt(v){ if(!Number.isFinite(v)) return "--"; return `${Math.round(v)}° (${toCardinal(v)})`; }
-  function toCardinal(deg){
-    const dirs=["N","NNE","NE","ENE","E","ESE","SE","SSE","S","SSW","SW","WSW","W","WNW","NW","NNW"];
-    const idx=Math.round(((deg%360)/22.5))%16;
-    return dirs[idx];
-  }
-
-  new LiveClient();
-})();
-</script>
 
 <body>
   <div class="container">
@@ -128,125 +44,215 @@
          alt="Two red hurricane warning flags blowing in strong wind"
          loading="lazy">
 
+    <!-- LIVE VALUE PLACEHOLDERS (C1) -->
+    <div class="panel">
+      <h3>ISS (Station 0)</h3>
+      <div>Temp: <span id="iss_temp">--</span> °F</div>
+      <div>RH: <span id="iss_rh">--</span> %</div>
+      <div>Dewpoint: <span id="iss_dew">--</span> °F</div>
+      <div>Heat Index: <span id="iss_hi">--</span> °F</div>
+      <div>Wind Chill: <span id="iss_wc">--</span> °F</div>
+      <div>SLP: <span id="iss_slp">--</span> inHg</div>
+      <div>Rain rate: <span id="iss_rainrate">--</span> in/hr</div>
+      <div>Rain today: <span id="iss_raintoday">--</span> in</div>
+      <div>Solar: <span id="iss_solar">--</span> W/m²</div>
+      <div>UV: <span id="iss_uv">--</span></div>
+      <div>Wind: <span id="iss_wspd">--</span> mph @ <span id="iss_wdir">--</span></div>
+      <div>Avg: <span id="iss_wavg">--</span> mph | Gust(10m): <span id="iss_wgst">--</span> mph</div>
+    </div>
+
+    <div class="panel">
+      <h3>Second Anemometer</h3>
+      <div>Wind: <span id="an2_wspd">--</span> mph @ <span id="an2_wdir">--</span></div>
+      <div>Avg: <span id="an2_wavg">--</span> mph | Gust(10m): <span id="an2_wgst">--</span> mph</div>
+    </div>
+
+    <div>As of: <span id="asof">--</span></div>
+
+    <!-- README content area -->
     <article class="markdown-body" id="app">Loading…</article>
   </div>
 
+  <!-- Markdown renderer -->
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script>
-  // --- helpers ---
-  function timeToSeconds(t){
-    if(!t) return 0;
-    if(/^\d+$/.test(t)) return parseInt(t,10);
-    let s=0, m;
-    m=t.match(/(\d+)h/); if(m) s+=parseInt(m[1],10)*3600;
-    m=t.match(/(\d+)m/); if(m) s+=parseInt(m[1],10)*60;
-    m=t.match(/(\d+)s/); if(m) s+=parseInt(m[1],10);
-    return s||0;
-  }
+    // --- helpers for README rendering ---
+    function timeToSeconds(t){
+      if(!t) return 0;
+      if(/^\d+$/.test(t)) return parseInt(t,10);
+      let s=0, m;
+      m=t.match(/(\d+)h/); if(m) s+=parseInt(m[1],10)*3600;
+      m=t.match(/(\d+)m/); if(m) s+=parseInt(m[1],10)*60;
+      m=t.match(/(\d+)s/); if(m) s+=parseInt(m[1],10);
+      return s||0;
+    }
 
-  function toYouTubeEmbed(href){
-    try{
-      const u = new URL(href, window.location.origin);
-      const host = u.hostname.replace(/^www\./,'');
-      let id=null, start=0, list=null;
+    function toYouTubeEmbed(href){
+      try{
+        const u = new URL(href, window.location.origin);
+        const host = u.hostname.replace(/^www\./,'');
+        let id=null, start=0, list=null;
 
-      if (host === 'youtu.be') {
-        id = u.pathname.slice(1).split('/')[0];
-        start = timeToSeconds(u.searchParams.get('t'));
-      } else if (host === 'youtube.com' || host === 'youtube-nocookie.com') {
-        if (u.pathname.startsWith('/watch')) {
-          id = u.searchParams.get('v');
-          start = timeToSeconds(u.searchParams.get('t') || u.searchParams.get('start'));
-          list = u.searchParams.get('list');
-        } else if (u.pathname.startsWith('/shorts/')) {
-          id = u.pathname.split('/shorts/')[1].split('/')[0];
-        } else if (u.pathname.startsWith('/embed/')) {
-          id = u.pathname.split('/embed/')[1].split('/')[0];
+        if (host === 'youtu.be') {
+          id = u.pathname.slice(1).split('/')[0];
+          start = timeToSeconds(u.searchParams.get('t'));
+        } else if (host === 'youtube.com' || host === 'youtube-nocookie.com') {
+          if (u.pathname.startsWith('/watch')) {
+            id = u.searchParams.get('v');
+            start = timeToSeconds(u.searchParams.get('t') || u.searchParams.get('start'));
+            list = u.searchParams.get('list');
+          } else if (u.pathname.startsWith('/shorts/')) {
+            id = u.pathname.split('/shorts/')[1].split('/')[0];
+          } else if (u.pathname.startsWith('/embed/')) {
+            id = u.pathname.split('/embed/')[1].split('/')[0];
+          }
+        }
+
+        if (!id) return null;
+        const params = new URLSearchParams({rel:'0',modestbranding:'1',playsinline:'1'});
+        if (start>0) params.set('start', String(start));
+        if (list) params.set('list', list);
+        return `https://www.youtube-nocookie.com/embed/${id}?${params.toString()}`;
+      }catch(e){ return null; }
+    }
+
+    (async () => {
+      const container = document.getElementById('app');
+      try {
+        const res = await fetch('README.md'); // README must be alongside index.html
+        if (!res.ok) throw new Error('README.md not found');
+        const md = await res.text();
+
+        // Render markdown
+        container.innerHTML = marked.parse(md);
+
+        // 1) Turn plain YouTube links into embedded iframes
+        container.querySelectorAll('a[href]').forEach(a => {
+          const href = a.getAttribute('href');
+          const embedURL = toYouTubeEmbed(href);
+          if (!embedURL) return;
+
+          const wrap = document.createElement('div');
+          wrap.className = 'yt-embed';
+          const iframe = document.createElement('iframe');
+          iframe.src = embedURL;
+          iframe.title = 'YouTube video';
+          iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+          iframe.referrerPolicy = 'origin-when-cross-origin';
+          iframe.allowFullscreen = true;
+          wrap.appendChild(iframe);
+          a.replaceWith(wrap);
+        });
+
+        // 2) Make ALL remaining images clickable (open same image in new tab)
+        container.querySelectorAll('img').forEach(img => {
+          // shrink plots/charts/graphs on-page
+          const src = (img.getAttribute('src') || '').toLowerCase();
+          if (/(plot|chart|graph)/.test(src)) img.classList.add('shrink');
+
+          if (img.closest('a')) return; // skip if already linked
+          const a = document.createElement('a');
+          a.href = img.getAttribute('src');
+          a.target = '_blank';
+          a.rel = 'noopener';
+          img.replaceWith(a);
+          a.appendChild(img);
+        });
+
+      } catch (e) {
+        console.error(e);
+        container.textContent =
+          'Could not load README.md. Make sure it is in the same folder as index.html.';
+      }
+    })();
+  </script>
+
+  <!-- LIVE CLIENT SCRIPT (C2) — must be after the placeholders and before </body> -->
+  <script>
+    (() => {
+      const API_BASE = "https://api.wxmanbran.com";
+      const WS_URL = API_BASE.replace("https", "wss") + "/live";
+      const LATEST_URL = API_BASE + "/latest";
+
+      const FIELDS = [
+        ["iss_temp","iss_temp_F",v=>fmt(v,1)],
+        ["iss_rh","iss_rh",v=>fmt(v,0)],
+        ["iss_dew","iss_dew_F",v=>fmt(v,1)],
+        ["iss_hi","iss_hi_F",v=>fmt(v,1)],
+        ["iss_wc","iss_wc_F",v=>fmt(v,1)],
+        ["iss_slp","iss_slp_inHg",v=>fmt(v,3)],
+        ["iss_rainrate","iss_rainrate_inphr",v=>fmt(v,2)],
+        ["iss_raintoday","iss_raintoday_in",v=>fmt(v,2)],
+        ["iss_solar","iss_solar_wm2",v=>fmt(v,0)],
+        ["iss_uv","iss_uv",v=>fmt(v,1)],
+        ["iss_wspd","iss_wind_mph",v=>fmt(v,1)],
+        ["iss_wdir","iss_wdir_deg",v=>degFmt(v)],
+        ["iss_wavg","iss_wavg_mph",v=>fmt(v,1)],
+        ["iss_wgst","iss_wgust10_mph",v=>fmt(v,1)],
+        ["an2_wspd","an2_wind_mph",v=>fmt(v,1)],
+        ["an2_wdir","an2_wdir_deg",v=>degFmt(v)],
+        ["an2_wavg","an2_wavg_mph",v=>fmt(v,1)],
+        ["an2_wgst","an2_wgust10_mph",v=>fmt(v,1)],
+      ];
+
+      function render(d){
+        for (const [id,key,format] of FIELDS){
+          const el=document.getElementById(id);
+          if (!el) continue;
+          const val=d[key];
+          el.textContent=(typeof val==="number" && Number.isFinite(val))?format(val):"--";
+        }
+        const asof=document.getElementById("asof");
+        if (asof){
+          const t=(typeof d.ts==="number" && d.ts>0)?d.ts:(typeof d.received_at==="number"?d.received_at:Date.now());
+          asof.textContent=new Date(t).toLocaleString();
         }
       }
 
-      if (!id) return null;
-      const params = new URLSearchParams({rel:'0',modestbranding:'1',playsinline:'1'});
-      if (start>0) params.set('start', String(start));
-      if (list) params.set('list', list);
-      return `https://www.youtube-nocookie.com/embed/${id}?${params.toString()}`;
-    }catch(e){ return null; }
-  }
+      class LiveClient{
+        constructor(){
+          this.ws=null; this.backoff=1000; this.maxBackoff=15000;
+          this.pollTimer=null; this.connectedOnce=false; this.start();
+        }
+        start(){
+          try{ this.ws=new WebSocket(WS_URL); }catch(e){ this.startPolling(); return; }
+          this.ws.addEventListener("open",()=>{ this.backoff=1000; });
+          this.ws.addEventListener("message",(e)=>{ render(JSON.parse(e.data)); this.connectedOnce=true; });
+          this.ws.addEventListener("close",()=>this.reconnect());
+          this.ws.addEventListener("error",()=>this.reconnect());
+        }
+        reconnect(){
+          if (this.ws){ try{ this.ws.close(); }catch{} this.ws=null; }
+          if (!this.connectedOnce) this.startPolling();
+          setTimeout(()=>this.start(), this.backoff);
+          this.backoff=Math.min(this.backoff*2, this.maxBackoff);
+        }
+        startPolling(){
+          if (this.pollTimer) return;
+          const poll=async ()=>{
+            try{
+              const res=await fetch(LATEST_URL,{ headers:{ "cache-control":"no-cache" } });
+              if (res.ok){
+                const d=await res.json();
+                if (d && Object.keys(d).length>0) render(d);
+              }
+            }catch(e){}
+          };
+          poll();
+          this.pollTimer=setInterval(poll,5000);
+        }
+      }
 
-  (async () => {
-    const container = document.getElementById('app');
-    try {
-      const res = await fetch('README.md'); // README must be alongside index.html
-      if (!res.ok) throw new Error('README.md not found');
-      const md = await res.text();
+      function fmt(v,d){ return Number.isFinite(v)?v.toFixed(d):"--"; }
+      function degFmt(v){ if(!Number.isFinite(v)) return "--"; return `${Math.round(v)}° (${toCardinal(v)})`; }
+      function toCardinal(deg){
+        const dirs=["N","NNE","NE","ENE","E","ESE","SE","SSE","S","SSW","SW","WSW","W","WNW","NW","NNW"];
+        const idx=Math.round(((deg%360)/22.5))%16;
+        return dirs[idx];
+      }
 
-      // Render markdown
-      container.innerHTML = marked.parse(md);
-
-      // 1) Turn plain YouTube links into embedded iframes
-      container.querySelectorAll('a[href]').forEach(a => {
-        const href = a.getAttribute('href');
-        const embedURL = toYouTubeEmbed(href);
-        if (!embedURL) return;
-
-        const wrap = document.createElement('div');
-        wrap.className = 'yt-embed';
-        const iframe = document.createElement('iframe');
-        iframe.src = embedURL;
-        iframe.title = 'YouTube video';
-        iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
-        iframe.referrerPolicy = 'origin-when-cross-origin';
-        iframe.allowFullscreen = true;
-        wrap.appendChild(iframe);
-        a.replaceWith(wrap);
-      });
-
-      // 2) Make ALL remaining images clickable (open same image in new tab)
-      container.querySelectorAll('img').forEach(img => {
-        // shrink plots/charts/graphs on-page
-        const src = (img.getAttribute('src') || '').toLowerCase();
-        if (/(plot|chart|graph)/.test(src)) img.classList.add('shrink');
-
-        if (img.closest('a')) return; // skip if already linked
-        const a = document.createElement('a');
-        a.href = img.getAttribute('src');
-        a.target = '_blank';
-        a.rel = 'noopener';
-        img.replaceWith(a);
-        a.appendChild(img);
-      });
-
-    } catch (e) {
-      console.error(e);
-      container.textContent =
-        'Could not load README.md. Make sure it is in the same folder as index.html.';
-    }
-  })();
-
-    <div class="panel">
-  <h3>ISS (Station 0)</h3>
-  <div>Temp: <span id="iss_temp">--</span> °F</div>
-  <div>RH: <span id="iss_rh">--</span> %</div>
-  <div>Dewpoint: <span id="iss_dew">--</span> °F</div>
-  <div>Heat Index: <span id="iss_hi">--</span> °F</div>
-  <div>Wind Chill: <span id="iss_wc">--</span> °F</div>
-  <div>SLP: <span id="iss_slp">--</span> inHg</div>
-  <div>Rain rate: <span id="iss_rainrate">--</span> in/hr</div>
-  <div>Rain today: <span id="iss_raintoday">--</span> in</div>
-  <div>Solar: <span id="iss_solar">--</span> W/m²</div>
-  <div>UV: <span id="iss_uv">--</span></div>
-  <div>Wind: <span id="iss_wspd">--</span> mph @ <span id="iss_wdir">--</span></div>
-  <div>Avg: <span id="iss_wavg">--</span> mph | Gust(10m): <span id="iss_wgst">--</span> mph</div>
-</div>
-
-<div class="panel">
-  <h3>Second Anemometer</h3>
-  <div>Wind: <span id="an2_wspd">--</span> mph @ <span id="an2_wdir">--</span></div>
-  <div>Avg: <span id="an2_wavg">--</span> mph | Gust(10m): <span id="an2_wgst">--</span> mph</div>
-</div>
-
-<div>As of: <span id="asof">--</span></div>
-
+      new LiveClient();
+    })();
   </script>
 </body>
 </html>
