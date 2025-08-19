@@ -167,12 +167,16 @@
     })();
   </script>
 
-  <!-- LIVE CLIENT SCRIPT (C2) — must be after the placeholders and before </body> -->
+  <!-- LIVE CLIENT SCRIPT (C2) — robust URL handling to avoid "scheme missing" -->
   <script>
     (() => {
-      const API_BASE = "https://api.wxmanbran.com";
-      const WS_URL = API_BASE.replace("https", "wss") + "/live";
-      const LATEST_URL = API_BASE + "/latest";
+      // Build URLs using URL(), then explicitly set wss: for the socket.
+      const API_BASE_OBJ = new URL("https://api.wxmanbran.com");
+      const LATEST_URL   = new URL("/latest", API_BASE_OBJ).href;
+
+      const WS_URL_OBJ   = new URL("/live", API_BASE_OBJ);
+      WS_URL_OBJ.protocol = "wss:";
+      const WS_URL = WS_URL_OBJ.href;
 
       const FIELDS = [
         ["iss_temp","iss_temp_F",v=>fmt(v,1)],
@@ -254,5 +258,12 @@
       new LiveClient();
     })();
   </script>
+
+  <!--
+    IMPORTANT for your Meteobridge uploader:
+    Use a FULLY-SCHEMED URL like:
+    https://api.wxmanbran.com/ingest?token=YOURTOKEN&th0temp=[th0!0temp-act=F.1:]&wind0wind=[wind0!0wind-act=mph.1:] ...
+    If you omit "https://", Meteobridge will log "Scheme missing".
+  -->
 </body>
 </html>
