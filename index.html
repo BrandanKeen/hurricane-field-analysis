@@ -120,7 +120,7 @@
       function setStatus(s){ if(statusEl) statusEl.textContent = s; }
       function fmt(v,d){ return Number.isFinite(v)?v.toFixed(d):"--"; }
       function degFmt(v){ if(!Number.isFinite(v)) return "--"; return `${Math.round(v)}° (${toCardinal(v)})`; }
-      function toCardinal(deg){ const dirs=["N","NNE","NE","ENE","E","ESE","SE","SSE","S","SSW","SW","WSW","W","WNW","NW","NNW"]; const idx=Math.round(((deg%360)/22.5))%16; return dirs[idx]; }
+      function toCardinal(deg){ const dirs=["N","NNE","NE","ENE","E","ESE","SE","S","SSW","SW","WSW","W","WNW","NW","NNW"]; const idx=Math.round(((deg%360)/22.5))%16; return dirs[idx]; }
 
       // --- ms helpers & monotonic guard ---
       function toMs(x){ return (typeof x==="number" && x>0) ? (x < 1e12 ? x*1000 : x) : 0; }
