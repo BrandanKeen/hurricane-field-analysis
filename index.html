@@ -36,8 +36,6 @@
       <div>Temp: <span id="iss_temp">--</span> °F</div>
       <div>RH: <span id="iss_rh">--</span> %</div>
       <div>Dewpoint: <span id="iss_dew">--</span> °F</div>
-      <div>Heat Index: <span id="iss_hi">--</span> °F</div>
-      <div>Wind Chill: <span id="iss_wc">--</span> °F</div>
       <div>SLP: <span id="iss_slp">--</span> inHg</div>
       <div>Rain rate: <span id="iss_rainrate">--</span> in/hr</div>
       <div>Rain today: <span id="iss_raintoday">--</span> in</div>
@@ -100,8 +98,6 @@
         ["iss_temp","iss_temp_F",v=>fmt(v,1)],
         ["iss_rh","iss_rh",v=>fmt(v,0)],
         ["iss_dew","iss_dew_F",v=>fmt(v,1)],
-        ["iss_hi","iss_hi_F",v=>fmt(v,1)],
-        ["iss_wc","iss_wc_F",v=>fmt(v,1)],
         ["iss_slp","iss_slp_inHg",v=>fmt(v,3)],
         ["iss_rainrate","iss_rainrate_inphr",v=>fmt(v,2)],
         ["iss_raintoday","iss_raintoday_in",v=>fmt(v,2)],
@@ -120,7 +116,7 @@
       function setStatus(s){ if(statusEl) statusEl.textContent = s; }
       function fmt(v,d){ return Number.isFinite(v)?v.toFixed(d):"--"; }
       function degFmt(v){ if(!Number.isFinite(v)) return "--"; return `${Math.round(v)}° (${toCardinal(v)})`; }
-      function toCardinal(deg){ const dirs=["N","NNE","NE","ENE","E","ESE","SE","S","SSW","SW","WSW","W","WNW","NW","NNW"]; const idx=Math.round(((deg%360)/22.5))%16; return dirs[idx]; }
+      function toCardinal(deg){ const dirs=["N","NNE","NE","ENE","E","ESE","SE","SSW","SW","WSW","W","WNW","NW","NNW"]; const idx=Math.round(((deg%360)/22.5))%16; return dirs[idx]; }
 
       // --- ms helpers & monotonic guard ---
       function toMs(x){ return (typeof x==="number" && x>0) ? (x < 1e12 ? x*1000 : x) : 0; }
