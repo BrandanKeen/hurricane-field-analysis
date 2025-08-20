@@ -1,8 +1,8 @@
 <!--
   WxManBran Live Dashboard — Phase 1
-  Version: v1-dashboard
+  Version: v1-dashboard (labels black + larger)
   Notes:
-    • Default units: °F / °F / mb / mph / in/hr / in (matches your approved demo)
+    • Default units: °F / °F / mb / mph / in/hr / in
     • Long-poll desktop, 1s polling on iOS; override with ?mode=lp|poll and ?pollms=NNN
 -->
 <!doctype html>
@@ -61,7 +61,8 @@
     @media (max-width:560px){.cond-grid{grid-template-columns:1fr}}
 
     .cond-item{display:grid;gap:8px;transition:opacity .14s ease, transform .14s ease}
-    .cond-item .label{font-weight:800;font-size:clamp(13px,1.6vw,16px)}
+    /* Titles bigger + black */
+    .cond-item .label{font-weight:800;font-size:clamp(15px,1.9vw,19px); color:var(--title-ink)}
     .cond-item .value{font-weight:800;letter-spacing:.2px;font-variant-numeric:tabular-nums;font-size:clamp(28px,4.4vw,40px)}
     .asof{position:absolute;left:22px;bottom:14px;color:var(--muted);font-size:12px}
     .hidden{display:none!important}
@@ -87,8 +88,8 @@
     .arrow{fill:var(--accent);stroke:var(--accent)}
     #wx-needle,#wx-needle2{transform-box:fill-box;transform-origin:50% 50%;transition:transform 140ms ease-out}
 
-    /* Value color classes */
-    .label-temp{color:var(--temp)} .label-dew{color:var(--dew)} .label-rh{color:var(--rh)} .label-slp{color:var(--slp)} .label-rainrate{color:var(--rainrate)} .label-raintoday{color:var(--raintotal)} .label-solar{color:var(--solar)} .label-uv{color:var(--uv)}
+    /* Labels black; values colored */
+    .label-temp,.label-dew,.label-rh,.label-slp,.label-rainrate,.label-raintoday,.label-solar,.label-uv{color:var(--title-ink)}
     .value-temp{color:var(--temp)} .value-dew{color:var(--dew)} .value-rh{color:var(--rh)} .value-slp{color:var(--slp)} .value-rainrate{color:var(--rainrate)} .value-raintoday{color:var(--raintotal)} .value-solar{color:var(--solar)} .value-uv{color:var(--uv)}
 
     /* Dark theme hooks (optional) */
@@ -138,7 +139,7 @@
           <details class="gear" id="gear-conditions">
             <summary aria-label="Conditions settings">
               <!-- gear icon -->
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 8 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 3.6 15a1.65 1.65 0 0 0-1.51-1H2a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 3.6-8 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 8 3.6a1.65 1.65 0 0 0 1-1.51V2a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 20.4 8a1.65 1.65 0 0 0 1.51 1H22a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 8 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 3.6 15a1.65 1.65 0 0 0-1.51-1H2a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1A1.65 1.65 0 0 0 3.6 8a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 8 3.6a1.65 1.65 0 0 0 1-1.51V2a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 20.4 8a1.65 1.65 0 0 0 1.51 1H22a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
             </summary>
             <div class="panel">
               <div class="menu-grid">
@@ -376,7 +377,7 @@
       (function(){
         const gears = () => Array.from(document.querySelectorAll('details.gear'));
         document.addEventListener('click', (e)=>{ gears().forEach(d => { if (d.open && !d.contains(e.target)) d.removeAttribute('open'); }); });
-        document.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') gears().forEach(d => d.removeAttribute('open')); });
+        document.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') gears().forEach(d => d.removeAttribute('open'); }); });
         gears().forEach(d => d.addEventListener('toggle', ()=>{ if (d.open) gears().forEach(o => { if (o!==d) o.removeAttribute('open'); }); }));
       })();
 
@@ -411,7 +412,7 @@
 
       function set(el,txt){ if(el && el.textContent !== txt) el.textContent = txt; }
 
-      function render(d, forceUnits=false){
+      function render(d){
         if (!d) return;
 
         // --- Monotonic guard ---
@@ -458,10 +459,14 @@
       }
 
       function updateWindStats(){
-        const mins = windPeriodMinutes();
+        const mins = parseInt(document.getElementById('windPeriodCard')?.value || '5', 10);
         const a1 = computeAvgAndGust(windBuf1, mins);
-        set(document.getElementById('wx-wind-avg'),  isNaN(a1.avg)?'--':`${windNum(a1.avg).toFixed(1)} ${windUnit()}`);
-        set(document.getElementById('wx-wind-gust'), isNaN(a1.gust)?'--':`${windNum(a1.gust).toFixed(1)} ${windUnit()}`);
+        const windNum = m => units.wind==='kt'?mph2kt(m):units.wind==='kmh'?mph2kmh(m):units.wind==='mps'?mph2mps(m):m;
+        const windUnit= () => units.wind==='kmh'?'km/h':(units.wind==='mps'?'m/s':units.wind);
+        const avgStr  = isNaN(a1.avg)  ? '--' : `${windNum(a1.avg).toFixed(1)} ${windUnit()}`;
+        const gustStr = isNaN(a1.gust) ? '--' : `${windNum(a1.gust).toFixed(1)} ${windUnit()}`;
+        set(document.getElementById('wx-wind-avg'),  avgStr);
+        set(document.getElementById('wx-wind-gust'), gustStr);
         set(document.getElementById('wx-wind-period'), `${mins} min`);
         set(document.getElementById('wx-wind-period2'), `${mins} min`);
 
@@ -469,8 +474,10 @@
         const an2Card = document.getElementById('wx-wind2');
         if (an2Card.style.display !== 'none'){
           const a2 = computeAvgAndGust(windBuf2, mins);
-          set(document.getElementById('wx-wind2-avg'),  isNaN(a2.avg)?'--':`${windNum(a2.avg).toFixed(1)} ${windUnit()}`);
-          set(document.getElementById('wx-wind2-gust'), isNaN(a2.gust)?'--':`${windNum(a2.gust).toFixed(1)} ${windUnit()}`);
+          const avgStr2  = isNaN(a2.avg)  ? '--' : `${windNum(a2.avg).toFixed(1)} ${windUnit()}`;
+          const gustStr2 = isNaN(a2.gust) ? '--' : `${windNum(a2.gust).toFixed(1)} ${windUnit()}`;
+          set(document.getElementById('wx-wind2-avg'),  avgStr2);
+          set(document.getElementById('wx-wind2-gust'), gustStr2);
           set(document.getElementById('wx-wind2-period'),  `${mins} min`);
           set(document.getElementById('wx-wind2-period2'), `${mins} min`);
         }
