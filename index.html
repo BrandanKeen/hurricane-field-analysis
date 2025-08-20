@@ -7,7 +7,6 @@
   <meta name="theme-color" content="#e11d48">
   <!-- v-iphone-fallback -->
 
-  <!-- Favicons -->
   <link rel="icon" type="image/svg+xml" href="/Images/favicon.svg">
   <link rel="apple-touch-icon" href="/Images/apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="/Images/icon-192.png">
@@ -18,7 +17,6 @@
     body{margin:0;background:#fff}
     .container{max-width:900px;margin:2rem auto;padding:0 1rem}
     .markdown-body{box-sizing:border-box;padding:0}
-
     .hero{display:block;margin:0 auto 1rem auto;max-width:420px;width:55%;min-width:240px;height:auto}
     .markdown-body img{max-width:100%;height:auto;cursor:zoom-in}
     .markdown-body img.shrink{max-width:520px}
@@ -57,14 +55,11 @@
     </div>
 
     <div>As of: <span id="asof">--</span></div>
-
     <article class="markdown-body" id="app">Loading…</article>
   </div>
 
-  <!-- Markdown renderer -->
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script>
-    // README rendering helpers
     function timeToSeconds(t){ if(!t) return 0; if(/^\d+$/.test(t)) return parseInt(t,10);
       let s=0,m; m=t.match(/(\d+)h/); if(m) s+=+m[1]*3600; m=t.match(/(\d+)m/); if(m) s+=+m[1]*60; m=t.match(/(\d+)s/); if(m) s+=+m[1]; return s||0; }
     function toYouTubeEmbed(href){
@@ -94,12 +89,11 @@
     })();
   </script>
 
-  <!-- LIVE CLIENT with Safari-safe long-poll + auto-fallback to 1s polling -->
+  <!-- Live client: Long-poll with auto-fallback to 1s polling (iPhone-safe) -->
   <script>
     (() => {
       const API_BASE = new URL("https://api.wxmanbran.com");
       const LATEST_URL = new URL("/latest", API_BASE).href;
-
       const statusEl = document.getElementById('conn_status');
 
       const FIELDS = [
@@ -123,6 +117,19 @@
         ["an2_wgst","an2_wgust10_mph",v=>fmt(v,1)],
       ];
 
+      function setStatus(s){ if(statusEl) statusEl.textContent = s; }
+      function fmt(v,d){ return Number.isFinite(v)?v.toFixed(d):"--"; }
+      function degFmt(v){ if(!Number.isFinite(v)) return "--"; return `${Math.round(v)}° (${toCardinal(v)})`; }
+      function toCardinal(deg){ const dirs=["N","NNE","NE","ENE","E","ESE","SE","SSE","S","SSW","SW","WSW","W","WNW","NW","NNW"]; const idx=Math.round(((deg%360)/22.5))%16; return dirs[idx]; }
+
+      // --- ms-safe helpers & best stamp ---
+      function toMs(x){ return (typeof x==="number" && x>0) ? (x < 1e12 ? x*1000 : x) : 0; }
+      function bestStamp(d){
+        const a = toMs(d.ts);
+        const b = toMs(d.received_at);
+        return Math.max(a, b);
+      }
+
       function render(d){
         for (const [id,key,format] of FIELDS){
           const el=document.getElementById(id); if(!el) continue;
@@ -130,65 +137,61 @@
         }
         const asof=document.getElementById("asof");
         if (asof){
-          const t=(typeof d.ts==="number"&&d.ts>0)?d.ts:(typeof d.received_at==="number"?d.received_at:Date.now());
-          asof.textContent=new Date(t).toLocaleString();
+          asof.textContent=new Date(bestStamp(d) || Date.now()).toLocaleString();
         }
       }
-      function fmt(v,d){ return Number.isFinite(v)?v.toFixed(d):"--"; }
-      function degFmt(v){ if(!Number.isFinite(v)) return "--"; return `${Math.round(v)}° (${toCardinal(v)})`; }
-      function toCardinal(deg){ const dirs=["N","NNE","NE","ENE","E","ESE","SE","SSE","S","SSW","SW","WSW","W","WNW","NW","NNW"]; const idx=Math.round(((deg%360)/22.5))%16; return dirs[idx]; }
 
-      // Mode: auto (default), or forced via ?mode=lp / ?mode=poll
       const modeParam = new URLSearchParams(location.search).get('mode');
-      let forceMode = modeParam === 'lp' ? 'lp' : (modeParam === 'poll' ? 'poll' : null);
+      const forceMode = modeParam === 'lp' ? 'lp' : (modeParam === 'poll' ? 'poll' : null);
 
-      // Start with a quick fetch so the page paints immediately
+      let lastTs = 0; // ms-based
+
       fetch(LATEST_URL, { cache: "no-store" })
         .then(r=>r.ok?r.json():null)
-        .then(d=>{ if(d){ render(d); } })
+        .then(d=>{
+          if(d){
+            render(d);
+            lastTs = bestStamp(d) || Date.now();
+          }
+        })
         .finally(() => {
           if (forceMode === 'poll') startPolling();
           else startLongPollWithFallback();
         });
 
-      function setStatus(s){ if(statusEl) statusEl.textContent = s; }
-
-      // ---- Long-poll with Safari-safe loop; fallback to polling on issues
       function startLongPollWithFallback(){
         if (forceMode === 'lp') setStatus("Live: long-poll");
         else setStatus("Live: auto (LP→poll if needed)");
-        let lastTs = 0;
+
         let failures = 0;
 
         const loop = async () => {
           try{
-            const params = new URLSearchParams({ wait:"1", since:String(lastTs||Date.now()), timeout:"15000" });
-            // Abort if it somehow runs too long
+            const params = new URLSearchParams({ wait:"1", since:String(lastTs || Date.now()), timeout:"15000" });
             const ctrl = new AbortController();
             const t = setTimeout(()=>ctrl.abort(), 17000);
-            const res = await fetch(`${LATEST_URL}?${params}`, { cache:"no-store", signal: ctrl.signal });
+            const res = await fetch(`${LATEST_URL}?${params}`, { cache: "no-store", signal: ctrl.signal });
             clearTimeout(t);
 
             if (!res.ok) throw new Error("HTTP "+res.status);
             const d = await res.json();
-            const ts = (typeof d.ts==="number"&&d.ts>0)?d.ts:(typeof d.received_at==="number"?d.received_at:0);
-            if (ts && ts !== lastTs){ lastTs = ts; render(d); }
+            const stamp = bestStamp(d);
+            if (stamp && stamp !== lastTs){ lastTs = stamp; render(d); }
             failures = 0;
-            setTimeout(loop, 0); // avoid queueMicrotask issues on iOS
+            setTimeout(loop, 0);
           }catch(e){
             failures++;
-            if (!forceMode && failures >= 2){ // after a couple hiccups, fall back
+            if (!forceMode && failures >= 2){
               setStatus("Live: polling (fallback)");
               startPolling();
               return;
             }
-            setTimeout(loop, 500); // brief retry
+            setTimeout(loop, 500);
           }
         };
         loop();
       }
 
-      // ---- Plain polling every 1000 ms (no preflight, very compatible)
       function startPolling(){
         setStatus("Live: polling");
         const run = async ()=>{
@@ -197,6 +200,7 @@
             if (res.ok){
               const d = await res.json();
               render(d);
+              lastTs = bestStamp(d) || lastTs;
             }
           }catch(e){}
         };
@@ -206,11 +210,13 @@
     })();
   </script>
 
-  <!-- Notes:
-    • You can force modes via URL:
+  <!-- Tips:
+    • Force modes via URL:
       - https://www.wxmanbran.com/?mode=lp&v=iphonefix
       - https://www.wxmanbran.com/?mode=poll&v=iphonefix
-    • If iPhone Safari struggles with long-poll fetch, this page will fall back to 1s polling automatically.
+    • Raw endpoints for quick checks:
+      - https://api.wxmanbran.com/latest
+      - https://api.wxmanbran.com/latest.txt
   -->
 </body>
 </html>
