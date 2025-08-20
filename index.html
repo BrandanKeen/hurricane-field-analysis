@@ -5,7 +5,7 @@
   <title>Weatherman Bran</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#e11d48">
-  <!-- v-fast-poll -->
+  <!-- v-long-poll -->
 
   <!-- Favicons -->
   <link rel="icon" type="image/svg+xml" href="/Images/favicon.svg">
@@ -151,21 +151,11 @@
     })();
   </script>
 
-  <!-- LIVE CLIENT SCRIPT (Polling only, tuned for speed) -->
+  <!-- LIVE CLIENT SCRIPT — Long-polling for near-instant updates -->
   <script>
     (() => {
       const API_BASE = new URL("https://api.wxmanbran.com");
       const LATEST_URL = new URL("/latest", API_BASE).href;
-
-      // Allow override via ?p=ms (e.g., ?p=750). Defaults to 1000ms. Clamped 300–5000.
-      const qp = new URLSearchParams(location.search);
-      const reqMs = parseInt(qp.get("p") || "1000", 10);
-      const BASE_POLL_MS = Math.min(5000, Math.max(300, isFinite(reqMs) ? reqMs : 1000));
-
-      // Adaptive: slow down if tab hidden; back off briefly on errors.
-      let backoffMs = 0;
-      let lastTs = 0;
-      let inFlight = null;
 
       const FIELDS = [
         ["iss_temp","iss_temp_F",v=>fmt(v,1)],
@@ -201,7 +191,6 @@
           asof.textContent=new Date(t).toLocaleString();
         }
       }
-
       function fmt(v,d){ return Number.isFinite(v)?v.toFixed(d):"--"; }
       function degFmt(v){ if(!Number.isFinite(v)) return "--"; return `${Math.round(v)}° (${toCardinal(v)})`; }
       function toCardinal(deg){
@@ -210,44 +199,40 @@
         return dirs[idx];
       }
 
-      function sleep(ms){ return new Promise(r=>setTimeout(r, ms)); }
-      function desiredInterval(){
-        const visSlow = document.hidden ? Math.max(BASE_POLL_MS*5, 3000) : BASE_POLL_MS;
-        return visSlow + backoffMs;
-      }
+      // --- Long-poll loop: server replies immediately when new data arrives
+      let lastTs = 0;
+      let backoff = 0;
 
-      async function pollLoop(){
-        // cancel any overlapping fetch
-        if (inFlight) try{ inFlight.abort(); }catch{}
-        const controller = new AbortController();
-        inFlight = controller;
-
+      async function longPoll(){
         try{
-          const res = await fetch(LATEST_URL, { cache:"no-store", signal: controller.signal });
+          const params = new URLSearchParams({
+            wait: "1",
+            since: String(lastTs),
+            timeout: "15000"
+          });
+          const res = await fetch(`${LATEST_URL}?${params}`, { cache: "no-store" });
           if (res.ok){
             const d = await res.json();
-            // Update only if new timestamp or first run
-            const ts = (typeof d.ts === "number" && d.ts>0) ? d.ts : (typeof d.received_at === "number" ? d.received_at : 0);
+            const ts = (typeof d.ts==="number" && d.ts>0) ? d.ts :
+                       (typeof d.received_at==="number" ? d.received_at : 0);
             if (ts && ts !== lastTs){ lastTs = ts; render(d); }
-            backoffMs = 0; // success -> clear backoff
-          }else{
-            backoffMs = Math.min(8000, (backoffMs||500)*2);
+            backoff = 0;                     // success -> clear backoff
+            queueMicrotask(longPoll);        // immediately wait again
+            return;
           }
+          backoff = Math.min(4000, (backoff||500)*2); // HTTP error -> backoff
         }catch(_){
-          backoffMs = Math.min(8000, (backoffMs||500)*2);
-        }finally{
-          inFlight = null;
-          await sleep(desiredInterval());
-          pollLoop();
+          backoff = Math.min(4000, (backoff||500)*2); // network error -> backoff
         }
+        setTimeout(longPoll, 500 + backoff);          // retry after brief backoff
       }
 
-      // Kick off
-      pollLoop();
-      // If visibility changes, adjust immediately
-      document.addEventListener("visibilitychange", () => {
-        if (!inFlight) pollLoop();
-      });
+      // First paint quickly, then enter long-poll
+      fetch(LATEST_URL, { cache: "no-store" })
+        .then(r=>r.ok?r.json():null)
+        .then(d=>{ if(d) { const ts = d.ts||d.received_at||0; if(ts) lastTs = ts; render(d); } })
+        .finally(longPoll);
+
     })();
   </script>
 
@@ -255,6 +240,7 @@
     Meteobridge uploader tip:
     Use a FULLY-SCHEMED URL (http:// or https://). Example:
     http://api.wxmanbran.com/ingest?token=YOURTOKEN&ts=[epoch]&th0temp=[th0temp-act=F.1:]
+    Long-polling here gives you near-instant updates without WebSockets.
   -->
 </body>
 </html>
