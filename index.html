@@ -5,7 +5,7 @@
   <title>Weatherman Bran</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#e11d48">
-  <!-- v1-dashboard -->
+  <!-- v1-dashboard r1 (bigger values + color-coded labels) -->
 
   <link rel="icon" type="image/svg+xml" href="/Images/favicon.svg">
   <link rel="apple-touch-icon" href="/Images/apple-touch-icon.png">
@@ -14,7 +14,7 @@
 
   <link rel="stylesheet" href="https://unpkg.com/github-markdown-css@5.5.1/github-markdown.css">
   <style>
-    /* Your existing base styles */
+    /* Existing base styles */
     body{margin:0;background:#fff}
     .container{max-width:900px;margin:2rem auto;padding:0 1rem}
     .markdown-body{box-sizing:border-box;padding:0}
@@ -26,71 +26,88 @@
     .panel{border:1px solid #e5e7eb;border-radius:12px;padding:12px 14px;box-shadow:0 1px 2px rgba(0,0,0,.04);margin:1rem 0}
     .status{font-size:.85rem;color:#6b7280;margin-top:.5rem}
 
-    /* Dashboard styles (scoped, neutral; does not change body bg) */
-    :root {
-      --card: #ffffff;
-      --text: #0b1220;
-      --muted: #646b76;
-      --border: #e7e9ee;
-      --shadow: 0 6px 16px rgba(0,0,0,.06);
-      --accent: #2563eb; /* needle */
+    /* Dashboard styles */
+    :root{
+      --card:#ffffff;
+      --text:#0b1220;
+      --muted:#646b76;
+      --border:#e7e9ee;
+      --shadow:0 6px 16px rgba(0,0,0,.06);
+      --accent:#2563eb;
+
+      /* Plot-inspired label colors */
+      --temp-color:#d62728;  /* red */
+      --dew-color:#2ca02c;   /* green */
+      --rh-color:#b58900;    /* beige/light brown */
+      --slp-color:#111111;   /* black */
     }
-    #wx-dashboard {
-      max-width: 1100px;
-      margin: 24px auto 32px;
-      padding: 0 0 0; /* inside your container */
-      display: grid;
-      gap: 16px;
-      grid-template-columns: 1fr;
-      color: var(--text);
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
-      line-height: 1.35;
+    #wx-dashboard{
+      max-width:1100px;margin:24px auto 32px;padding:0;display:grid;gap:16px;grid-template-columns:1fr;
+      color:var(--text);
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji";
+      line-height:1.35;
     }
-    header.site-header {
-      display: flex; align-items: center; justify-content: space-between;
-      gap: 12px; padding: 4px 0 0;
+    header.site-header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:4px 0 0}
+    .logo{font-weight:700;letter-spacing:.2px;font-size:18px}
+    #wx-conn{color:var(--muted);font-size:13px}
+
+    .cards{display:grid;gap:16px;grid-template-columns:1fr;align-items:stretch}
+    @media (min-width:860px){.cards{grid-template-columns:1fr 1fr}}
+
+    .card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:12px;
+      box-shadow:var(--shadow);
+      padding:20px; /* more breathing room */
     }
-    .logo { font-weight: 700; letter-spacing: 0.2px; font-size: 18px; }
-    #wx-conn { color: var(--muted); font-size: 13px; }
-
-    .cards { display: grid; gap: 16px; grid-template-columns: 1fr; align-items: stretch; }
-    @media (min-width: 860px) { .cards { grid-template-columns: 1fr 1fr; } }
-
-    .card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      box-shadow: var(--shadow);
-      padding: 16px;
+    .card h2{
+      margin:0 0 12px;
+      font-size:clamp(18px,2.4vw,22px); /* larger title */
+      letter-spacing:.2px;
     }
-    .card h2 { margin: 0 0 8px; font-size: 16px; letter-spacing: .2px; }
-    .subtle { color: var(--muted); font-size: 12px; }
+    .subtle{color:var(--muted);font-size:12px}
 
-    .cond-grid { display: grid; gap: 10px 14px; grid-template-columns: repeat(2, minmax(0,1fr)); }
-    .cond-item { display: grid; gap: 2px; }
-    .cond-item .label { color: var(--muted); font-size: 12px; }
-    .cond-item .value { font-size: 22px; font-weight: 600; letter-spacing: .2px; font-variant-numeric: tabular-nums; }
-    .asof { margin-top: 10px; color: var(--muted); font-size: 12px; }
+    /* Conditions grid */
+    .cond-grid{display:grid;gap:12px 16px;grid-template-columns:repeat(2,minmax(0,1fr))}
+    .cond-item{display:grid;gap:4px}
+    .cond-item .label{
+      font-size:clamp(13px,1.6vw,16px);  /* larger label */
+      font-weight:700;
+    }
+    .label-temp{color:var(--temp-color)}
+    .label-dew{color:var(--dew-color)}
+    .label-rh{color:var(--rh-color)}
+    .label-slp{color:var(--slp-color)}
 
-    .wind-wrap { display: grid; grid-template-columns: 1fr; justify-items: center; gap: 8px; }
-    .wind-values { text-align: center; }
-    .wind-values .speed { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; }
-    .wind-values .sub { color: var(--muted); font-size: 12px; }
-    .wind-cardinal { color: var(--muted); font-size: 12px; margin-top: 4px; }
+    .cond-item .value{
+      font-size:clamp(24px,3.6vw,34px); /* bigger values to “fill” cards */
+      font-weight:700;
+      letter-spacing:.2px;
+      font-variant-numeric:tabular-nums;
+    }
+    .asof{margin-top:10px;color:var(--muted);font-size:12px}
 
-    .compass { width: 100%; max-width: 340px; min-width: 220px; aspect-ratio: 1 / 1; }
-    .tick { stroke: #cdd3dc; stroke-width: 1; }
-    .tick.major { stroke: #b7bfca; stroke-width: 1.4; }
-    .ring { fill: none; stroke: #dfe5ee; stroke-width: 2; }
-    .labels { fill: #4a5568; font-size: 6px; font-weight: 600; }
-    .needle { fill: var(--accent); stroke: var(--accent); }
-    #wx-needle, #wx-needle2 { transform-box: fill-box; transform-origin: 50% 50%; transition: transform 120ms ease-out; }
+    /* Wind card */
+    .wind-wrap{display:grid;grid-template-columns:1fr;justify-items:center;gap:8px}
+    .wind-values{text-align:center}
+    .wind-values .speed{font-size:clamp(24px,3.4vw,32px);font-weight:800;font-variant-numeric:tabular-nums}
+    .wind-values .sub{color:var(--muted);font-size:13px}
+    .wind-cardinal{color:var(--muted);font-size:12px;margin-top:4px}
 
-    /* Optional secondary anemometer card (hidden until an2_* exists) */
-    #wx-wind2 { display: none; }
+    /* SVG Compass */
+    .compass{width:100%;max-width:340px;min-width:220px;aspect-ratio:1/1}
+    .tick{stroke:#cdd3dc;stroke-width:1}
+    .tick.major{stroke:#b7bfca;stroke-width:1.4}
+    .ring{fill:none;stroke:#dfe5ee;stroke-width:2}
+    .labels{fill:#4a5568;font-size:6px;font-weight:600}
+    .needle{fill:var(--accent);stroke:var(--accent)}
+    #wx-needle,#wx-needle2{transform-box:fill-box;transform-origin:50% 50%;transition:transform 120ms ease-out}
+
+    /* Optional secondary anemometer card */
+    #wx-wind2{display:none}
   </style>
 </head>
-
 <body>
   <div class="container">
     <img class="hero" src="/Images/WxManBran_Logo.png" alt="Two red hurricane warning flags blowing in strong wind" loading="lazy">
@@ -107,10 +124,10 @@
         <article class="card" aria-label="Current Conditions">
           <h2>Conditions</h2>
           <div id="wx-values" class="cond-grid" aria-live="polite">
-            <div class="cond-item"><div class="label">Temp</div><div id="wx-temp" class="value">--</div></div>
-            <div class="cond-item"><div class="label">RH</div><div id="wx-rh" class="value">--</div></div>
-            <div class="cond-item"><div class="label">Dewpoint</div><div id="wx-dew" class="value">--</div></div>
-            <div class="cond-item"><div class="label">SLP</div><div id="wx-slp" class="value">--</div></div>
+            <div class="cond-item"><div class="label label-temp">Temp</div><div id="wx-temp" class="value">--</div></div>
+            <div class="cond-item"><div class="label label-rh">RH</div><div id="wx-rh" class="value">--</div></div>
+            <div class="cond-item"><div class="label label-dew">Dewpoint</div><div id="wx-dew" class="value">--</div></div>
+            <div class="cond-item"><div class="label label-slp">SLP</div><div id="wx-slp" class="value">--</div></div>
             <div class="cond-item"><div class="label">Rain Rate</div><div id="wx-rainrate" class="value">--</div></div>
             <div class="cond-item"><div class="label">Rain Today</div><div id="wx-raintoday" class="value">--</div></div>
             <div class="cond-item"><div class="label">Solar</div><div id="wx-solar" class="value">--</div></div>
@@ -123,7 +140,6 @@
         <article class="card" aria-label="Wind">
           <h2>Wind</h2>
           <div class="wind-wrap">
-            <!-- SVG Compass -->
             <svg id="wx-wind-compass" class="compass" viewBox="0 0 100 100" role="img" aria-label="Wind compass">
               <circle class="ring" cx="50" cy="50" r="44"></circle>
               <g id="ticks">
@@ -169,7 +185,7 @@
           </div>
         </article>
 
-        <!-- Optional Second Anemometer (hidden until data appears) -->
+        <!-- Optional Second Anemometer -->
         <article id="wx-wind2" class="card" aria-label="Wind — Anemometer 2">
           <h2>Wind — Anemometer 2</h2>
           <div class="wind-wrap">
@@ -219,11 +235,11 @@
       </section>
     </main>
 
-    <!-- Your README.md area stays intact -->
+    <!-- README stays intact -->
     <article class="markdown-body" id="app">Loading…</article>
   </div>
 
-  <!-- README + YouTube embedding (unchanged) -->
+  <!-- README + YouTube parsing (unchanged) -->
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script>
     function timeToSeconds(t){ if(!t) return 0; if(/^\d+$/.test(t)) return parseInt(t,10);
@@ -255,215 +271,123 @@
     })();
   </script>
 
-  <!-- Live client: Long-poll with iOS polling fallback (Phase 1) -->
+  <!-- Live client (unchanged logic) -->
   <script>
     (function(){
       const API = 'https://api.wxmanbran.com/latest';
 
-      // ===== Helpers =====
       const qs = (id) => document.getElementById(id);
       const setText = (el, txt) => { if (el && el.textContent !== txt) el.textContent = txt; };
-      const fmtNum = (x, d=0) => {
-        const n = Number(x);
-        return Number.isFinite(n) ? n.toFixed(d) : '--';
-      };
-      const formatSLP = (inHg) => {
-        const n = Number(inHg);
-        return Number.isFinite(n) ? `${n.toFixed(3)} inHg` : '--';
-      };
-      const toMs = (x) => {
-        const n = Number(x);
-        if (!Number.isFinite(n)) return 0;
-        return n < 1e12 ? Math.round(n * 1000) : Math.round(n);
-      };
+      const fmtNum = (x, d=0) => { const n = Number(x); return Number.isFinite(n) ? n.toFixed(d) : '--'; };
+      const formatSLP = (inHg) => { const n = Number(inHg); return Number.isFinite(n) ? `${n.toFixed(3)} inHg` : '--'; };
+      const toMs = (x) => { const n = Number(x); if (!Number.isFinite(n)) return 0; return n < 1e12 ? Math.round(n * 1000) : Math.round(n); };
       const bestStamp = (d) => Math.max(toMs(d && d.ts), toMs(d && d.received_at));
 
-      const CARD16 = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
-      const toCardinal = (deg) => {
-        const n = Number(deg);
-        if (!Number.isFinite(n)) return '--';
-        const i = Math.round((((n % 360) + 360) % 360) / 22.5) % 16;
-        return CARD16[i];
-      };
+      const CARD16=['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
+      const toCardinal=(deg)=>{ const n=Number(deg); if(!Number.isFinite(n)) return '--'; const i=Math.round((((n%360)+360)%360)/22.5)%16; return CARD16[i]; };
 
-      // Shortest-path rotation
       function makeNeedleRotator(el){
-        let lastAngle = 0; // [0,360)
-        let accum = 0;     // cumulative rotation
-        return function rotateTo(deg){
-          if (!el || !Number.isFinite(deg)) return;
-          const a = ((deg % 360) + 360) % 360;
-          const delta = ((a - lastAngle + 540) % 360) - 180; // [-180, 180)
-          accum += delta;
-          lastAngle = a;
-          el.style.transform = `rotate(${accum}deg)`;
+        let lastAngle=0,accum=0;
+        return function(deg){
+          if(!el||!Number.isFinite(deg))return;
+          const a=((deg%360)+360)%360;
+          const delta=((a-lastAngle+540)%360)-180;
+          accum+=delta; lastAngle=a;
+          el.style.transform=`rotate(${accum}deg)`;
         };
       }
 
-      // DOM refs
-      const el = {
-        conn: qs('wx-conn'),
-        asof: qs('wx-asof'),
-        temp: qs('wx-temp'), rh: qs('wx-rh'), dew: qs('wx-dew'), slp: qs('wx-slp'),
-        rainrate: qs('wx-rainrate'), raintoday: qs('wx-raintoday'), solar: qs('wx-solar'), uv: qs('wx-uv'),
-        windSpd: qs('wx-wind-speed'), windAvg: qs('wx-wind-avg'), windGust: qs('wx-wind-gust'), windCard: qs('wx-wind-cardinal'),
-        needle: qs('wx-needle'),
-
-        wind2Wrap: qs('wx-wind2'), needle2: qs('wx-needle2'),
-        wind2Spd: qs('wx-wind2-speed'), wind2Avg: qs('wx-wind2-avg'), wind2Gust: qs('wx-wind2-gust'), wind2Card: qs('wx-wind2-cardinal'),
+      const el={
+        conn:qs('wx-conn'), asof:qs('wx-asof'),
+        temp:qs('wx-temp'), rh:qs('wx-rh'), dew:qs('wx-dew'), slp:qs('wx-slp'),
+        rainrate:qs('wx-rainrate'), raintoday:qs('wx-raintoday'), solar:qs('wx-solar'), uv:qs('wx-uv'),
+        windSpd:qs('wx-wind-speed'), windAvg:qs('wx-wind-avg'), windGust:qs('wx-wind-gust'), windCard:qs('wx-wind-cardinal'),
+        needle:qs('wx-needle'),
+        wind2Wrap:qs('wx-wind2'), needle2:qs('wx-needle2'),
+        wind2Spd:qs('wx-wind2-speed'), wind2Avg:qs('wx-wind2-avg'), wind2Gust:qs('wx-wind2-gust'), wind2Card:qs('wx-wind2-cardinal'),
       };
 
-      const rotateNeedle  = makeNeedleRotator(el.needle);
-      const rotateNeedle2 = makeNeedleRotator(el.needle2);
+      const rotateNeedle=makeNeedleRotator(el.needle);
+      const rotateNeedle2=makeNeedleRotator(el.needle2);
 
-      // Monotonic timestamp state
-      let lastTs = 0;
-
-      // Render scheduling (batch to next frame)
-      let pending = null, rafId = 0;
-      function scheduleRender(data){
-        pending = data;
-        if (!rafId) rafId = requestAnimationFrame(applyRender);
-      }
+      let lastTs=0;
+      let pending=null,rafId=0;
+      function scheduleRender(data){ pending=data; if(!rafId) rafId=requestAnimationFrame(applyRender); }
       function applyRender(){
-        rafId = 0;
-        if (!pending) return;
-        const d = pending; pending = null;
+        rafId=0; if(!pending) return; const d=pending; pending=null;
+        const stamp=bestStamp(d); if(stamp<(lastTs-2000)) return; lastTs=Math.max(lastTs,stamp);
 
-        // Timestamp / monotonic guard (2s tolerance)
-        const stamp = bestStamp(d);
-        if (stamp < (lastTs - 2000)) return;
-        lastTs = Math.max(lastTs, stamp);
+        setText(el.temp,fmtNum(d.iss_temp_F,1)+' °F');
+        setText(el.rh,fmtNum(d.iss_rh,0)+' %');
+        setText(el.dew,fmtNum(d.iss_dew_F,1)+' °F');
+        setText(el.slp,formatSLP(d.iss_slp_inHg));
+        setText(el.rainrate,fmtNum(d.iss_rainrate_inphr,2)+' in/hr');
+        setText(el.raintoday,fmtNum(d.iss_raintoday_in,2)+' in');
+        setText(el.solar,fmtNum(d.iss_solar_wm2,0)+' W/m²');
+        setText(el.uv,fmtNum(d.iss_uv,1));
 
-        // Values
-        setText(el.temp,      fmtNum(d.iss_temp_F, 1) + ' °F');
-        setText(el.rh,        fmtNum(d.iss_rh, 0) + ' %');
-        setText(el.dew,       fmtNum(d.iss_dew_F, 1) + ' °F');
-        setText(el.slp,       formatSLP(d.iss_slp_inHg));
-        setText(el.rainrate,  fmtNum(d.iss_rainrate_inphr, 2) + ' in/hr');
-        setText(el.raintoday, fmtNum(d.iss_raintoday_in, 2) + ' in');
-        setText(el.solar,     fmtNum(d.iss_solar_wm2, 0) + ' W/m²');
-        setText(el.uv,        fmtNum(d.iss_uv, 1));
+        const dir=Number(d.iss_wdir_deg), spd=Number(d.iss_wind_mph), avg=Number(d.iss_wavg_mph), gst=Number(d.iss_wgust10_mph);
+        if(Number.isFinite(dir)) rotateNeedle(dir);
+        setText(el.windSpd,Number.isFinite(spd)?`${spd.toFixed(1)} mph`:'--');
+        setText(el.windAvg,Number.isFinite(avg)?avg.toFixed(1):'--');
+        setText(el.windGust,Number.isFinite(gst)?gst.toFixed(1):'--');
+        setText(el.windCard,Number.isFinite(dir)?`${toCardinal(dir)} ${Math.round(((dir%360)+360)%360)}°`:'--');
 
-        // Wind 1
-        const dir = Number(d.iss_wdir_deg);
-        const spd = Number(d.iss_wind_mph);
-        const avg = Number(d.iss_wavg_mph);
-        const gst = Number(d.iss_wgust10_mph);
-        if (Number.isFinite(dir)) rotateNeedle(dir);
-        setText(el.windSpd,  Number.isFinite(spd) ? `${spd.toFixed(1)} mph` : '--');
-        setText(el.windAvg,  Number.isFinite(avg) ? avg.toFixed(1) : '--');
-        setText(el.windGust, Number.isFinite(gst) ? gst.toFixed(1) : '--');
-        setText(el.windCard, Number.isFinite(dir) ? `${toCardinal(dir)} ${Math.round(((dir%360)+360)%360)}°` : '--');
+        const hasAn2=d&&(Object.prototype.hasOwnProperty.call(d,'an2_wind_mph')||
+                          Object.prototype.hasOwnProperty.call(d,'an2_wdir_deg')||
+                          Object.prototype.hasOwnProperty.call(d,'an2_wavg_mph')||
+                          Object.prototype.hasOwnProperty.call(d,'an2_wgust10_mph'));
+        if(hasAn2&&el.wind2Wrap){
+          el.wind2Wrap.style.display='';
+          const dir2=Number(d.an2_wdir_deg), sp2=Number(d.an2_wind_mph), av2=Number(d.an2_wavg_mph), gs2=Number(d.an2_wgust10_mph);
+          if(Number.isFinite(dir2)) rotateNeedle2(dir2);
+          setText(el.wind2Spd,Number.isFinite(sp2)?`${sp2.toFixed(1)} mph`:'--');
+          setText(el.wind2Avg,Number.isFinite(av2)?av2.toFixed(1):'--');
+          setText(el.wind2Gust,Number.isFinite(gs2)?gs2.toFixed(1):'--');
+          setText(el.wind2Card,Number.isFinite(dir2)?`${toCardinal(dir2)} ${Math.round(((dir2%360)+360)%360)}°`:'--');
+        } else if(el.wind2Wrap){ el.wind2Wrap.style.display='none'; }
 
-        // Wind 2 (optional)
-        const hasAn2 = d && (Object.prototype.hasOwnProperty.call(d,'an2_wind_mph') ||
-                             Object.prototype.hasOwnProperty.call(d,'an2_wdir_deg') ||
-                             Object.prototype.hasOwnProperty.call(d,'an2_wavg_mph') ||
-                             Object.prototype.hasOwnProperty.call(d,'an2_wgust10_mph'));
-        if (hasAn2 && el.wind2Wrap){
-          el.wind2Wrap.style.display = '';
-          const dir2 = Number(d.an2_wdir_deg);
-          const sp2  = Number(d.an2_wind_mph);
-          const av2  = Number(d.an2_wavg_mph);
-          const gs2  = Number(d.an2_wgust10_mph);
-          if (Number.isFinite(dir2)) rotateNeedle2(dir2);
-          setText(el.wind2Spd,  Number.isFinite(sp2) ? `${sp2.toFixed(1)} mph` : '--');
-          setText(el.wind2Avg,  Number.isFinite(av2) ? av2.toFixed(1) : '--');
-          setText(el.wind2Gust, Number.isFinite(gs2) ? gs2.toFixed(1) : '--');
-          setText(el.wind2Card, Number.isFinite(dir2) ? `${toCardinal(dir2)} ${Math.round(((dir2%360)+360)%360)}°` : '--');
-        } else if (el.wind2Wrap) {
-          el.wind2Wrap.style.display = 'none';
-        }
-
-        // As-of timestamp (local)
-        try {
-          const dt = new Date(lastTs);
-          const fmt = dt.toLocaleString([], { year:'numeric', month:'short', day:'2-digit', hour:'numeric', minute:'2-digit', second:'2-digit' });
-          setText(el.asof, fmt);
-        } catch {}
+        try{ const dt=new Date(lastTs); setText(el.asof, dt.toLocaleString([], {year:'numeric',month:'short',day:'2-digit',hour:'numeric',minute:'2-digit',second:'2-digit'})); }catch{}
       }
 
-      // ===== Transport (LP / Poll) =====
-      const urlParams = new URLSearchParams(location.search);
-      const ua = navigator.userAgent || navigator.vendor || window.opera || '';
-      const isTouchMac = /Mac/.test(navigator.platform || '') && navigator.maxTouchPoints > 1;
-      const isIOS = /iPad|iPhone|iPod/.test(ua) || isTouchMac;
+      const urlParams=new URLSearchParams(location.search);
+      const ua=navigator.userAgent||navigator.vendor||window.opera||'';
+      const isTouchMac=/Mac/.test(navigator.platform||'')&&navigator.maxTouchPoints>1;
+      const isIOS=/iPad|iPhone|iPod/.test(ua)||isTouchMac;
+      const paramMode=urlParams.get('mode');
+      let mode=(paramMode==='lp'||paramMode==='poll')?paramMode:(isIOS?'poll':'lp');
+      let pollms=Math.max(250,parseInt(urlParams.get('pollms')||'1000',10)||1000);
 
-      const paramMode = urlParams.get('mode'); // lp|poll
-      let mode = (paramMode === 'lp' || paramMode === 'poll') ? paramMode : (isIOS ? 'poll' : 'lp');
-      let pollms = Math.max(250, parseInt(urlParams.get('pollms') || '1000', 10) || 1000);
+      function setConn(text){ setText(el.conn,text); }
 
-      function setConn(text){ setText(el.conn, text); }
-
-      let lpErrorStreak = 0;
-      let lpNoChangeStreak = 0;
+      let lpErrorStreak=0, lpNoChangeStreak=0;
 
       async function initialFetch(){
-        try {
-          const res = await fetch(API, { cache: 'no-store' });
-          if (!res.ok) throw new Error('HTTP ' + res.status);
-          const data = await res.json();
-          scheduleRender(data);
-        } catch {}
+        try{ const res=await fetch(API,{cache:'no-store'}); if(!res.ok) throw 0; const data=await res.json(); scheduleRender(data); }catch{}
       }
-
       async function longPollLoop(){
         setConn(`Live: long-poll`);
-        const since = lastTs || 0;
-        const controller = new AbortController();
-        const t = setTimeout(() => controller.abort(), 17000);
-        const url = `${API}?wait=1&since=${encodeURIComponent(since)}&timeout=15000`;
+        const since=lastTs||0;
+        const controller=new AbortController();
+        const t=setTimeout(()=>controller.abort(),17000);
+        const url=`${API}?wait=1&since=${encodeURIComponent(since)}&timeout=15000`;
         try{
-          const res = await fetch(url, { signal: controller.signal, cache: 'no-store' });
-          clearTimeout(t);
-          if (!res.ok) throw new Error('HTTP ' + res.status);
-          const data = await res.json();
-          const stamp = bestStamp(data);
-          if (stamp <= lastTs) {
-            lpNoChangeStreak++;
-          } else {
-            lpNoChangeStreak = 0; lpErrorStreak = 0;
-            scheduleRender(data);
-          }
-        } catch (e){
-          clearTimeout(t);
-          lpErrorStreak++;
-        }
-
-        if (lpErrorStreak >= 2 || lpNoChangeStreak >= 2) {
-          mode = 'poll';
-          pollLoop();
-        } else {
-          if (mode === 'lp') longPollLoop();
-        }
+          const res=await fetch(url,{signal:controller.signal,cache:'no-store'}); clearTimeout(t);
+          if(!res.ok) throw 0;
+          const data=await res.json(); const stamp=bestStamp(data);
+          if(stamp<=lastTs){ lpNoChangeStreak++; } else { lpNoChangeStreak=0; lpErrorStreak=0; scheduleRender(data); }
+        }catch(e){ clearTimeout(t); lpErrorStreak++; }
+        if(lpErrorStreak>=2||lpNoChangeStreak>=2){ mode='poll'; pollLoop(); } else { if(mode==='lp') longPollLoop(); }
       }
-
       async function pollLoop(){
         setConn(`Live: polling (${pollms}ms)`);
-        try{
-          const res = await fetch(API, { cache: 'no-store' });
-          if (res.ok){
-            const data = await res.json();
-            scheduleRender(data);
-          }
-        }catch(e){}
-        if (mode === 'poll') setTimeout(pollLoop, pollms);
+        try{ const res=await fetch(API,{cache:'no-store'}); if(res.ok){ const data=await res.json(); scheduleRender(data); } }catch(e){}
+        if(mode==='poll') setTimeout(pollLoop,pollms);
       }
 
-      document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'visible') {
-          fetch(API, { cache:'no-store' })
-            .then(r => r.ok ? r.json() : null)
-            .then(d => d && scheduleRender(d))
-            .catch(()=>{});
-        }
-      });
+      document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible'){ fetch(API,{cache:'no-store'}).then(r=>r.ok?r.json():null).then(d=>d&&scheduleRender(d)).catch(()=>{}); } });
 
-      // Kick off
-      initialFetch().finally(() => {
-        if (mode === 'lp') longPollLoop(); else pollLoop();
-      });
+      initialFetch().finally(()=>{ if(mode==='lp') longPollLoop(); else pollLoop(); });
     })();
   </script>
 
