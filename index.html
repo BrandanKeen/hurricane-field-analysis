@@ -5,7 +5,7 @@
   <title>Weatherman Bran</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#e11d48">
-  <!-- v-long-poll -->
+  <!-- v-iphone-fallback -->
 
   <!-- Favicons -->
   <link rel="icon" type="image/svg+xml" href="/Images/favicon.svg">
@@ -19,33 +19,20 @@
     .container{max-width:900px;margin:2rem auto;padding:0 1rem}
     .markdown-body{box-sizing:border-box;padding:0}
 
-    /* Hero graphic */
     .hero{display:block;margin:0 auto 1rem auto;max-width:420px;width:55%;min-width:240px;height:auto}
-
-    /* README images: scale to container, show zoom cursor */
     .markdown-body img{max-width:100%;height:auto;cursor:zoom-in}
-
-    /* Auto-shrink big plot/chart/graph images on the page; click still opens full size */
     .markdown-body img.shrink{max-width:520px}
-
-    /* Responsive 16:9 YouTube embeds */
     .yt-embed{position:relative;padding-bottom:56.25%;height:0;margin:1.25rem 0;background:#000;border-radius:12px;overflow:hidden}
     .yt-embed iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
-
-    /* Simple cards for live values */
     .panel{border:1px solid #e5e7eb;border-radius:12px;padding:12px 14px;box-shadow:0 1px 2px rgba(0,0,0,.04);margin:1rem 0}
+    .status{font-size:.85rem;color:#6b7280;margin-top:.5rem}
   </style>
 </head>
 
 <body>
   <div class="container">
-    <!-- Hero image -->
-    <img class="hero"
-         src="/Images/WxManBran_Logo.png"
-         alt="Two red hurricane warning flags blowing in strong wind"
-         loading="lazy">
+    <img class="hero" src="/Images/WxManBran_Logo.png" alt="Two red hurricane warning flags blowing in strong wind" loading="lazy">
 
-    <!-- LIVE VALUE PLACEHOLDERS -->
     <div class="panel">
       <h3>ISS (Station 0)</h3>
       <div>Temp: <span id="iss_temp">--</span> °F</div>
@@ -60,6 +47,7 @@
       <div>UV: <span id="iss_uv">--</span></div>
       <div>Wind: <span id="iss_wspd">--</span> mph @ <span id="iss_wdir">--</span></div>
       <div>Avg: <span id="iss_wavg">--</span> mph | Gust(10m): <span id="iss_wgst">--</span> mph</div>
+      <div class="status" id="conn_status">Connecting…</div>
     </div>
 
     <div class="panel">
@@ -70,92 +58,49 @@
 
     <div>As of: <span id="asof">--</span></div>
 
-    <!-- README content area -->
     <article class="markdown-body" id="app">Loading…</article>
   </div>
 
   <!-- Markdown renderer -->
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script>
-    // --- helpers for README rendering ---
-    function timeToSeconds(t){
-      if(!t) return 0;
-      if(/^\d+$/.test(t)) return parseInt(t,10);
-      let s=0, m;
-      m=t.match(/(\d+)h/); if(m) s+=parseInt(m[1],10)*3600;
-      m=t.match(/(\d+)m/); if(m) s+=parseInt(m[1],10)*60;
-      m=t.match(/(\d+)s/); if(m) s+=parseInt(m[1],10);
-      return s||0;
-    }
+    // README rendering helpers
+    function timeToSeconds(t){ if(!t) return 0; if(/^\d+$/.test(t)) return parseInt(t,10);
+      let s=0,m; m=t.match(/(\d+)h/); if(m) s+=+m[1]*3600; m=t.match(/(\d+)m/); if(m) s+=+m[1]*60; m=t.match(/(\d+)s/); if(m) s+=+m[1]; return s||0; }
     function toYouTubeEmbed(href){
       try{
-        const u = new URL(href, window.location.origin);
-        const host = u.hostname.replace(/^www\./,'');
-        let id=null, start=0, list=null;
-        if (host === 'youtu.be') {
-          id = u.pathname.slice(1).split('/')[0];
-          start = timeToSeconds(u.searchParams.get('t'));
-        } else if (host === 'youtube.com' || host === 'youtube-nocookie.com') {
-          if (u.pathname.startsWith('/watch')) {
-            id = u.searchParams.get('v');
-            start = timeToSeconds(u.searchParams.get('t') || u.searchParams.get('start'));
-            list = u.searchParams.get('list');
-          } else if (u.pathname.startsWith('/shorts/')) {
-            id = u.pathname.split('/shorts/')[1].split('/')[0];
-          } else if (u.pathname.startsWith('/embed/')) {
-            id = u.pathname.split('/embed/')[1].split('/')[0];
-          }
+        const u=new URL(href,location.origin), host=u.hostname.replace(/^www\./,''); let id=null,start=0,list=null;
+        if(host==='youtu.be'){ id=u.pathname.slice(1).split('/')[0]; start=timeToSeconds(u.searchParams.get('t')); }
+        else if(host==='youtube.com'||host==='youtube-nocookie.com'){
+          if(u.pathname.startsWith('/watch')){ id=u.searchParams.get('v'); start=timeToSeconds(u.searchParams.get('t')||u.searchParams.get('start')); list=u.searchParams.get('list'); }
+          else if(u.pathname.startsWith('/shorts/')){ id=u.pathname.split('/shorts/')[1].split('/')[0]; }
+          else if(u.pathname.startsWith('/embed/')){ id=u.pathname.split('/embed/')[1].split('/')[0]; }
         }
-        if (!id) return null;
-        const params = new URLSearchParams({rel:'0',modestbranding:'1',playsinline:'1'});
-        if (start>0) params.set('start', String(start));
-        if (list) params.set('list', list);
+        if(!id) return null;
+        const params=new URLSearchParams({rel:'0',modestbranding:'1',playsinline:'1'}); if(start>0) params.set('start',String(start)); if(list) params.set('list',list);
         return `https://www.youtube-nocookie.com/embed/${id}?${params.toString()}`;
       }catch(e){ return null; }
     }
-    (async () => {
-      const container = document.getElementById('app');
-      try {
-        const res = await fetch('README.md'); // README must be alongside index.html
-        if (!res.ok) throw new Error('README.md not found');
-        const md = await res.text();
-        container.innerHTML = marked.parse(md);
-        // embed YouTube & link images
-        container.querySelectorAll('a[href]').forEach(a => {
-          const href = a.getAttribute('href');
-          const embedURL = toYouTubeEmbed(href);
-          if (!embedURL) return;
-          const wrap = document.createElement('div');
-          wrap.className = 'yt-embed';
-          const iframe = document.createElement('iframe');
-          iframe.src = embedURL;
-          iframe.title = 'YouTube video';
-          iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
-          iframe.referrerPolicy = 'origin-when-cross-origin';
-          iframe.allowFullscreen = true;
-          wrap.appendChild(iframe);
-          a.replaceWith(wrap);
-        });
-        container.querySelectorAll('img').forEach(img => {
-          const src = (img.getAttribute('src') || '').toLowerCase();
-          if (/(plot|chart|graph)/.test(src)) img.classList.add('shrink');
-          if (img.closest('a')) return;
-          const a = document.createElement('a');
-          a.href = img.getAttribute('src'); a.target = '_blank'; a.rel = 'noopener';
-          img.replaceWith(a); a.appendChild(img);
-        });
-      } catch (e) {
-        console.error(e);
-        container.textContent = 'Could not load README.md. Make sure it is in the same folder as index.html.';
-      }
+    (async ()=>{ const container=document.getElementById('app');
+      try{
+        const res=await fetch('README.md'); if(!res.ok) throw 0; const md=await res.text(); container.innerHTML=marked.parse(md);
+        container.querySelectorAll('a[href]').forEach(a=>{ const href=a.getAttribute('href'); const u=toYouTubeEmbed(href); if(!u) return;
+          const wrap=document.createElement('div'); wrap.className='yt-embed'; const iframe=document.createElement('iframe'); iframe.src=u; iframe.title='YouTube video';
+          iframe.allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share'; iframe.referrerPolicy='origin-when-cross-origin'; iframe.allowFullscreen=true;
+          wrap.appendChild(iframe); a.replaceWith(wrap); });
+        container.querySelectorAll('img').forEach(img=>{ const src=(img.getAttribute('src')||'').toLowerCase(); if(/(plot|chart|graph)/.test(src)) img.classList.add('shrink');
+          if(img.closest('a')) return; const a=document.createElement('a'); a.href=img.getAttribute('src'); a.target='_blank'; a.rel='noopener'; img.replaceWith(a); a.appendChild(img); });
+      }catch(e){ container.textContent='Could not load README.md. Make sure it is in the same folder as index.html.'; }
     })();
   </script>
 
-  <!-- LIVE CLIENT SCRIPT — Long-polling for near-instant updates -->
+  <!-- LIVE CLIENT with Safari-safe long-poll + auto-fallback to 1s polling -->
   <script>
     (() => {
       const API_BASE = new URL("https://api.wxmanbran.com");
       const LATEST_URL = new URL("/latest", API_BASE).href;
+
+      const statusEl = document.getElementById('conn_status');
 
       const FIELDS = [
         ["iss_temp","iss_temp_F",v=>fmt(v,1)],
@@ -180,67 +125,92 @@
 
       function render(d){
         for (const [id,key,format] of FIELDS){
-          const el=document.getElementById(id);
-          if (!el) continue;
-          const val=d[key];
-          el.textContent=(typeof val==="number" && Number.isFinite(val))?format(val):"--";
+          const el=document.getElementById(id); if(!el) continue;
+          const val=d[key]; el.textContent=(typeof val==="number"&&Number.isFinite(val))?format(val):"--";
         }
         const asof=document.getElementById("asof");
         if (asof){
-          const t=(typeof d.ts==="number" && d.ts>0)?d.ts:(typeof d.received_at==="number"?d.received_at:Date.now());
+          const t=(typeof d.ts==="number"&&d.ts>0)?d.ts:(typeof d.received_at==="number"?d.received_at:Date.now());
           asof.textContent=new Date(t).toLocaleString();
         }
       }
       function fmt(v,d){ return Number.isFinite(v)?v.toFixed(d):"--"; }
       function degFmt(v){ if(!Number.isFinite(v)) return "--"; return `${Math.round(v)}° (${toCardinal(v)})`; }
-      function toCardinal(deg){
-        const dirs=["N","NNE","NE","ENE","E","ESE","SE","SSE","S","SSW","SW","WSW","W","WNW","NW","NNW"];
-        const idx=Math.round(((deg%360)/22.5))%16;
-        return dirs[idx];
-      }
+      function toCardinal(deg){ const dirs=["N","NNE","NE","ENE","E","ESE","SE","SSE","S","SSW","SW","WSW","W","WNW","NW","NNW"]; const idx=Math.round(((deg%360)/22.5))%16; return dirs[idx]; }
 
-      // --- Long-poll loop: server replies immediately when new data arrives
-      let lastTs = 0;
-      let backoff = 0;
+      // Mode: auto (default), or forced via ?mode=lp / ?mode=poll
+      const modeParam = new URLSearchParams(location.search).get('mode');
+      let forceMode = modeParam === 'lp' ? 'lp' : (modeParam === 'poll' ? 'poll' : null);
 
-      async function longPoll(){
-        try{
-          const params = new URLSearchParams({
-            wait: "1",
-            since: String(lastTs),
-            timeout: "15000"
-          });
-          const res = await fetch(`${LATEST_URL}?${params}`, { cache: "no-store" });
-          if (res.ok){
-            const d = await res.json();
-            const ts = (typeof d.ts==="number" && d.ts>0) ? d.ts :
-                       (typeof d.received_at==="number" ? d.received_at : 0);
-            if (ts && ts !== lastTs){ lastTs = ts; render(d); }
-            backoff = 0;                     // success -> clear backoff
-            queueMicrotask(longPoll);        // immediately wait again
-            return;
-          }
-          backoff = Math.min(4000, (backoff||500)*2); // HTTP error -> backoff
-        }catch(_){
-          backoff = Math.min(4000, (backoff||500)*2); // network error -> backoff
-        }
-        setTimeout(longPoll, 500 + backoff);          // retry after brief backoff
-      }
-
-      // First paint quickly, then enter long-poll
+      // Start with a quick fetch so the page paints immediately
       fetch(LATEST_URL, { cache: "no-store" })
         .then(r=>r.ok?r.json():null)
-        .then(d=>{ if(d) { const ts = d.ts||d.received_at||0; if(ts) lastTs = ts; render(d); } })
-        .finally(longPoll);
+        .then(d=>{ if(d){ render(d); } })
+        .finally(() => {
+          if (forceMode === 'poll') startPolling();
+          else startLongPollWithFallback();
+        });
 
+      function setStatus(s){ if(statusEl) statusEl.textContent = s; }
+
+      // ---- Long-poll with Safari-safe loop; fallback to polling on issues
+      function startLongPollWithFallback(){
+        if (forceMode === 'lp') setStatus("Live: long-poll");
+        else setStatus("Live: auto (LP→poll if needed)");
+        let lastTs = 0;
+        let failures = 0;
+
+        const loop = async () => {
+          try{
+            const params = new URLSearchParams({ wait:"1", since:String(lastTs||Date.now()), timeout:"15000" });
+            // Abort if it somehow runs too long
+            const ctrl = new AbortController();
+            const t = setTimeout(()=>ctrl.abort(), 17000);
+            const res = await fetch(`${LATEST_URL}?${params}`, { cache:"no-store", signal: ctrl.signal });
+            clearTimeout(t);
+
+            if (!res.ok) throw new Error("HTTP "+res.status);
+            const d = await res.json();
+            const ts = (typeof d.ts==="number"&&d.ts>0)?d.ts:(typeof d.received_at==="number"?d.received_at:0);
+            if (ts && ts !== lastTs){ lastTs = ts; render(d); }
+            failures = 0;
+            setTimeout(loop, 0); // avoid queueMicrotask issues on iOS
+          }catch(e){
+            failures++;
+            if (!forceMode && failures >= 2){ // after a couple hiccups, fall back
+              setStatus("Live: polling (fallback)");
+              startPolling();
+              return;
+            }
+            setTimeout(loop, 500); // brief retry
+          }
+        };
+        loop();
+      }
+
+      // ---- Plain polling every 1000 ms (no preflight, very compatible)
+      function startPolling(){
+        setStatus("Live: polling");
+        const run = async ()=>{
+          try{
+            const res = await fetch(LATEST_URL, { cache:"no-store" });
+            if (res.ok){
+              const d = await res.json();
+              render(d);
+            }
+          }catch(e){}
+        };
+        run();
+        setInterval(run, 1000);
+      }
     })();
   </script>
 
-  <!--
-    Meteobridge uploader tip:
-    Use a FULLY-SCHEMED URL (http:// or https://). Example:
-    http://api.wxmanbran.com/ingest?token=YOURTOKEN&ts=[epoch]&th0temp=[th0temp-act=F.1:]
-    Long-polling here gives you near-instant updates without WebSockets.
+  <!-- Notes:
+    • You can force modes via URL:
+      - https://www.wxmanbran.com/?mode=lp&v=iphonefix
+      - https://www.wxmanbran.com/?mode=poll&v=iphonefix
+    • If iPhone Safari struggles with long-poll fetch, this page will fall back to 1s polling automatically.
   -->
 </body>
 </html>
