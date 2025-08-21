@@ -65,9 +65,8 @@ Observations captured are presented below chronologically with the most recent h
 
 ---
 
-<h2 align="center">Hurricane Helene (September 26, 2024) – Perry, FL</h2>
+<h2 align="center">Hurricane Helene (September 26, 2024) – Perry, FL</h2> <br><br>
 
-<br><br>
 
 <div align="center" style="display:flex;justify-content:center;gap:12px;flex-wrap:wrap;">
   <a href="Images/Helene/Helene_animated.gif" target="_blank" rel="noopener"
@@ -171,7 +170,7 @@ Planned expansions and enhancements to this project are already underway, with s
     - Live video streaming during intercepts.
     - Real-time weather station data streamed from the vehicle (and eventually deployed VP2 sites) with instantaneous updates and auto-refreshing plots.
    
-      - ***Update — August 21, 2025***: Custom dashboard for polling real-time weather station data from the vehicle-based station is complete.
+      - ***Update — August 21, 2025***: Custom dashboard for polling real-time data from the vehicle-based station is complete.
 
 
 ---
