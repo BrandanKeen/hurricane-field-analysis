@@ -170,11 +170,13 @@ Planned expansions and enhancements to this project are already underway, with s
 
     - Live video streaming during intercepts.
     - Real-time weather station data streamed from the vehicle (and eventually deployed VP2 sites) with instantaneous updates and auto-refreshing plots.
+   
+      - ***Update — August 21, 2025***: Custom dashboard for polling real-time weather station data from the vehicle-based station is complete.
 
 
 ---
 
-## License
+<h2 align="center">License</h2>
 
 Figures and methodologies may be used for research and educational purposes with appropriate attribution.
 
