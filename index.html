@@ -1,8 +1,12 @@
 <!--
   WxManBran Live Dashboard — Phase 1
-  Version: v1-dashboard-final+needle-black-triangle
-  Change:
-    • Wind needle is a black triangular pointer (tail on ring, tip points inward)
+  Version: v1-dashboard-final+needle-sector+labels
+  Changes:
+    • Restored card settings panels (Conditions + Wind)
+    • Wind settings icon is a CLOCK (not a gear)
+    • “Averaging period” renamed to “Sustained/Gust Period”
+    • Labels positioned with polar math + optical tweaks
+    • Needle is a circular-sector wedge (base hugs r=44, tip inward)
 -->
 <!doctype html>
 <html lang="en">
@@ -22,7 +26,7 @@
     :root{
       --card:#fff; --bg:#f6f7f9; --text:#0b1220; --muted:#667085; --border:#e6e8ee; --shadow:0 6px 16px rgba(0,0,0,.06);
       --temp:#d62728; --dew:#2ca02c; --rh:#b58900; --slp:#111111; --rainrate:#6f3fa4; --raintotal:#7b3f00; --solar:#f97316; --uv:#1e1b4b; --accent:#2563eb; --title-ink:#111;
-      --needle:#2f2f2f;               /* NEW: needle color (black/charcoal) */
+      --needle:#2f2f2f;               /* needle color (black/charcoal) */
       --title-scale:1.35;
     }
     html,body{height:100%}
@@ -75,7 +79,7 @@
     .tick.major{stroke:#b7bfca;stroke-width:1.4}
     .labels{fill:#4a5568;font-size:6px;font-weight:700}
 
-    /* NEW: needle color now black/charcoal */
+    /* needle */
     .arrow{fill:var(--needle);stroke:var(--needle)}
     #wx-needle,#wx-needle2{transform-box:fill-box;transform-origin:50% 50%;transition:transform 140ms ease-out}
 
@@ -147,9 +151,10 @@
           </div>
           <div class="asof">As of <span id="wx-asof">--</span></div>
 
-          <!-- Restored: Conditions gear -->
+          <!-- Conditions settings -->
           <details class="gear" id="gear-conditions">
             <summary aria-label="Conditions settings">
+              <!-- gear icon -->
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                 <path d="M12 8.5a3.5 3.5 0 1 1 0 7 3.5 3.5 0 0 1 0-7Z" stroke="#334155" stroke-width="1.6"/>
                 <path d="M20 12a8 8 0 0 0-.09-1.2l2.01-1.56-2-3.46-2.42.7a8 8 0 0 0-2.08-1.2L15 2h-6l-.42 2.28a8 8 0 0 0-2.08 1.2l-2.42-.7-2 3.46L4.09 10.8A8 8 0 0 0 4 12c0 .41.03.81.09 1.2l-2.01 1.56 2 3.46 2.42-.7c.63.49 1.32.9 2.08 1.2L9 22h6l.42-2.28c.76-.3 1.45-.71 2.08-1.2l2.42.7 2-3.46-2.01-1.56c.06-.39.09-.79.09-1.2Z" stroke="#334155" stroke-width="1.2" opacity=".5"/>
@@ -238,7 +243,7 @@
                 <text x="22" y="78">SW</text>
                 <text x="22" y="22">NW</text>
               </g>
-              <!-- NEW: black triangular pointer (short wedge), tail on ring (y=6), tip points inward -->
+              <!-- group remains; JS injects sector wedge path -->
               <g id="wx-needle" class="arrow">
                 <polygon points="50,38 57,6 43,6" />
               </g>
@@ -251,12 +256,13 @@
             </div>
           </div>
 
-          <!-- Restored: Wind gear -->
+          <!-- Wind settings (clock icon) -->
           <details class="gear" id="gear-wind">
             <summary aria-label="Wind settings">
+              <!-- clock icon -->
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <path d="M12 8.5a3.5 3.5 0 1 1 0 7 3.5 3.5 0 0 1 0-7Z" stroke="#334155" stroke-width="1.6"/>
-                <path d="M20 12a8 8 0 0 0-.09-1.2l2.01-1.56-2-3.46-2.42.7a8 8 0 0 0-2.08-1.2L15 2h-6l-.42 2.28a8 8 0 0 0-2.08 1.2l-2.42-.7-2 3.46L4.09 10.8A8 8 0 0 0 4 12c0 .41.03.81.09 1.2l-2.01 1.56 2 3.46 2.42-.7c.63.49 1.32.9 2.08 1.2L9 22h6l.42-2.28c.76-.3 1.45-.71 2.08-1.2l2.42.7 2-3.46-2.01-1.56c.06-.39.09-.79.09-1.2Z" stroke="#334155" stroke-width="1.2" opacity=".5"/>
+                <circle cx="12" cy="12" r="8" stroke="#334155" stroke-width="1.6"/>
+                <path d="M12 7v5l3 2" stroke="#334155" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
             </summary>
             <div class="panel">
@@ -269,7 +275,7 @@
                     <option value="mps">m/s</option>
                   </select>
                 </label>
-                <label>Averaging period
+                <label>Sustained/Gust Period
                   <select id="windPeriodCard">
                     <option value="1" selected>1 min</option>
                     <option value="2">2 min</option>
@@ -311,7 +317,6 @@
               <g class="labels" text-anchor="middle" dominant-baseline="central">
                 <text x="50" y="15">N</text><text x="85" y="50">E</text><text x="50" y="85">S</text><text x="15" y="50">W</text>
               </g>
-              <!-- Matching black pointer for anemometer 2 -->
               <g id="wx-needle2" class="arrow">
                 <polygon points="50,38 57,6 43,6" />
               </g>
@@ -341,7 +346,7 @@
   </script>
 
   <script>
-    /* Live engine (unchanged apart from needle shape color via CSS) */
+    /* Live engine (data pipeline unchanged; added compass helpers + working settings) */
     (() => {
       const API = "https://api.wxmanbran.com/latest";
       const conn = document.getElementById('wx-conn');
@@ -364,7 +369,7 @@
       bindUnitSelect('uSLPCard','slp');
       bindUnitSelect('uRainRateCard','rainrate');
       bindUnitSelect('uRainCard','rain');
-      bindUnitSelect('uWindCard','wind'); // <-- restored wind units binding
+      bindUnitSelect('uWindCard','wind'); // wind units
 
       const f2c=f=>(f-32)*5/9, inHg2hPa=i=>i*33.8638866667, in2mm=i=>i*25.4, mph2kt=m=>m*0.868976, mph2kmh=m=>m*1.609344, mph2mps=m=>m*0.44704;
       const windNum = m => units.wind==='kt'?mph2kt(m):units.wind==='kmh'?mph2kmh(m):units.wind==='mps'?mph2mps(m):m;
@@ -378,7 +383,56 @@
       const fmtWind=v=>Number.isFinite(nfix(v))?`${windNum(nfix(v)).toFixed(1)} ${windUnit()}`:'--';
       const toCard = d=>['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'][Math.round((((nfix(d)%360)+360)%360)/22.5)%16];
 
-      function needleRotator(el){ let last=0,acc=0; return function(deg){ const a=((deg%360)+360)%360; const delta=((a-last+540)%360)-180; acc+=delta; last=a; el.style.transform=`rotate(${acc}deg)`; }; }
+      /* ===== Compass helpers: label spacing + sector needle (with optical tweaks) ===== */
+      const LABEL_OFFSET = 8; // base outward offset from ring (SVG units)
+
+      function labelXY(deg, R=44, offset=LABEL_OFFSET) {
+        const cx=50, cy=50, rad=(deg*Math.PI)/180, r=R+offset;
+        return [cx + r*Math.sin(rad), cy - r*Math.cos(rad)];
+      }
+      function radialAdjustFor(label){
+        // Negative pulls closer to the ring
+        const tweak = { N:0, E:0, S:0, W:-2, NE:-1.5, SE:0, SW:0, NW:-1.0 };
+        return tweak[label] ?? 0;
+      }
+      function applyLabelOffsets(svgId){
+        const svg = document.getElementById(svgId); if(!svg) return;
+        const labels = svg.querySelectorAll('.labels text');
+        const angles = [0,90,180,270,45,135,225,315]; // DOM order: N,E,S,W,NE,SE,SW,NW
+        labels.forEach((t,i)=>{
+          const name = (t.textContent || '').trim();
+          const offset = LABEL_OFFSET + radialAdjustFor(name);
+          const [x,y] = labelXY(angles[i], 44, offset);
+          t.setAttribute('x', x.toFixed(2));
+          t.setAttribute('y', y.toFixed(2));
+        });
+      }
+      function sectorPath({ R=44, tipR=20, halfWidthDeg=7 } = {}) {
+        const cx=50, cy=50;
+        const toXY=(deg,r)=>{ const t=(deg*Math.PI)/180; return [cx + r*Math.sin(t), cy - r*Math.cos(t)]; };
+        const a1=-halfWidthDeg, a2=+halfWidthDeg;
+        const [x1,y1]=toXY(a1,R), [x2,y2]=toXY(a2,R), [xt,yt]=toXY(0,tipR);
+        return `M ${x1.toFixed(3)} ${y1.toFixed(3)} A ${R} ${R} 0 0 1 ${x2.toFixed(3)} ${y2.toFixed(3)} L ${xt.toFixed(3)} ${yt.toFixed(3)} Z`;
+      }
+      function buildNeedle(groupId){
+        const g=document.getElementById(groupId); if(!g) return;
+        const d=sectorPath({ R:44, tipR:20, halfWidthDeg:7 });
+        g.innerHTML = `<path d="${d}" fill="currentColor"/>`;
+      }
+      // Build wedges + place labels (safe no-ops if 2nd compass hidden or partial labels)
+      buildNeedle('wx-needle');   applyLabelOffsets('wx-wind-compass');
+      buildNeedle('wx-needle2');  applyLabelOffsets('wx-wind2-compass');
+      /* ===== /Compass helpers ===== */
+
+      function needleRotator(el){
+        let last=0,acc=0;
+        return function(deg){
+          const a=((deg%360)+360)%360;
+          const delta=((a-last+540)%360)-180;
+          acc+=delta; last=a;
+          el.style.transform=`rotate(${acc}deg)`;
+        };
+      }
       const rotate1 = needleRotator(document.getElementById('wx-needle'));
       const rotate2 = needleRotator(document.getElementById('wx-needle2'));
 
@@ -402,6 +456,7 @@
           }
           grid.appendChild(el);
         }
+        // Show/hide toggles
         document.querySelectorAll('#gear-conditions input[type="checkbox"][data-target]').forEach(cb=>{
           cb.addEventListener('change', ()=>{
             const el = document.getElementById(cb.dataset.target);
@@ -442,7 +497,7 @@
         if (Number.isFinite(dir1)) rotate1(dir1);
         if (Number.isFinite(spd1)) pushWind(windBuf1, spd1);
         set(document.getElementById('wx-wind-speed'), fmtWind(spd1));
-        set(document.getElementById('wx-wind-cardinal'), Number.isFinite(dir1) ? `${toCard(dir1)} ${Math.round(((dir1%360)+360)%360)}°` : '--`);
+        set(document.getElementById('wx-wind-cardinal'), Number.isFinite(dir1) ? `${toCard(dir1)} ${Math.round(((dir1%360)+360)%360)}°` : '--');
 
         const hasAn2 = Number.isFinite(nfix(d.an2_wind_mph)) || Number.isFinite(nfix(d.an2_wdir_deg));
         const an2Card = document.getElementById('wx-wind2');
@@ -452,7 +507,7 @@
           if (Number.isFinite(dir2)) rotate2(dir2);
           if (Number.isFinite(spd2)) pushWind(windBuf2, spd2);
           set(document.getElementById('wx-wind2-speed'), fmtWind(spd2));
-          set(document.getElementById('wx-wind2-cardinal'), Number.isFinite(dir2) ? `${toCard(dir2)} ${Math.round(((dir2%360)+360)%360)}°` : '--`);
+          set(document.getElementById('wx-wind2-cardinal'), Number.isFinite(dir2) ? `${toCard(dir2)} ${Math.round(((dir2%360)+360)%360)}°` : '--');
         }
 
         updateWindStats();
