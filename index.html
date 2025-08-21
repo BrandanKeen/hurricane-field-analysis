@@ -1,9 +1,12 @@
 <!--
   WxManBran Live Dashboard — Phase 1
-  Version: v1-dashboard-final+svg-labels-no-clip+helene-stack
-  Changes this pass:
-    • Helene section: stack first two images vertically & normalize size
-    • Compass labels no longer clip; needle rotation origin fix retained
+  Version: v1-dashboard-final+compass-needle+labels+helene-stack
+  This build:
+    • Compass labels via rotate+translate (no clipping)
+    • Needle = sector wedge with arc base on r=44; shortest-path rotation
+    • Settings restored (Conditions gear + Wind clock gear)
+    • Wind units + Sustained/Gust Period
+    • Helene section: stack two images, same responsive height, full-width
 -->
 <!doctype html>
 <html lang="en">
@@ -91,7 +94,7 @@
     .markdown-body img{max-width:100%;height:auto;cursor:zoom-in}
     .markdown-body img.shrink{max-width:520px}
 
-    /* ===== Helene stacked image helper ===== */
+    /* ===== Helene stacked image helper (full-width, equal height, cover) ===== */
     .helene-stack{
       display:grid;
       grid-template-columns:1fr;
@@ -102,15 +105,11 @@
     }
     .helene-stack img{
       width:100% !important;
-      height:auto;
+      height:clamp(300px, 45vw, 520px);
       display:block;
       border-radius:8px;
-    }
-    /* keep heights closer; shrink tall images but never upscale small ones */
-    .helene-stack img.same{
-      max-height:420px;
-      object-fit:contain;
-      background:#f8fafc;
+      object-fit:cover;
+      object-position:center;
     }
     /* ===== /Helene helper ===== */
 
@@ -259,7 +258,7 @@
                 <line class="tick" x1="50" y1="6" x2="50" y2="10" transform="rotate(337.5 50 50)" />
               </g>
 
-              <!-- PURE SVG LABELS: rotate around center, translate out by radius 47 -->
+              <!-- Labels: rotate around (50,50), translate outward by 47 -->
               <g class="labels">
                 <g transform="rotate(0 50 50)"><text x="50" y="50" text-anchor="middle" dominant-baseline="middle" transform="translate(0,-47)">N</text></g>
                 <g transform="rotate(90 50 50)"><text x="50" y="50" text-anchor="middle" dominant-baseline="middle" transform="translate(0,-47)">E</text></g>
@@ -271,7 +270,7 @@
                 <g transform="rotate(315 50 50)"><text x="50" y="50" text-anchor="middle" dominant-baseline="middle" transform="translate(0,-47)">NW</text></g>
               </g>
 
-              <!-- Needle group; JS injects a sector wedge path -->
+              <!-- Needle group; JS will inject a sector wedge path -->
               <g id="wx-needle" class="arrow">
                 <polygon points="50,38 57,6 43,6" />
               </g>
@@ -374,44 +373,35 @@
         const res=await fetch('README.md', {cache:'no-store'}); 
         if(!res.ok) throw 0;
         container.innerHTML=marked.parse(await res.text());
-        heleneStack(container);            // << stack/normalize Helene images
+        heleneStack(container); // stack/normalize Helene images
       }catch{ container.textContent=''; }
 
       // Wrap & stack the first two images under the "Hurricane Helene" section
       function heleneStack(root){
-        // find the first heading that contains "Hurricane Helene"
         const heading = Array.from(root.querySelectorAll('h1,h2,h3,h4'))
           .find(h => /hurricane\s+helene/i.test(h.textContent));
         if(!heading) return;
 
-        // collect elements until the next heading
         const blockEls = [];
         for(let el = heading.nextElementSibling; el && !/^H[1-6]$/.test(el.tagName); el = el.nextElementSibling){
           blockEls.push(el);
         }
-
-        // find the images within that block
         const imgs = blockEls.flatMap(el => Array.from(el.querySelectorAll('img')));
         if(imgs.length < 2) return;
 
-        // create wrapper and move the first two images into it
         const wrapper = document.createElement('div');
         wrapper.className = 'helene-stack';
 
-        // insert wrapper before the first image's current container
         const anchor = imgs[0].closest('p') || imgs[0];
         anchor.parentNode.insertBefore(wrapper, anchor.closest('p') || anchor);
 
         const movedParents = new Set();
         imgs.slice(0,2).forEach(img=>{
           const p = img.closest('p'); if(p) movedParents.add(p);
-          img.classList.add('same');
           img.removeAttribute('width'); img.removeAttribute('height');
           img.style.maxWidth = '100%';
           wrapper.appendChild(img);
         });
-
-        // clean up any now-empty paragraphs that only held the images
         movedParents.forEach(p=>{
           if(!p.textContent.trim() && p.querySelectorAll('img').length===0) p.remove();
         });
@@ -420,7 +410,7 @@
   </script>
 
   <script>
-    /* Live engine (unchanged data pipeline; needle rotation origin fix retained) */
+    /* Live engine: API fetch, render, rotation, settings wiring */
     (() => {
       const API = "https://api.wxmanbran.com/latest";
       const conn = document.getElementById('wx-conn');
@@ -457,7 +447,7 @@
       const fmtWind=v=>Number.isFinite(nfix(v))?`${windNum(nfix(v)).toFixed(1)} ${windUnit()}`:'--';
       const toCard = d=>['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'][Math.round((((nfix(d)%360)+360)%360)/22.5)%16];
 
-      /* ===== Needle builder: sector wedge base on ring r=44 ===== */
+      /* ===== Needle: sector wedge with arc base on ring r=44 ===== */
       function sectorPath({ R=44, tipR=20, halfWidthDeg=7 } = {}) {
         const cx=50, cy=50;
         const toXY=(deg,r)=>{ const t=(deg*Math.PI)/180; return [cx + r*Math.sin(t), cy - r*Math.cos(t)]; };
@@ -472,9 +462,9 @@
       }
       buildNeedle('wx-needle');
       buildNeedle('wx-needle2');
-      /* ===== /Needle builder ===== */
+      /* ===== /Needle ===== */
 
-      /* Shortest-path accumulator; set BOTH CSS and SVG transform for reliability */
+      /* Shortest-path accumulator; apply CSS + SVG transform for cross-browser reliability */
       function needleRotator(el){
         let last=0,acc=0;
         return function(deg){
@@ -488,13 +478,15 @@
       const rotate1 = needleRotator(document.getElementById('wx-needle'));
       const rotate2 = needleRotator(document.getElementById('wx-needle2'));
 
+      /* details/gear behavior */
       (function(){
         const gears = () => Array.from(document.querySelectorAll('details.gear'));
         document.addEventListener('click', (e)=>{ gears().forEach(d => { if (d.open && !d.contains(e.target)) d.removeAttribute('open'); }); });
-        document.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') gears().forEach(d => d.removeAttribute('open'); }); });
+        document.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') gears().forEach(d => d.removeAttribute('open')); });
         gears().forEach(d => d.addEventListener('toggle', ()=>{ if (d.open) gears().forEach(o => { if (o!==d) o.removeAttribute('open'); }); }));
       })();
 
+      /* reorder/visibility for Conditions */
       (function wireCustomizeCond(){
         const grid = document.getElementById('wx-values');
         if (!grid.__order) grid.__order = Array.from(grid.children).map(el=>el.id);
@@ -518,6 +510,7 @@
         });
       })();
 
+      /* Wind stats buffers & formatting */
       const windPeriodSel = document.getElementById('windPeriodCard');
       function windPeriodMinutes(){ const v = windPeriodSel?.value || '1'; return parseInt(v,10)||1; } // default 1 min
       windPeriodSel?.addEventListener('change', ()=> updateWindStats());
@@ -585,6 +578,7 @@
         }
       }
 
+      /* fetch cycle (initial fetch + long-poll with fallback to interval polling) */
       function isIOS(){ const ua = navigator.userAgent || navigator.vendor || window.opera; const touchMac = (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1); return /iPhone|iPad|iPod/i.test(ua) || touchMac; }
       const qs = new URLSearchParams(location.search);
       const force = qs.get('mode');
