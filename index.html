@@ -147,8 +147,61 @@
           </div>
           <div class="asof">As of <span id="wx-asof">--</span></div>
 
-          <!-- Conditions gear omitted here to keep focus; leave your existing settings block if present -->
-          <!-- (Use your current version with units/customize; no changes needed for the needle) -->
+          <!-- Restored: Conditions gear -->
+          <details class="gear" id="gear-conditions">
+            <summary aria-label="Conditions settings">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M12 8.5a3.5 3.5 0 1 1 0 7 3.5 3.5 0 0 1 0-7Z" stroke="#334155" stroke-width="1.6"/>
+                <path d="M20 12a8 8 0 0 0-.09-1.2l2.01-1.56-2-3.46-2.42.7a8 8 0 0 0-2.08-1.2L15 2h-6l-.42 2.28a8 8 0 0 0-2.08 1.2l-2.42-.7-2 3.46L4.09 10.8A8 8 0 0 0 4 12c0 .41.03.81.09 1.2l-2.01 1.56 2 3.46 2.42-.7c.63.49 1.32.9 2.08 1.2L9 22h6l.42-2.28c.76-.3 1.45-.71 2.08-1.2l2.42.7 2-3.46-2.01-1.56c.06-.39.09-.79.09-1.2Z" stroke="#334155" stroke-width="1.2" opacity=".5"/>
+              </svg>
+            </summary>
+            <div class="panel">
+              <div class="menu-grid">
+                <label>Temperature
+                  <select id="uTempCard">
+                    <option value="F" selected>°F</option>
+                    <option value="C">°C</option>
+                  </select>
+                </label>
+                <label>Dewpoint
+                  <select id="uDewCard">
+                    <option value="F" selected>°F</option>
+                    <option value="C">°C</option>
+                  </select>
+                </label>
+                <label>Pressure
+                  <select id="uSLPCard">
+                    <option value="mb" selected>mb</option>
+                    <option value="hPa">hPa</option>
+                    <option value="inHg">inHg</option>
+                  </select>
+                </label>
+                <label>Rain rate
+                  <select id="uRainRateCard">
+                    <option value="inphr" selected>in/hr</option>
+                    <option value="mmphr">mm/hr</option>
+                  </select>
+                </label>
+                <label>Total rain
+                  <select id="uRainCard">
+                    <option value="in" selected>in</option>
+                    <option value="mm">mm</option>
+                  </select>
+                </label>
+              </div>
+              <hr style="border:none;border-top:1px solid var(--border);margin:6px 2px">
+              <div class="menu-grid">
+                <label><input type="checkbox" data-target="item-temp" checked> Temperature</label>
+                <label><input type="checkbox" data-target="item-dew" checked> Dewpoint</label>
+                <label><input type="checkbox" data-target="item-rh" checked> Relative Humidity</label>
+                <label><input type="checkbox" data-target="item-slp" checked> Pressure</label>
+                <label><input type="checkbox" data-target="item-rainrate" checked> Rain Rate</label>
+                <label><input type="checkbox" data-target="item-raintoday" checked> Total Accumulation</label>
+                <label><input type="checkbox" data-target="item-uv" checked> UV</label>
+                <label><input type="checkbox" data-target="item-solar" checked> Solar</label>
+              </div>
+            </div>
+          </details>
         </article>
 
         <!-- Wind -->
@@ -198,7 +251,37 @@
             </div>
           </div>
 
-          <!-- Keep your existing wind settings block if present -->
+          <!-- Restored: Wind gear -->
+          <details class="gear" id="gear-wind">
+            <summary aria-label="Wind settings">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M12 8.5a3.5 3.5 0 1 1 0 7 3.5 3.5 0 0 1 0-7Z" stroke="#334155" stroke-width="1.6"/>
+                <path d="M20 12a8 8 0 0 0-.09-1.2l2.01-1.56-2-3.46-2.42.7a8 8 0 0 0-2.08-1.2L15 2h-6l-.42 2.28a8 8 0 0 0-2.08 1.2l-2.42-.7-2 3.46L4.09 10.8A8 8 0 0 0 4 12c0 .41.03.81.09 1.2l-2.01 1.56 2 3.46 2.42-.7c.63.49 1.32.9 2.08 1.2L9 22h6l.42-2.28c.76-.3 1.45-.71 2.08-1.2l2.42.7 2-3.46-2.01-1.56c.06-.39.09-.79.09-1.2Z" stroke="#334155" stroke-width="1.2" opacity=".5"/>
+              </svg>
+            </summary>
+            <div class="panel">
+              <div class="menu-grid">
+                <label>Wind units
+                  <select id="uWindCard">
+                    <option value="mph" selected>mph</option>
+                    <option value="kt">kt</option>
+                    <option value="kmh">km/h</option>
+                    <option value="mps">m/s</option>
+                  </select>
+                </label>
+                <label>Averaging period
+                  <select id="windPeriodCard">
+                    <option value="1" selected>1 min</option>
+                    <option value="2">2 min</option>
+                    <option value="5">5 min</option>
+                    <option value="10">10 min</option>
+                    <option value="15">15 min</option>
+                    <option value="60">60 min</option>
+                  </select>
+                </label>
+              </div>
+            </div>
+          </details>
         </article>
 
         <!-- Optional Anemometer 2 -->
@@ -276,7 +359,12 @@
         const s=document.getElementById(id); if(!s) return;
         s.addEventListener('change',()=>{ units[key]=s.value; if (lastData) render(lastData); });
       }
-      bindUnitSelect('uTempCard','temp'); bindUnitSelect('uDewCard','dew'); bindUnitSelect('uSLPCard','slp'); bindUnitSelect('uRainRateCard','rainrate'); bindUnitSelect('uRainCard','rain');
+      bindUnitSelect('uTempCard','temp');
+      bindUnitSelect('uDewCard','dew');
+      bindUnitSelect('uSLPCard','slp');
+      bindUnitSelect('uRainRateCard','rainrate');
+      bindUnitSelect('uRainCard','rain');
+      bindUnitSelect('uWindCard','wind'); // <-- restored wind units binding
 
       const f2c=f=>(f-32)*5/9, inHg2hPa=i=>i*33.8638866667, in2mm=i=>i*25.4, mph2kt=m=>m*0.868976, mph2kmh=m=>m*1.609344, mph2mps=m=>m*0.44704;
       const windNum = m => units.wind==='kt'?mph2kt(m):units.wind==='kmh'?mph2kmh(m):units.wind==='mps'?mph2mps(m):m;
@@ -354,7 +442,7 @@
         if (Number.isFinite(dir1)) rotate1(dir1);
         if (Number.isFinite(spd1)) pushWind(windBuf1, spd1);
         set(document.getElementById('wx-wind-speed'), fmtWind(spd1));
-        set(document.getElementById('wx-wind-cardinal'), Number.isFinite(dir1) ? `${toCard(dir1)} ${Math.round(((dir1%360)+360)%360)}°` : '--');
+        set(document.getElementById('wx-wind-cardinal'), Number.isFinite(dir1) ? `${toCard(dir1)} ${Math.round(((dir1%360)+360)%360)}°` : '--`);
 
         const hasAn2 = Number.isFinite(nfix(d.an2_wind_mph)) || Number.isFinite(nfix(d.an2_wdir_deg));
         const an2Card = document.getElementById('wx-wind2');
@@ -364,7 +452,7 @@
           if (Number.isFinite(dir2)) rotate2(dir2);
           if (Number.isFinite(spd2)) pushWind(windBuf2, spd2);
           set(document.getElementById('wx-wind2-speed'), fmtWind(spd2));
-          set(document.getElementById('wx-wind2-cardinal'), Number.isFinite(dir2) ? `${toCard(dir2)} ${Math.round(((dir2%360)+360)%360)}°` : '--');
+          set(document.getElementById('wx-wind2-cardinal'), Number.isFinite(dir2) ? `${toCard(dir2)} ${Math.round(((dir2%360)+360)%360)}°` : '--`);
         }
 
         updateWindStats();
