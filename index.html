@@ -1,9 +1,9 @@
 <!--
   WxManBran Live Dashboard — Phase 1
-  Version: v1-dashboard-final+svg-labels-no-clip
+  Version: v1-dashboard-final+svg-labels-no-clip+helene-stack
   Changes this pass:
-    • Compass labels no longer clip: baseline = middle, translate radius = 47, overflow visible
-    • Needle rotation origin fix retained
+    • Helene section: stack first two images vertically & normalize size
+    • Compass labels no longer clip; needle rotation origin fix retained
 -->
 <!doctype html>
 <html lang="en">
@@ -90,6 +90,30 @@
     .markdown-body{box-sizing:border-box;padding:0}
     .markdown-body img{max-width:100%;height:auto;cursor:zoom-in}
     .markdown-body img.shrink{max-width:520px}
+
+    /* ===== Helene stacked image helper ===== */
+    .helene-stack{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:10px;
+      margin:16px 0;
+      max-width:900px;
+      margin-left:auto;margin-right:auto;
+    }
+    .helene-stack img{
+      width:100% !important;
+      height:auto;
+      display:block;
+      border-radius:8px;
+    }
+    /* keep heights closer; shrink tall images but never upscale small ones */
+    .helene-stack img.same{
+      max-height:420px;
+      object-fit:contain;
+      background:#f8fafc;
+    }
+    /* ===== /Helene helper ===== */
+
     .yt-embed{position:relative;padding-bottom:56.25%;height:0;margin:1.25rem 0;background:#000;border-radius:12px;overflow:hidden}
     .yt-embed iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
     #app{ margin-top:48px; }
@@ -344,11 +368,54 @@
 
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script>
-    (async ()=>{ const container=document.getElementById('app');
+    (async ()=>{ 
+      const container=document.getElementById('app');
       try{
-        const res=await fetch('README.md', {cache:'no-store'}); if(!res.ok) throw 0;
+        const res=await fetch('README.md', {cache:'no-store'}); 
+        if(!res.ok) throw 0;
         container.innerHTML=marked.parse(await res.text());
+        heleneStack(container);            // << stack/normalize Helene images
       }catch{ container.textContent=''; }
+
+      // Wrap & stack the first two images under the "Hurricane Helene" section
+      function heleneStack(root){
+        // find the first heading that contains "Hurricane Helene"
+        const heading = Array.from(root.querySelectorAll('h1,h2,h3,h4'))
+          .find(h => /hurricane\s+helene/i.test(h.textContent));
+        if(!heading) return;
+
+        // collect elements until the next heading
+        const blockEls = [];
+        for(let el = heading.nextElementSibling; el && !/^H[1-6]$/.test(el.tagName); el = el.nextElementSibling){
+          blockEls.push(el);
+        }
+
+        // find the images within that block
+        const imgs = blockEls.flatMap(el => Array.from(el.querySelectorAll('img')));
+        if(imgs.length < 2) return;
+
+        // create wrapper and move the first two images into it
+        const wrapper = document.createElement('div');
+        wrapper.className = 'helene-stack';
+
+        // insert wrapper before the first image's current container
+        const anchor = imgs[0].closest('p') || imgs[0];
+        anchor.parentNode.insertBefore(wrapper, anchor.closest('p') || anchor);
+
+        const movedParents = new Set();
+        imgs.slice(0,2).forEach(img=>{
+          const p = img.closest('p'); if(p) movedParents.add(p);
+          img.classList.add('same');
+          img.removeAttribute('width'); img.removeAttribute('height');
+          img.style.maxWidth = '100%';
+          wrapper.appendChild(img);
+        });
+
+        // clean up any now-empty paragraphs that only held the images
+        movedParents.forEach(p=>{
+          if(!p.textContent.trim() && p.querySelectorAll('img').length===0) p.remove();
+        });
+      }
     })();
   </script>
 
@@ -424,7 +491,7 @@
       (function(){
         const gears = () => Array.from(document.querySelectorAll('details.gear'));
         document.addEventListener('click', (e)=>{ gears().forEach(d => { if (d.open && !d.contains(e.target)) d.removeAttribute('open'); }); });
-        document.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') gears().forEach(d => d.removeAttribute('open')); });
+        document.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') gears().forEach(d => d.removeAttribute('open'); }); });
         gears().forEach(d => d.addEventListener('toggle', ()=>{ if (d.open) gears().forEach(o => { if (o!==d) o.removeAttribute('open'); }); }));
       })();
 
