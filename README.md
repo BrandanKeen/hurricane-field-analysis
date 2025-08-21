@@ -1,7 +1,8 @@
 <h1 align="center">Hurricane Intercept &amp; Field Data Analysis</h1>
 
+<h2 align="center">Independent, Vehicle-based Observations & Analysis</h2>
 
-## Independent, Vehicle-based Observations & Analysis
+## 
 
 This website presents field observations from surface data collected during vehicle-based intercepts of landfalling hurricanes during the 2024 Atlantic hurricane season. Data was recorded using a **Davis Vantage Pro 2** weather station mounted on a custom-built mount secured to the vehicle, designed to withstand hurricane-force conditions and collect reliable in-situ meteorological data.
 
