@@ -1,9 +1,12 @@
 <!--
   WxManBran Live Dashboard — Phase 1
-  Version: v1-dashboard-final+prime-fetch+helene-stack-safe
-  Changes in this build:
-    • Prime fetch before long-poll so data renders immediately when available
-    • Helene stack: safe DOM move (no unwrapping/removal), images visible again
+  Version: v1-dashboard-final+data-fix+helene-center
+  Highlights:
+    • Helene images centered & stacked; radar slightly smaller
+    • Live data engine parse fixes (fmtWind line & gear handler)
+    • Prime fetch + long-poll (fallback to polling)
+    • Compass labels & sector needle wedge retained
+    • Settings intact (Conditions gear + Wind clock, Sustained/Gust Period)
 -->
 <!doctype html>
 <html lang="en">
@@ -91,26 +94,26 @@
     .markdown-body img{max-width:100%;height:auto;cursor:zoom-in}
     .markdown-body img.shrink{max-width:520px}
 
-    /* ===== Helene stacked image helper (full-width, equal height; radar slightly smaller) ===== */
+    /* ===== Helene stacked, centered images ===== */
     .helene-stack{
       display:grid;
       grid-template-columns:1fr;
-      gap:10px;
-      margin:16px 0;
-      max-width:900px;
-      margin-left:auto;margin-right:auto;
+      gap:12px;
+      margin:16px auto;
+      max-width:900px;            /* control width */
+      justify-items:center;       /* center the children */
     }
-    .helene-stack a{ display:block; }       /* clickable area fills the row */
+    .helene-stack a{ display:block; width:100%; }  /* anchors fill the row */
     .helene-stack img{
       width:100% !important;
       height:clamp(300px, 45vw, 520px);
       display:block;
       border-radius:8px;
       object-fit:cover;
-      object-position:center;
+      object-position:center;     /* center cropping */
     }
     .helene-stack img.radar{
-      height:clamp(260px, 38vw, 460px); /* a little smaller than the second image */
+      height:clamp(260px, 38vw, 460px); /* slightly smaller radar */
     }
     /* ===== /Helene helper ===== */
 
@@ -262,7 +265,7 @@
                 <line class="tick" x1="50" y1="6" x2="50" y2="10" transform="rotate(337.5 50 50)" />
               </g>
 
-              <!-- Labels: rotate around (50,50), translate outward by 47 -->
+              <!-- Labels via rotate+translate -->
               <g class="labels">
                 <g transform="rotate(0 50 50)"><text x="50" y="50" text-anchor="middle" dominant-baseline="middle" transform="translate(0,-47)">N</text></g>
                 <g transform="rotate(90 50 50)"><text x="50" y="50" text-anchor="middle" dominant-baseline="middle" transform="translate(0,-47)">E</text></g>
@@ -274,7 +277,7 @@
                 <g transform="rotate(315 50 50)"><text x="50" y="50" text-anchor="middle" dominant-baseline="middle" transform="translate(0,-47)">NW</text></g>
               </g>
 
-              <!-- Needle group; JS will inject a sector wedge path -->
+              <!-- Needle; JS injects wedge path -->
               <g id="wx-needle" class="arrow">
                 <polygon points="50,38 57,6 43,6" />
               </g>
@@ -387,13 +390,13 @@
         console && console.warn && console.warn('README enhancement skipped:', e);
       }
 
-      // SAFER Helene stack: do NOT unwrap or remove anything; just move first two images after the Helene heading
+      // Helene stack: center & keep links intact
       function heleneStack(root){
         const heading = Array.from(root.querySelectorAll('h1,h2,h3,h4'))
-          .find(h => /helene/i.test(h.textContent));
+          .find(h => /hurricane\s+helene/i.test(h.textContent));
         if(!heading) return;
 
-        // Insert wrapper directly AFTER the heading to avoid confusing anchor/paragraph layouts
+        // Insert wrapper directly AFTER the heading
         const wrapper = document.createElement('div');
         wrapper.className = 'helene-stack';
         heading.parentNode.insertBefore(wrapper, heading.nextSibling);
@@ -407,10 +410,9 @@
         }
         if (imgs.length < 2) { wrapper.remove(); return; }
 
-        // Move the first two images (or their containing links) into the stack
+        // Move the first two images (or their <a> wrappers) into the stack
         imgs.slice(0,2).forEach((img, idx)=>{
           const carrier = img.closest('a') || img; // keep existing link intact
-          // normalize size on the <img> itself
           img.removeAttribute('width'); img.removeAttribute('height');
           img.style.maxWidth = '100%';
           if (idx === 0) img.classList.add('radar');
@@ -490,7 +492,7 @@
   </script>
 
   <script>
-    /* Live engine: unchanged logic + prime fetch before long-poll */
+    /* Live engine: API fetch, render, rotation, settings wiring */
     (() => {
       const API = "https://api.wxmanbran.com/latest";
       const conn = document.getElementById('wx-conn');
@@ -524,8 +526,8 @@
       const fmtPress=v=>Number.isFinite(nfix(v))?((units.slp==='hPa'||units.slp==='mb')?`${inHg2hPa(nfix(v)).toFixed(1)} ${units.slp}`:`${nfix(v).toFixed(3)} inHg`):'--';
       const fmtRainRate=v=>Number.isFinite(nfix(v))?(units.rainrate==='mmphr'?`${in2mm(nfix(v)).toFixed(2)} mm/hr`:`${nfix(v).toFixed(2)} in/hr`):'--';
       const fmtRain=v=>Number.isFinite(nfix(v))?(units.rain==='mm'?`${in2mm(nfix(v)).toFixed(2)} mm`:`${nfix(v).toFixed(2)} in`):'--';
-      const fmtWind=v=>Number.isFinite(nfix(v))?`${windNum(nfix(v)).toFixed(1)} ${w
-      indUnit()}`:'--';
+      const fmtWind=v=>Number.isFinite(nfix(v))?`${windNum(nfix(v)).toFixed(1)} ${windUnit()}`:'--';  /* <-- fixed line */
+
       const toCard = d=>['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'][Math.round((((nfix(d)%360)+360)%360)/22.5)%16];
 
       /* Needle builder */
@@ -544,7 +546,7 @@
       buildNeedle('wx-needle');
       buildNeedle('wx-needle2');
 
-      /* Shortest-path rotation (also set SVG transform attribute) */
+      /* Shortest-path rotation (safe across north crossing) */
       function needleRotator(el){
         let last=0,acc=0;
         return function(deg){
@@ -558,12 +560,16 @@
       const rotate1 = needleRotator(document.getElementById('wx-needle'));
       const rotate2 = needleRotator(document.getElementById('wx-needle2'));
 
-      /* details/gear behavior */
+      /* details/gear behavior (fixed missing bracket) */
       (function(){
         const gears = () => Array.from(document.querySelectorAll('details.gear'));
         document.addEventListener('click', (e)=>{ gears().forEach(d => { if (d.open && !d.contains(e.target)) d.removeAttribute('open'); }); });
-        document.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') gears().forEach(d => d.removeAttribute('open'); });
-        gears().forEach(d => d.addEventListener('toggle', ()=>{ if (d.open) gears().forEach(o => { if (o!==d) o.removeAttribute('open'); }); }));
+        document.addEventListener('keydown', (e)=>{
+          if (e.key === 'Escape') gears().forEach(d => d.removeAttribute('open'));
+        });
+        gears().forEach(d => d.addEventListener('toggle', ()=>{
+          if (d.open) gears().forEach(o => { if (o!==d) o.removeAttribute('open'); });
+        }));
       })();
 
       /* Conditions visibility wiring */
@@ -578,7 +584,7 @@
             const next = document.getElementById(order[j]);
             if (isVisible(next)) { grid.insertBefore(el, next); return; }
           }
-        grid.appendChild(el);
+          grid.appendChild(el);
         }
         document.querySelectorAll('#gear-conditions input[type="checkbox"][data-target]').forEach(cb=>{
           cb.addEventListener('change', ()=>{
