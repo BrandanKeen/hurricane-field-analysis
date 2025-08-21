@@ -1,14 +1,14 @@
 <!--
   WxManBran Live Dashboard — Phase 1
-  Version: v1-dashboard-final+compass-needle+labels+helene-stack+yt-embed+img-click
+  Version: v1-dashboard-final+compass-needle+labels+helene-stack-fix+yt-embed+img-click
   This build:
     • Compass labels via rotate+translate (no clipping)
     • Needle = sector wedge with arc base on r=44; shortest-path rotation
-    • Settings restored (Conditions gear + Wind clock gear)
+    • Settings intact (Conditions gear + Wind clock gear)
     • Wind units + Sustained/Gust Period
-    • Helene section: stack two images; first (radar) slightly smaller
+    • Helene section: stack two images (radar slightly smaller) — visibility fix
     • YouTube: auto-embed links; larger thumbnails fallback
-    • All images: click opens that exact image in a new tab (fixes truck linking)
+    • All images: click opens that exact image in a new tab
 -->
 <!doctype html>
 <html lang="en">
@@ -105,6 +105,7 @@
       max-width:900px;
       margin-left:auto;margin-right:auto;
     }
+    .helene-stack a{ display:block; }       /* ensure clickable area fills the row */
     .helene-stack img{
       width:100% !important;
       height:clamp(300px, 45vw, 520px);
@@ -388,12 +389,11 @@
         enhanceYouTube(container);  // convert YouTube links to embedded players
         enhanceImages(container);   // make all images open themselves in a new tab
       }catch(e){
-        /* Defensive: README helpers should never block the live engine. */
         console && console.warn && console.warn('README enhancement skipped:', e);
       }
 
-      // Wrap & stack the first two images under the "Hurricane Helene" section;
-      // ensure each image links to its own src in a new tab.
+      // Stack the first two images under the "Hurricane Helene" heading.
+      // Minimal & safe: just move images into a wrapper and size them.
       function heleneStack(root){
         const heading = Array.from(root.querySelectorAll('h1,h2,h3,h4'))
           .find(h => /hurricane\s+helene/i.test(h.textContent));
@@ -409,29 +409,30 @@
         const wrapper = document.createElement('div');
         wrapper.className = 'helene-stack';
 
-        // insert wrapper before first image's paragraph or image
-        const anchor = imgs[0].closest('p') || imgs[0];
-        anchor.parentNode.insertBefore(wrapper, anchor.closest('p') || anchor);
+        // Insert wrapper before the first image's paragraph or the image itself
+        const firstAnchor = imgs[0].closest('p') || imgs[0];
+        (firstAnchor.closest('p') || firstAnchor).parentNode.insertBefore(wrapper, firstAnchor.closest('p') || firstAnchor);
 
-        const movedParents = new Set();
+        const parentsToCheck = new Set();
+
         imgs.slice(0,2).forEach((img, idx)=>{
-          // If image is wrapped by a link, unwrap so it can't point to the "other" image.
+          // If image was inside a link, unwrap it to avoid cross-link bugs
           const link = img.closest('a'); 
           if(link){ link.replaceWith(img); }
-          const p = img.closest('p'); if(p) movedParents.add(p);
 
-          // Normalize attributes
+          const p = img.closest('p'); if(p) parentsToCheck.add(p);
+
+          // Normalize size attributes
           img.removeAttribute('width'); img.removeAttribute('height');
           img.style.maxWidth = '100%';
-          if(idx===0) img.classList.add('radar'); // first is radar: a touch smaller
+          if(idx===0) img.classList.add('radar');
 
-          // Ensure this exact image opens itself
-          wrapImageInLink(img);
-
+          // Move image into the wrapper
           wrapper.appendChild(img);
         });
 
-        movedParents.forEach(p=>{
+        // Clean up any now-empty <p> wrappers
+        parentsToCheck.forEach(p=>{
           if(!p.textContent.trim() && p.querySelectorAll('img').length===0) p.remove();
         });
       }
@@ -488,9 +489,7 @@
       // Ensure every image opens that image in a new tab (fixes multiplots & truck mast)
       function enhanceImages(root){
         root.querySelectorAll('img').forEach(img=>{
-          // Skip images inside .yt-embed (thumbnails converted or iframes)
-          if (img.closest('.yt-embed')) return;
-          // Normalize: if wrapped in a link with a different href, rewrite it
+          if (img.closest('.yt-embed')) return; // ignore thumbnails inside yt
           const link = img.closest('a');
           if (link){
             link.href = img.currentSrc || img.src;
@@ -514,7 +513,7 @@
   </script>
 
   <script>
-    /* Live engine: API fetch, render, rotation, settings wiring (unchanged logic; added light retry) */
+    /* Live engine: API fetch, render, rotation, settings wiring (unchanged logic; light retry retained) */
     (() => {
       const API = "https://api.wxmanbran.com/latest";
       const conn = document.getElementById('wx-conn');
@@ -551,7 +550,6 @@
       const fmtWind=v=>Number.isFinite(nfix(v))?`${windNum(nfix(v)).toFixed(1)} ${windUnit()}`:'--';
       const toCard = d=>['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'][Math.round((((nfix(d)%360)+360)%360)/22.5)%16];
 
-      /* ===== Needle: sector wedge with arc base on ring r=44 ===== */
       function sectorPath({ R=44, tipR=20, halfWidthDeg=7 } = {}) {
         const cx=50, cy=50;
         const toXY=(deg,r)=>{ const t=(deg*Math.PI)/180; return [cx + r*Math.sin(t), cy - r*Math.cos(t)]; };
@@ -566,9 +564,7 @@
       }
       buildNeedle('wx-needle');
       buildNeedle('wx-needle2');
-      /* ===== /Needle ===== */
 
-      /* Shortest-path accumulator; apply CSS + SVG transform for cross-browser reliability */
       function needleRotator(el){
         let last=0,acc=0;
         return function(deg){
@@ -582,15 +578,13 @@
       const rotate1 = needleRotator(document.getElementById('wx-needle'));
       const rotate2 = needleRotator(document.getElementById('wx-needle2'));
 
-      /* details/gear behavior */
       (function(){
         const gears = () => Array.from(document.querySelectorAll('details.gear'));
         document.addEventListener('click', (e)=>{ gears().forEach(d => { if (d.open && !d.contains(e.target)) d.removeAttribute('open'); }); });
-        document.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') gears().forEach(d => d.removeAttribute('open')); });
+        document.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') gears().forEach(d => d.removeAttribute('open'); });
         gears().forEach(d => d.addEventListener('toggle', ()=>{ if (d.open) gears().forEach(o => { if (o!==d) o.removeAttribute('open'); }); }));
       })();
 
-      /* reorder/visibility for Conditions */
       (function wireCustomizeCond(){
         const grid = document.getElementById('wx-values');
         if (!grid.__order) grid.__order = Array.from(grid.children).map(el=>el.id);
@@ -614,7 +608,6 @@
         });
       })();
 
-      /* Wind stats buffers & formatting */
       const windPeriodSel = document.getElementById('windPeriodCard');
       function windPeriodMinutes(){ const v = windPeriodSel?.value || '1'; return parseInt(v,10)||1; }
       windPeriodSel?.addEventListener('change', ()=> updateWindStats());
@@ -682,7 +675,6 @@
         }
       }
 
-      /* fetch cycle (initial fetch + long-poll with fallback to interval polling) */
       function isIOS(){ const ua = navigator.userAgent || navigator.vendor || window.opera; const touchMac = (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1); return /iPhone|iPad|iPod/i.test(ua) || touchMac; }
       const qs = new URLSearchParams(location.search);
       const force = qs.get('mode');
@@ -697,7 +689,7 @@
         .catch(()=>{ conn.textContent = 'Status: Offline'; if (!initialTried) setTimeout(initialFetch, 1200); });
 
       initialFetch();
-      (function start(){  // Long-poll or interval as before
+      (function start(){
         if (force === 'poll' || (!force && isIOS())) startPolling();
         else startLongPoll();
       })();
