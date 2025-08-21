@@ -1,6 +1,6 @@
 <!--
   WxManBran Live Dashboard — Phase 1
-  Version: v1-dashboard-final+compass-needle+labels+helene-stack+yt-embed
+  Version: v1-dashboard-final+compass-needle+labels+helene-stack+yt-embed+img-click
   This build:
     • Compass labels via rotate+translate (no clipping)
     • Needle = sector wedge with arc base on r=44; shortest-path rotation
@@ -8,6 +8,7 @@
     • Wind units + Sustained/Gust Period
     • Helene section: stack two images; first (radar) slightly smaller
     • YouTube: auto-embed links; larger thumbnails fallback
+    • All images: click opens that exact image in a new tab (fixes truck linking)
 -->
 <!doctype html>
 <html lang="en">
@@ -120,10 +121,8 @@
     /* YouTube embeds and larger thumbnails */
     .yt-embed{position:relative;padding-bottom:56.25%;height:0;margin:1.25rem 0;background:#000;border-radius:12px;overflow:hidden}
     .yt-embed iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
-    /* If a YouTube link still uses an <img> thumbnail, make it big */
     .markdown-body a[href*="youtu"] img{width:100%!important;height:auto;display:block;border-radius:12px}
 
-    .yt-embed iframe{border:0}
     #app{ margin-top:48px; }
 
     /* Phone portrait */
@@ -382,11 +381,19 @@
         const res=await fetch('README.md', {cache:'no-store'}); 
         if(!res.ok) throw 0;
         container.innerHTML=marked.parse(await res.text());
-        heleneStack(container);   // stack/normalize Helene images
-        enhanceYouTube(container); // convert YouTube links to embedded players
       }catch{ container.textContent=''; }
 
-      // Wrap & stack the first two images under the "Hurricane Helene" section
+      try{
+        heleneStack(container);     // stack/normalize Helene images
+        enhanceYouTube(container);  // convert YouTube links to embedded players
+        enhanceImages(container);   // make all images open themselves in a new tab
+      }catch(e){
+        /* Defensive: README helpers should never block the live engine. */
+        console && console.warn && console.warn('README enhancement skipped:', e);
+      }
+
+      // Wrap & stack the first two images under the "Hurricane Helene" section;
+      // ensure each image links to its own src in a new tab.
       function heleneStack(root){
         const heading = Array.from(root.querySelectorAll('h1,h2,h3,h4'))
           .find(h => /hurricane\s+helene/i.test(h.textContent));
@@ -402,17 +409,28 @@
         const wrapper = document.createElement('div');
         wrapper.className = 'helene-stack';
 
+        // insert wrapper before first image's paragraph or image
         const anchor = imgs[0].closest('p') || imgs[0];
         anchor.parentNode.insertBefore(wrapper, anchor.closest('p') || anchor);
 
         const movedParents = new Set();
         imgs.slice(0,2).forEach((img, idx)=>{
+          // If image is wrapped by a link, unwrap so it can't point to the "other" image.
+          const link = img.closest('a'); 
+          if(link){ link.replaceWith(img); }
           const p = img.closest('p'); if(p) movedParents.add(p);
+
+          // Normalize attributes
           img.removeAttribute('width'); img.removeAttribute('height');
           img.style.maxWidth = '100%';
-          if(idx===0) img.classList.add('radar'); // treat first as radar: a touch smaller
+          if(idx===0) img.classList.add('radar'); // first is radar: a touch smaller
+
+          // Ensure this exact image opens itself
+          wrapImageInLink(img);
+
           wrapper.appendChild(img);
         });
+
         movedParents.forEach(p=>{
           if(!p.textContent.trim() && p.querySelectorAll('img').length===0) p.remove();
         });
@@ -437,7 +455,7 @@
           return m ? (m[1] || m[2]) : null;
         };
 
-        // 1) existing iframes -> wrap in .yt-embed
+        // existing iframes -> wrap in .yt-embed
         root.querySelectorAll('iframe[src*="youtube.com"],iframe[src*="youtu.be"]').forEach(ifr=>{
           if (!ifr.closest('.yt-embed')){
             const wrap = document.createElement('div');
@@ -450,7 +468,7 @@
           ifr.setAttribute('referrerpolicy','strict-origin-when-cross-origin');
         });
 
-        // 2) anchors -> replace with iframe embed
+        // anchors -> replace with iframe embed
         root.querySelectorAll('a[href*="youtu"]').forEach(a=>{
           const id = toId(a.href);
           if(!id) return;
@@ -466,11 +484,37 @@
           a.remove();
         });
       }
+
+      // Ensure every image opens that image in a new tab (fixes multiplots & truck mast)
+      function enhanceImages(root){
+        root.querySelectorAll('img').forEach(img=>{
+          // Skip images inside .yt-embed (thumbnails converted or iframes)
+          if (img.closest('.yt-embed')) return;
+          // Normalize: if wrapped in a link with a different href, rewrite it
+          const link = img.closest('a');
+          if (link){
+            link.href = img.currentSrc || img.src;
+            link.target = '_blank';
+            link.rel = 'noopener';
+            return;
+          }
+          wrapImageInLink(img);
+        });
+      }
+
+      function wrapImageInLink(img){
+        const a = document.createElement('a');
+        a.href = img.currentSrc || img.src;
+        a.target = '_blank';
+        a.rel = 'noopener';
+        img.parentNode.insertBefore(a, img);
+        a.appendChild(img);
+      }
     })();
   </script>
 
   <script>
-    /* Live engine: API fetch, render, rotation, settings wiring (unchanged) */
+    /* Live engine: API fetch, render, rotation, settings wiring (unchanged logic; added light retry) */
     (() => {
       const API = "https://api.wxmanbran.com/latest";
       const conn = document.getElementById('wx-conn');
@@ -542,8 +586,7 @@
       (function(){
         const gears = () => Array.from(document.querySelectorAll('details.gear'));
         document.addEventListener('click', (e)=>{ gears().forEach(d => { if (d.open && !d.contains(e.target)) d.removeAttribute('open'); }); });
-        document.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') gears().forEach(d => d.removeAttribute('open'); });
-        });
+        document.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') gears().forEach(d => d.removeAttribute('open')); });
         gears().forEach(d => d.addEventListener('toggle', ()=>{ if (d.open) gears().forEach(o => { if (o!==d) o.removeAttribute('open'); }); }));
       })();
 
@@ -647,14 +690,17 @@
 
       const wpSel = document.getElementById('windPeriodCard'); if (wpSel) wpSel.value = '1';
 
-      fetch(API, { cache: "no-store" })
+      let initialTried = false;
+      const initialFetch = () => fetch(API, { cache: "no-store" })
         .then(r=>r.ok?r.json():Promise.reject(r.status))
-        .then(d=>{ render(d); })
-        .catch(()=>{ conn.textContent = 'Status: Offline'; })
-        .finally(() => {
-          if (force === 'poll' || (!force && isIOS())) startPolling();
-          else startLongPoll();
-        });
+        .then(d=>{ render(d); initialTried=true; })
+        .catch(()=>{ conn.textContent = 'Status: Offline'; if (!initialTried) setTimeout(initialFetch, 1200); });
+
+      initialFetch();
+      (function start(){  // Long-poll or interval as before
+        if (force === 'poll' || (!force && isIOS())) startPolling();
+        else startLongPoll();
+      })();
 
       function startPolling(){
         const tick = async ()=>{
