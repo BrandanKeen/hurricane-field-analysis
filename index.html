@@ -1,12 +1,9 @@
 <!--
   WxManBran Live Dashboard — Phase 1
-  Version: v1-dashboard-final+svg-labels+needle-centerfix
+  Version: v1-dashboard-final+svg-labels-no-clip
   Changes this pass:
-    • Fix needle rotation origin so the wedge stays centered & hugs the ring
-      - Use transform-box:view-box; transform-origin:50px 50px
-      - Also set the SVG transform attribute (rotate(angle 50 50)) for cross-browser accuracy
-    • Keep pure-SVG label placement (rotate+translate) from last pass
-    • Preserve data pipeline, settings, and clock icon
+    • Compass labels no longer clip: baseline = middle, translate radius = 47, overflow visible
+    • Needle rotation origin fix retained
 -->
 <!doctype html>
 <html lang="en">
@@ -73,7 +70,7 @@
     .wind-values .wind-line .wlbl{font-weight:700}
     #wx-wind-avg,#wx-wind-gust,#wx-wind2-avg,#wx-wind2-gust,#wx-wind2-speed{color:var(--accent)}
 
-    .compass{width:100%;max-width:340px;min-width:220px;aspect-ratio:1/1}
+    .compass{width:100%;max-width:340px;min-width:220px;aspect-ratio:1/1; overflow:visible;}
     .ring{fill:none;stroke:#dfe5ee;stroke-width:2}
     .tick{stroke:#cdd3dc;stroke-width:1}
     .tick.major{stroke:#b7bfca;stroke-width:1.4}
@@ -81,10 +78,9 @@
 
     /* needle */
     .arrow{fill:var(--needle);stroke:var(--needle)}
-    /* CRITICAL: rotate needle groups around the SVG viewBox center (50,50) */
     #wx-needle,#wx-needle2{
-      transform-box:view-box;              /* use SVG viewBox coordinate system */
-      transform-origin:50px 50px;          /* explicit origin in SVG units */
+      transform-box:view-box;
+      transform-origin:50px 50px;
       transition:transform 140ms ease-out;
     }
 
@@ -239,16 +235,16 @@
                 <line class="tick" x1="50" y1="6" x2="50" y2="10" transform="rotate(337.5 50 50)" />
               </g>
 
-              <!-- PURE SVG LABELS: rotate around center, translate out by R(44)+offset(8)=52 -->
+              <!-- PURE SVG LABELS: rotate around center, translate out by radius 47 -->
               <g class="labels">
-                <g transform="rotate(0 50 50)"><text x="50" y="50" dy=".35em" text-anchor="middle" dominant-baseline="central" transform="translate(0,-52)">N</text></g>
-                <g transform="rotate(90 50 50)"><text x="50" y="50" dy=".35em" text-anchor="middle" dominant-baseline="central" transform="translate(0,-52)">E</text></g>
-                <g transform="rotate(180 50 50)"><text x="50" y="50" dy=".35em" text-anchor="middle" dominant-baseline="central" transform="translate(0,-52)">S</text></g>
-                <g transform="rotate(270 50 50)"><text x="50" y="50" dy=".35em" text-anchor="middle" dominant-baseline="central" transform="translate(0,-52)">W</text></g>
-                <g transform="rotate(45 50 50)"><text x="50" y="50" dy=".35em" text-anchor="middle" dominant-baseline="central" transform="translate(0,-52)">NE</text></g>
-                <g transform="rotate(135 50 50)"><text x="50" y="50" dy=".35em" text-anchor="middle" dominant-baseline="central" transform="translate(0,-52)">SE</text></g>
-                <g transform="rotate(225 50 50)"><text x="50" y="50" dy=".35em" text-anchor="middle" dominant-baseline="central" transform="translate(0,-52)">SW</text></g>
-                <g transform="rotate(315 50 50)"><text x="50" y="50" dy=".35em" text-anchor="middle" dominant-baseline="central" transform="translate(0,-52)">NW</text></g>
+                <g transform="rotate(0 50 50)"><text x="50" y="50" text-anchor="middle" dominant-baseline="middle" transform="translate(0,-47)">N</text></g>
+                <g transform="rotate(90 50 50)"><text x="50" y="50" text-anchor="middle" dominant-baseline="middle" transform="translate(0,-47)">E</text></g>
+                <g transform="rotate(180 50 50)"><text x="50" y="50" text-anchor="middle" dominant-baseline="middle" transform="translate(0,-47)">S</text></g>
+                <g transform="rotate(270 50 50)"><text x="50" y="50" text-anchor="middle" dominant-baseline="middle" transform="translate(0,-47)">W</text></g>
+                <g transform="rotate(45 50 50)"><text x="50" y="50" text-anchor="middle" dominant-baseline="middle" transform="translate(0,-47)">NE</text></g>
+                <g transform="rotate(135 50 50)"><text x="50" y="50" text-anchor="middle" dominant-baseline="middle" transform="translate(0,-47)">SE</text></g>
+                <g transform="rotate(225 50 50)"><text x="50" y="50" text-anchor="middle" dominant-baseline="middle" transform="translate(0,-47)">SW</text></g>
+                <g transform="rotate(315 50 50)"><text x="50" y="50" text-anchor="middle" dominant-baseline="middle" transform="translate(0,-47)">NW</text></g>
               </g>
 
               <!-- Needle group; JS injects a sector wedge path -->
@@ -323,10 +319,10 @@
                 <line class="tick" x1="50" y1="6" x2="50" y2="10" transform="rotate(337.5 50 50)" />
               </g>
               <g class="labels">
-                <g transform="rotate(0 50 50)"><text x="50" y="50" dy=".35em" text-anchor="middle" dominant-baseline="central" transform="translate(0,-52)">N</text></g>
-                <g transform="rotate(90 50 50)"><text x="50" y="50" dy=".35em" text-anchor="middle" dominant-baseline="central" transform="translate(0,-52)">E</text></g>
-                <g transform="rotate(180 50 50)"><text x="50" y="50" dy=".35em" text-anchor="middle" dominant-baseline="central" transform="translate(0,-52)">S</text></g>
-                <g transform="rotate(270 50 50)"><text x="50" y="50" dy=".35em" text-anchor="middle" dominant-baseline="central" transform="translate(0,-52)">W</text></g>
+                <g transform="rotate(0 50 50)"><text x="50" y="50" text-anchor="middle" dominant-baseline="middle" transform="translate(0,-47)">N</text></g>
+                <g transform="rotate(90 50 50)"><text x="50" y="50" text-anchor="middle" dominant-baseline="middle" transform="translate(0,-47)">E</text></g>
+                <g transform="rotate(180 50 50)"><text x="50" y="50" text-anchor="middle" dominant-baseline="middle" transform="translate(0,-47)">S</text></g>
+                <g transform="rotate(270 50 50)"><text x="50" y="50" text-anchor="middle" dominant-baseline="middle" transform="translate(0,-47)">W</text></g>
               </g>
               <g id="wx-needle2" class="arrow">
                 <polygon points="50,38 57,6 43,6" />
@@ -357,7 +353,7 @@
   </script>
 
   <script>
-    /* Live engine (unchanged data pipeline; corrected needle rotation origin) */
+    /* Live engine (unchanged data pipeline; needle rotation origin fix retained) */
     (() => {
       const API = "https://api.wxmanbran.com/latest";
       const conn = document.getElementById('wx-conn');
@@ -418,8 +414,8 @@
           const a=((deg%360)+360)%360;
           const delta=((a-last+540)%360)-180;
           acc+=delta; last=a;
-          el.style.transform = `rotate(${acc}deg)`;          // CSS path
-          el.setAttribute('transform', `rotate(${acc} 50 50)`); // SVG path (explicit origin)
+          el.style.transform = `rotate(${acc}deg)`;
+          el.setAttribute('transform', `rotate(${acc} 50 50)`);
         };
       }
       const rotate1 = needleRotator(document.getElementById('wx-needle'));
