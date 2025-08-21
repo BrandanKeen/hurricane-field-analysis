@@ -1,12 +1,13 @@
 <!--
   WxManBran Live Dashboard — Phase 1
-  Version: v1-dashboard-final+compass-needle+labels+helene-stack
+  Version: v1-dashboard-final+compass-needle+labels+helene-stack+yt-embed
   This build:
     • Compass labels via rotate+translate (no clipping)
     • Needle = sector wedge with arc base on r=44; shortest-path rotation
     • Settings restored (Conditions gear + Wind clock gear)
     • Wind units + Sustained/Gust Period
-    • Helene section: stack two images, same responsive height, full-width
+    • Helene section: stack two images; first (radar) slightly smaller
+    • YouTube: auto-embed links; larger thumbnails fallback
 -->
 <!doctype html>
 <html lang="en">
@@ -94,7 +95,7 @@
     .markdown-body img{max-width:100%;height:auto;cursor:zoom-in}
     .markdown-body img.shrink{max-width:520px}
 
-    /* ===== Helene stacked image helper (full-width, equal height, cover) ===== */
+    /* ===== Helene stacked image helper (full-width, equal height; radar slightly smaller) ===== */
     .helene-stack{
       display:grid;
       grid-template-columns:1fr;
@@ -111,10 +112,18 @@
       object-fit:cover;
       object-position:center;
     }
+    .helene-stack img.radar{
+      height:clamp(260px, 38vw, 460px); /* a little smaller than the second image */
+    }
     /* ===== /Helene helper ===== */
 
+    /* YouTube embeds and larger thumbnails */
     .yt-embed{position:relative;padding-bottom:56.25%;height:0;margin:1.25rem 0;background:#000;border-radius:12px;overflow:hidden}
     .yt-embed iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+    /* If a YouTube link still uses an <img> thumbnail, make it big */
+    .markdown-body a[href*="youtu"] img{width:100%!important;height:auto;display:block;border-radius:12px}
+
+    .yt-embed iframe{border:0}
     #app{ margin-top:48px; }
 
     /* Phone portrait */
@@ -373,7 +382,8 @@
         const res=await fetch('README.md', {cache:'no-store'}); 
         if(!res.ok) throw 0;
         container.innerHTML=marked.parse(await res.text());
-        heleneStack(container); // stack/normalize Helene images
+        heleneStack(container);   // stack/normalize Helene images
+        enhanceYouTube(container); // convert YouTube links to embedded players
       }catch{ container.textContent=''; }
 
       // Wrap & stack the first two images under the "Hurricane Helene" section
@@ -396,21 +406,71 @@
         anchor.parentNode.insertBefore(wrapper, anchor.closest('p') || anchor);
 
         const movedParents = new Set();
-        imgs.slice(0,2).forEach(img=>{
+        imgs.slice(0,2).forEach((img, idx)=>{
           const p = img.closest('p'); if(p) movedParents.add(p);
           img.removeAttribute('width'); img.removeAttribute('height');
           img.style.maxWidth = '100%';
+          if(idx===0) img.classList.add('radar'); // treat first as radar: a touch smaller
           wrapper.appendChild(img);
         });
         movedParents.forEach(p=>{
           if(!p.textContent.trim() && p.querySelectorAll('img').length===0) p.remove();
         });
       }
+
+      // Convert YouTube links (or existing iframes) into embedded players
+      function enhanceYouTube(root){
+        const YT = /(?:youtu\.be\/([A-Za-z0-9_-]{11}))|(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)([A-Za-z0-9_-]{11}))/i;
+
+        const toId = (url) => {
+          try{
+            const u = new URL(url);
+            if (/youtu\.be$/i.test(u.hostname)) return u.pathname.split('/')[1] || null;
+            if (/youtube\.com$/i.test(u.hostname)){
+              if (u.pathname === '/watch') return u.searchParams.get('v');
+              const parts = u.pathname.split('/');
+              const i = parts.findIndex(p => ['embed','shorts'].includes(p));
+              if (i>=0 && parts[i+1]) return parts[i+1];
+            }
+          }catch{}
+          const m = String(url).match(YT);
+          return m ? (m[1] || m[2]) : null;
+        };
+
+        // 1) existing iframes -> wrap in .yt-embed
+        root.querySelectorAll('iframe[src*="youtube.com"],iframe[src*="youtu.be"]').forEach(ifr=>{
+          if (!ifr.closest('.yt-embed')){
+            const wrap = document.createElement('div');
+            wrap.className = 'yt-embed';
+            ifr.parentNode.insertBefore(wrap, ifr);
+            wrap.appendChild(ifr);
+          }
+          ifr.setAttribute('loading','lazy');
+          ifr.setAttribute('allow','accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share');
+          ifr.setAttribute('referrerpolicy','strict-origin-when-cross-origin');
+        });
+
+        // 2) anchors -> replace with iframe embed
+        root.querySelectorAll('a[href*="youtu"]').forEach(a=>{
+          const id = toId(a.href);
+          if(!id) return;
+          const wrap = document.createElement('div');
+          wrap.className = 'yt-embed';
+          const ifr = document.createElement('iframe');
+          ifr.src = `https://www.youtube.com/embed/${id}?rel=0&modestbranding=1&playsinline=1`;
+          ifr.loading = 'lazy';
+          ifr.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+          ifr.referrerPolicy = 'strict-origin-when-cross-origin';
+          wrap.appendChild(ifr);
+          a.parentNode.insertBefore(wrap, a);
+          a.remove();
+        });
+      }
     })();
   </script>
 
   <script>
-    /* Live engine: API fetch, render, rotation, settings wiring */
+    /* Live engine: API fetch, render, rotation, settings wiring (unchanged) */
     (() => {
       const API = "https://api.wxmanbran.com/latest";
       const conn = document.getElementById('wx-conn');
@@ -482,7 +542,8 @@
       (function(){
         const gears = () => Array.from(document.querySelectorAll('details.gear'));
         document.addEventListener('click', (e)=>{ gears().forEach(d => { if (d.open && !d.contains(e.target)) d.removeAttribute('open'); }); });
-        document.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') gears().forEach(d => d.removeAttribute('open')); });
+        document.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') gears().forEach(d => d.removeAttribute('open'); });
+        });
         gears().forEach(d => d.addEventListener('toggle', ()=>{ if (d.open) gears().forEach(o => { if (o!==d) o.removeAttribute('open'); }); }));
       })();
 
@@ -512,7 +573,7 @@
 
       /* Wind stats buffers & formatting */
       const windPeriodSel = document.getElementById('windPeriodCard');
-      function windPeriodMinutes(){ const v = windPeriodSel?.value || '1'; return parseInt(v,10)||1; } // default 1 min
+      function windPeriodMinutes(){ const v = windPeriodSel?.value || '1'; return parseInt(v,10)||1; }
       windPeriodSel?.addEventListener('change', ()=> updateWindStats());
       let windBuf1 = [], windBuf2 = [];
       function pushWind(buf, mph){ const now = Date.now(); buf.push({t:now, v:Number.isFinite(+mph)?+mph:0}); const cutoff = now - 60*60*1000; while(buf.length && buf[0].t < cutoff) buf.shift(); }
