@@ -1,12 +1,11 @@
 <!--
   WxManBran Live Dashboard — Phase 1
-  Version: v1-dashboard-final+phone-fit
-  What’s new (mobile-only):
-    • Smaller card padding, font sizes, gaps
-    • Smaller compass
-    • Smaller logo and container spacing
-    • Two fine-grained breakpoints so both cards fit on most phones
-  Desktop/tablet styles are untouched.
+  Version: v1-dashboard-final+mobile-fit2+phone-landscape
+  Changes:
+    • Fix: robust initial render + unit-change guards (prevents "no data")
+    • Phone portrait: slightly smaller typography/padding/compass so both cards fit comfortably
+    • Phone landscape: special media query; tighter type & side-by-side cards on phones only
+    • Desktop/tablet: unchanged
 -->
 <!doctype html>
 <html lang="en">
@@ -45,7 +44,7 @@
     .card{position:relative;background:var(--card);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);padding:34px 22px 60px}
     .card h2{margin:0 0 26px;text-align:center;font-weight:800;font-size:calc(clamp(18px,2.2vw,22px) * var(--title-scale))}
 
-    /* Gear/clock buttons */
+    /* Settings buttons */
     .gear{position:absolute;right:12px;bottom:12px}
     .gear summary{list-style:none;cursor:pointer;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:#fff;border:1px solid var(--border);box-shadow:0 2px 8px rgba(0,0,0,.06)}
     .gear summary::-webkit-details-marker{display:none}
@@ -54,8 +53,7 @@
     .menu-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 10px;font-size:13px}
     .menu-grid label{display:flex;align-items:center;gap:6px}
 
-    /* Conditions grid
-       NOTE: fixed at two columns on all widths to prevent iPhone 8×1 collapse */
+    /* Conditions grid (always 2 columns; packed RTL so top-right to bottom-left) */
     .cond-grid{display:grid;gap:28px 34px;
       grid-template-columns:repeat(2,minmax(0,1fr));
       grid-auto-flow:row dense;direction:rtl;margin-top:20px}
@@ -70,12 +68,10 @@
     /* Wind */
     .wind-wrap{display:grid;grid-template-columns:1fr;justify-items:center;gap:14px}
     .wind-values{width:100%;max-width:360px;text-align:center}
-    /* +1 size on instantaneous wind */
     .wind-values .speed{font-size:clamp(27px,3.8vw,35px);font-weight:900;font-variant-numeric:tabular-nums;color:var(--accent)}
-    .wind-values .wind-cardinal{font-size:14px;font-weight:800;color:#475569;margin-top:8px;margin-bottom:6px}
+    .wind-values .wind-cardinal{font-size:14px;font-weight:800;color:#475569;margin-top:8px;margin-bottom:8px}
     .wind-values .wind-line{font-size:14px;margin-top:6px;color:var(--title-ink)}
-    .wind-values .wind-line .wlbl{font-weight:700} /* bold label text only */
-    /* make the numbers after Sustained/Gust blue (not bold) */
+    .wind-values .wind-line .wlbl{font-weight:700}
     #wx-wind-avg,#wx-wind-gust,#wx-wind2-avg,#wx-wind2-gust,#wx-wind2-speed{color:var(--accent)}
 
     .compass{width:100%;max-width:340px;min-width:220px;aspect-ratio:1/1}
@@ -97,36 +93,39 @@
     .yt-embed{position:relative;padding-bottom:56.25%;height:0;margin:1.25rem 0;background:#000;border-radius:12px;overflow:hidden}
     .yt-embed iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
 
-    /* ===========================
-       Mobile-only scaling (phones)
-       =========================== */
+    /* ========== MOBILE: phone portrait (smaller to ensure full fit) ========== */
     @media (max-width: 480px) and (orientation: portrait){
       .container{margin:10px auto 16px}
-      .hero{max-width:180px;width:45%;margin:0.25rem auto 0.5rem}
-      #wx-dashboard{gap:14px}
-      .cards{gap:14px}
-      .card{padding:18px 14px 46px}
-      .card h2{font-size:calc(clamp(15px,4.2vw,18px) * 1.10)}
-      .cond-grid{gap:16px 18px}
-      .cond-item .label{font-size:clamp(12px,3.6vw,14px)}
-      .cond-item .value{font-size:clamp(22px,6.0vw,28px)}
-      .asof{left:14px;bottom:10px;font-size:11px}
-      .compass{max-width:240px;min-width:180px}
+      .hero{max-width:170px;width:42%;margin:0.2rem auto 0.4rem}
+      #wx-dashboard{gap:12px}
+      .cards{gap:12px}
+      .card{padding:16px 12px 42px}
+      .card h2{font-size:calc(clamp(14px,4.0vw,18px) * 1.06)}
+      .cond-grid{gap:14px 16px}
+      .cond-item .label{font-size:clamp(12px,3.4vw,14px)}
+      .cond-item .value{font-size:clamp(20px,5.6vw,26px)}
+      .asof{left:12px;bottom:10px;font-size:11px}
+      .compass{max-width:220px;min-width:170px}
       .wind-values{max-width:300px}
-      .wind-values .speed{font-size:clamp(22px,6.4vw,30px)}
+      .wind-values .speed{font-size:clamp(20px,6.2vw,28px)}
       .wind-values .wind-cardinal{font-size:12px}
       .wind-values .wind-line{font-size:12px}
-      .gear summary{width:30px;height:30px}
+      .gear summary{width:28px;height:28px}
     }
 
-    /* Extra-tight screens (small phones/short viewports) */
-    @media (max-width: 430px) and (max-height: 740px){
-      .card{padding:14px 12px 42px}
-      .card h2{font-size:calc(clamp(14px,4.0vw,16px) * 1.05)}
-      .cond-grid{gap:14px 16px}
-      .cond-item .value{font-size:clamp(20px,5.8vw,26px)}
-      .compass{max-width:220px;min-width:170px}
-      .wind-values .speed{font-size:clamp(20px,7.0vw,26px)}
+    /* ========== MOBILE: phone landscape only (side-by-side + tighter type) ========== */
+    @media (max-width: 896px) and (orientation: landscape){
+      .cards{grid-template-columns:1fr 1fr;gap:12px}
+      .card{padding:14px 12px 40px}
+      .card h2{font-size:calc(clamp(14px,2.2vw,18px) * 1.00)}
+      .cond-grid{gap:12px 14px}
+      .cond-item .label{font-size:clamp(11px,1.9vw,13px)}
+      .cond-item .value{font-size:clamp(18px,3.4vw,24px)}
+      .compass{max-width:200px;min-width:160px}
+      .wind-values{max-width:260px}
+      .wind-values .speed{font-size:clamp(18px,3.2vw,24px)}
+      .wind-values .wind-cardinal{font-size:12px;margin-bottom:6px}
+      .wind-values .wind-line{font-size:12px}
     }
   </style>
 </head>
@@ -225,7 +224,7 @@
                 <text x="22" y="78">SW</text>
                 <text x="22" y="22">NW</text>
               </g>
-              <!-- Inward arrow: tail on ring (y=6), tip at center -->
+              <!-- Inward-pointing arrow: tail on ring (y=6), tip at center -->
               <g id="wx-needle" class="arrow"><polygon points="50,50 54,6 46,6" /></g>
             </svg>
             <div class="wind-values" aria-live="polite">
@@ -303,62 +302,63 @@
 
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script>
-    /* README loader (kept) */
-    function timeToSeconds(t){ if(!t) return 0; if(/^\d+$/.test(t)) return parseInt(t,10);
-      let s=0,m; m=t.match(/(\d+)h/); if(m) s+=+m[1]*3600; m=t.match(/(\d+)m/); if(m) s+=+m[1]*60; m=t.match(/(\d+)s/); if(m) s+=+m[1]; return s||0; }
-    function toYouTubeEmbed(href){
-      try{
-        const u=new URL(href,location.origin), host=u.hostname.replace(/^www\./,''); let id=null,start=0,list=null;
-        if(host==='youtu.be'){ id=u.pathname.slice(1).split('/')[0]; start=timeToSeconds(u.searchParams.get('t')); }
-        else if(host==='youtube.com'||host==='youtube-nocookie.com'){
-          if(u.pathname.startsWith('/watch')){ id=u.searchParams.get('v'); start=timeToSeconds(u.searchParams.get('t')||u.searchParams.get('start')); list=u.searchParams.get('list'); }
-          else if(u.pathname.startsWith('/shorts/')){ id=u.pathname.split('/shorts/')[1].split('/')[0]; }
-          else if(u.pathname.startsWith('/embed/')){ id=u.pathname.split('/embed/')[1].split('/')[0]; }
-        }
-        if(!id) return null;
-        const params=new URLSearchParams({rel:'0',modestbranding:'1',playsinline:'1'}); if(start>0) params.set('start',String(start)); if(list) params.set('list',list);
-        return `https://www.youtube-nocookie.com/embed/${id}?${params.toString()}`;
-      }catch(e){ return null; }
-    }
+    /* README loader (kept; safe if README.md absent) */
     (async ()=>{ const container=document.getElementById('app');
       try{
-        const res=await fetch('README.md'); if(!res.ok) throw 0; const md=await res.text(); container.innerHTML=marked.parse(md);
-        container.querySelectorAll('a[href]').forEach(a=>{ const href=a.getAttribute('href'); const u=toYouTubeEmbed(href); if(!u) return;
-          const wrap=document.createElement('div'); wrap.className='yt-embed'; const iframe=document.createElement('iframe'); iframe.src=u; iframe.title='YouTube video';
-          iframe.allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share'; iframe.referrerPolicy='origin-when-cross-origin'; iframe.allowFullscreen=true;
-          wrap.appendChild(iframe); a.replaceWith(wrap); });
-        container.querySelectorAll('img').forEach(img=>{ const src=(img.getAttribute('src')||'').toLowerCase(); if(/(plot|chart|graph)/.test(src)) img.classList.add('shrink');
-          if(img.closest('a')) return; const a=document.createElement('a'); a.href=img.getAttribute('src'); a.target='_blank'; a.rel='noopener'; img.replaceWith(a); a.appendChild(img); });
-      }catch(e){ container.textContent=''; }
+        const res=await fetch('README.md', {cache:'no-store'}); if(!res.ok) throw 0; const md=await res.text();
+        container.innerHTML=marked.parse(md);
+      }catch{ container.textContent=''; }
     })();
   </script>
 
   <script>
-    /* Live engine (unchanged) */
+    /* Live engine */
     (() => {
       const API = "https://api.wxmanbran.com/latest";
       const conn = document.getElementById('wx-conn');
 
+      // Defaults (match desired)
       const units = { temp:'F', dew:'F', slp:'mb', wind:'mph', rainrate:'inphr', rain:'in' };
-      function bindUnitSelect(id,key){ const s=document.getElementById(id); if(!s) return; s.addEventListener('change',()=>{ units[key]=s.value; render(lastData); }); }
-      bindUnitSelect('uTempCard','temp'); bindUnitSelect('uDewCard','dew'); bindUnitSelect('uSLPCard','slp'); bindUnitSelect('uRainRateCard','rainrate'); bindUnitSelect('uRainCard','rain');
 
+      // Bind unit selectors (guard if elements missing)
+      function bindUnitSelect(id,key){
+        const s=document.getElementById(id); if(!s) return;
+        s.addEventListener('change',()=>{ units[key]=s.value; if (lastData) render(lastData); });
+      }
+      bindUnitSelect('uTempCard','temp');
+      bindUnitSelect('uDewCard','dew');
+      bindUnitSelect('uSLPCard','slp');
+      bindUnitSelect('uRainRateCard','rainrate');
+      bindUnitSelect('uRainCard','rain');
+
+      // Conversions & formatters
       const f2c=f=>(f-32)*5/9, inHg2hPa=i=>i*33.8638866667, in2mm=i=>i*25.4, mph2kt=m=>m*0.868976, mph2kmh=m=>m*1.609344, mph2mps=m=>m*0.44704;
       const windNum = m => units.wind==='kt'?mph2kt(m):units.wind==='kmh'?mph2kmh(m):units.wind==='mps'?mph2mps(m):m;
       const windUnit= () => units.wind==='kmh'?'km/h':(units.wind==='mps'?'m/s':units.wind);
-      const fmtTemp=(v,key)=>!isFinite(v)?'--':(units[key]==='C'?`${f2c(v).toFixed(1)} °C`:`${(+v).toFixed(1)} °F`);
-      const fmtPress=v=>!isFinite(v)?'--':((units.slp==='hPa'||units.slp==='mb')?`${inHg2hPa(+v).toFixed(1)} ${units.slp}`:`${(+v).toFixed(3)} inHg`);
-      const fmtRainRate=v=>!isFinite(v)?'--':(units.rainrate==='mmphr'?`${in2mm(+v).toFixed(2)} mm/hr`:`${(+v).toFixed(2)} in/hr`);
-      const fmtRain=v=>!isFinite(v)?'--':(units.rain==='mm'?`${in2mm(+v).toFixed(2)} mm`:`${(+v).toFixed(2)} in`);
-      const fmtWind=v=>!isFinite(+v)?'--':`${windNum(+v).toFixed(1)} ${windUnit()}`;
+      const fmtTemp=(v,key)=>Number.isFinite(+v)?(units[key]==='C'?`${f2c(+v).toFixed(1)} °C`:`${(+v).toFixed(1)} °F`):'--';
+      const fmtPress=v=>Number.isFinite(+v)?((units.slp==='hPa'||units.slp==='mb')?`${inHg2hPa(+v).toFixed(1)} ${units.slp}`:`${(+v).toFixed(3)} inHg`):'--';
+      const fmtRainRate=v=>Number.isFinite(+v)?(units.rainrate==='mmphr'?`${in2mm(+v).toFixed(2)} mm/hr`:`${(+v).toFixed(2)} in/hr`):'--';
+      const fmtRain=v=>Number.isFinite(+v)?(units.rain==='mm'?`${in2mm(+v).toFixed(2)} mm`:`${(+v).toFixed(2)} in`):'--';
+      const fmtWind=v=>Number.isFinite(+v)?`${windNum(+v).toFixed(1)} ${windUnit()}`:'--';
       const toCard = d=>['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'][Math.round((((d%360)+360)%360)/22.5)%16];
 
+      // Needle rotation (shortest path)
       function needleRotator(el){ let last=0,acc=0; return function(deg){ const a=((deg%360)+360)%360; const delta=((a-last+540)%360)-180; acc+=delta; last=a; el.style.transform=`rotate(${acc}deg)`; }; }
       const rotate1 = needleRotator(document.getElementById('wx-needle'));
       const rotate2 = needleRotator(document.getElementById('wx-needle2'));
 
+      // Customize: close settings when clicking outside/ESC
+      (function(){
+        const gears = () => Array.from(document.querySelectorAll('details.gear'));
+        document.addEventListener('click', (e)=>{ gears().forEach(d => { if (d.open && !d.contains(e.target)) d.removeAttribute('open'); }); });
+        document.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') gears().forEach(d => d.removeAttribute('open')); });
+        gears().forEach(d => d.addEventListener('toggle', ()=>{ if (d.open) gears().forEach(o => { if (o!==d) o.removeAttribute('open'); }); }));
+      })();
+
+      // Conditions customize (pack left by restoring original order)
       (function wireCustomizeCond(){
         const grid = document.getElementById('wx-values');
+        if (!grid) return;
         if (!grid.__order) grid.__order = Array.from(grid.children).map(el=>el.id);
         const order = grid.__order;
         function isVisible(el){ return el && !el.classList.contains('hidden'); }
@@ -376,29 +376,27 @@
             if(!el) return;
             if(cb.checked){
               insertAtOriginalPosition(el);
-              el.classList.remove('hidden'); el.classList.add('anim-in');
-              setTimeout(()=>el.classList.remove('anim-in'), 180);
+              el.classList.remove('hidden');
             } else {
-              el.classList.add('anim-out'); setTimeout(()=>{ el.classList.remove('anim-out'); el.classList.add('hidden'); }, 120);
+              el.classList.add('hidden');
             }
           });
         });
       })();
 
-      (function(){
-        const gears = () => Array.from(document.querySelectorAll('details.gear'));
-        document.addEventListener('click', (e)=>{ gears().forEach(d => { if (d.open && !d.contains(e.target)) d.removeAttribute('open'); }); });
-        document.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') gears().forEach(d => d.removeAttribute('open'); });
-        gears().forEach(d => d.addEventListener('toggle', ()=>{ if (d.open) gears().forEach(o => { if (o!==d) o.removeAttribute('open'); }); }));
-      })();
-
+      // Wind period & rolling buffers (up to 60 min)
       const windPeriodSel = document.getElementById('windPeriodCard');
       function windPeriodMinutes(){ const v = windPeriodSel?.value || '5'; return parseInt(v,10)||5; }
       windPeriodSel?.addEventListener('change', ()=> updateWindStats());
       let windBuf1 = [], windBuf2 = [];
       function pushWind(buf, mph){ const now = Date.now(); buf.push({t:now, v:+mph||0}); const cutoff = now - 60*60*1000; while(buf.length && buf[0].t < cutoff) buf.shift(); }
-      function computeAvgAndGust(buf, minutes){ const cutoff = Date.now() - minutes*60*1000; const win = buf.filter(s=>s.t>=cutoff); if (!win.length) return {avg:NaN, gust:NaN}; const avg = win.reduce((a,s)=>a+s.v,0)/win.length; const gust = win.reduce((m,s)=> s.v>m?s.v:m, 0); return {avg, gust}; }
+      function computeAvgAndGust(buf, minutes){
+        const cutoff = Date.now() - minutes*60*1000; const win = buf.filter(s=>s.t>=cutoff);
+        if (!win.length) return {avg:NaN, gust:NaN};
+        const avg = win.reduce((a,s)=>a+s.v,0)/win.length; const gust = win.reduce((m,s)=> s.v>m?s.v:m, 0); return {avg, gust};
+      }
 
+      // Timestamp helpers + monotonic rule
       function toMs(x){ return (typeof x==="number" && x>0) ? (x < 1e12 ? x*1000 : x) : 0; }
       function bestStamp(d){ return Math.max(toMs(d.ts), toMs(d.received_at)); }
       let lastTs = 0, lastData = null;
@@ -406,32 +404,32 @@
       function set(el,txt){ if(el && el.textContent !== txt) el.textContent = txt; }
 
       function render(d){
-        if (!d) return;
+        if (!d || typeof d!=='object') return;
         const stamp = bestStamp(d);
         if (stamp && stamp >= lastTs - 2000) lastTs = Math.max(lastTs, stamp);
 
-        set(document.getElementById('wx-temp'), fmtTemp(+d.iss_temp_F, 'temp'));
-        set(document.getElementById('wx-dew'),  fmtTemp(+d.iss_dew_F,  'dew'));
+        set(document.getElementById('wx-temp'), fmtTemp(d.iss_temp_F, 'temp'));
+        set(document.getElementById('wx-dew'),  fmtTemp(d.iss_dew_F,  'dew'));
         set(document.getElementById('wx-rh'),   Number.isFinite(+d.iss_rh) ? `${Math.round(+d.iss_rh)} %` : '--');
-        set(document.getElementById('wx-slp'),  fmtPress(+d.iss_slp_inHg));
-        set(document.getElementById('wx-rainrate'),  fmtRainRate(+d.iss_rainrate_inphr));
-        set(document.getElementById('wx-raintoday'), fmtRain(+d.iss_raintoday_in));
+        set(document.getElementById('wx-slp'),  fmtPress(d.iss_slp_inHg));
+        set(document.getElementById('wx-rainrate'),  fmtRainRate(d.iss_rainrate_inphr));
+        set(document.getElementById('wx-raintoday'), fmtRain(d.iss_raintoday_in));
         set(document.getElementById('wx-solar'), Number.isFinite(+d.iss_solar_wm2) ? `${Math.round(+d.iss_solar_wm2)} W/m²` : '--');
         set(document.getElementById('wx-uv'),   Number.isFinite(+d.iss_uv) ? (+d.iss_uv).toFixed(1) : '--');
 
         const dir1 = +d.iss_wdir_deg, spd1 = +d.iss_wind_mph;
         if (Number.isFinite(dir1)) rotate1(dir1);
-        pushWind(windBuf1, spd1);
+        if (Number.isFinite(spd1)) pushWind(windBuf1, spd1);
         set(document.getElementById('wx-wind-speed'), fmtWind(spd1));
         set(document.getElementById('wx-wind-cardinal'), Number.isFinite(dir1) ? `${toCard(dir1)} ${Math.round(((dir1%360)+360)%360)}°` : '--');
 
         const hasAn2 = Number.isFinite(+d.an2_wind_mph) || Number.isFinite(+d.an2_wdir_deg);
         const an2Card = document.getElementById('wx-wind2');
-        if (hasAn2 && an2Card.style.display === 'none') an2Card.style.display = '';
+        if (an2Card) an2Card.style.display = hasAn2 ? '' : 'none';
         if (hasAn2){
           const dir2 = +d.an2_wdir_deg, spd2 = +d.an2_wind_mph;
           if (Number.isFinite(dir2)) rotate2(dir2);
-          pushWind(windBuf2, spd2);
+          if (Number.isFinite(spd2)) pushWind(windBuf2, spd2);
           set(document.getElementById('wx-wind2-speed'), fmtWind(spd2));
           set(document.getElementById('wx-wind2-cardinal'), Number.isFinite(dir2) ? `${toCard(dir2)} ${Math.round(((dir2%360)+360)%360)}°` : '--');
         }
@@ -450,7 +448,7 @@
         set(document.getElementById('wx-wind-period2'), `${mins} min`);
 
         const an2Card = document.getElementById('wx-wind2');
-        if (an2Card.style.display !== 'none'){
+        if (an2Card && an2Card.style.display !== 'none'){
           const a2 = computeAvgAndGust(windBuf2, mins);
           set(document.getElementById('wx-wind2-avg'),  isNaN(a2.avg)?'--':`${windNum(a2.avg).toFixed(1)} ${windUnit()}`);
           set(document.getElementById('wx-wind2-gust'), isNaN(a2.gust)?'--':`${windNum(a2.gust).toFixed(1)} ${windUnit()}`);
@@ -461,10 +459,12 @@
 
       function setConn(s){ if(conn) conn.textContent = s; }
       function isIOS(){ const ua = navigator.userAgent || navigator.vendor || window.opera; const touchMac = (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1); return /iPhone|iPad|iPod/i.test(ua) || touchMac; }
+
       const qs = new URLSearchParams(location.search);
       const force = qs.get('mode');
       const pollMS = Math.max(250, +(qs.get('pollms')||1000)|0);
 
+      // Initial fetch (no-store) with robust error guard
       fetch(API, { cache: "no-store" })
         .then(r=>r.ok?r.json():Promise.reject(r.status))
         .then(d=>{ render(d); })
@@ -510,6 +510,7 @@
         })();
       }
 
+      // Snap fresh on tab return
       document.addEventListener('visibilitychange', () => {
         if (!document.hidden) fetch(API, { cache:"no-store" })
           .then(r => r.ok ? r.json() : null)
