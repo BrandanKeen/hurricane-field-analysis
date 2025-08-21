@@ -15,8 +15,8 @@ The analyses include:
 Observations captured are presented below chronologically with the most recent hurricane first.
 
 ---
-
-## Hurricane Milton (October 9, 2024) – Sarasota, FL
+ 
+<h2 align="center">Hurricane Milton (October 9, 2024) – Sarasota, FL</h2>
 
 <div align="center" style="display:flex;justify-content:center;gap:12px;flex-wrap:wrap;">
   <a href="Images/Milton/Milton_animated.GIF" target="_blank" rel="noopener"
@@ -63,7 +63,7 @@ Observations captured are presented below chronologically with the most recent h
 
 ---
 
-## Hurricane Helene (September 26, 2024) – Perry, FL
+<h2 align="center">Hurricane Helene (September 26, 2024) – Perry, FL</h2>
 
 <div align="center" style="display:flex;justify-content:center;gap:12px;flex-wrap:wrap;">
   <a href="Images/Helene/Helene_animated.gif" target="_blank" rel="noopener"
