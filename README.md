@@ -1,4 +1,5 @@
-# Hurricane Intercept & Field Data Analysis
+<h1 align="center">Hurricane Intercept &amp; Field Data Analysis</h1>
+
 
 ## Independent, Vehicle-based Observations & Analysis
 
