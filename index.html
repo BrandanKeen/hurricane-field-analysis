@@ -1,11 +1,8 @@
 <!--
   WxManBran Live Dashboard — Phase 1
-  Version: v1-dashboard-final+mobile-fit2+phone-landscape
-  Changes:
-    • Fix: robust initial render + unit-change guards (prevents "no data")
-    • Phone portrait: slightly smaller typography/padding/compass so both cards fit comfortably
-    • Phone landscape: special media query; tighter type & side-by-side cards on phones only
-    • Desktop/tablet: unchanged
+  Version: v1-dashboard-final+mobile-fit2+phone-landscape+status-live-text+wind-1min+readme-spacing
+  Changes this rev:
+    • Status label now reads “Status: Live (Polling)” when data present; “Status: Offline” otherwise
 -->
 <!doctype html>
 <html lang="en">
@@ -34,7 +31,7 @@
     .container{max-width:1100px;margin:20px auto 32px;padding:0 16px}
     .hero{display:block;margin:0 auto 1rem auto;max-width:420px;width:55%;min-width:240px;height:auto}
 
-    #wx-dashboard{display:grid;gap:22px}
+    #wx-dashboard{display:grid;gap:22px; margin-bottom:32px;} /* space below widget */
     header.site-header{display:flex;justify-content:flex-end;align-items:center}
     #wx-conn{font-size:13px;color:var(--muted)}
 
@@ -92,12 +89,13 @@
     .markdown-body img.shrink{max-width:520px}
     .yt-embed{position:relative;padding-bottom:56.25%;height:0;margin:1.25rem 0;background:#000;border-radius:12px;overflow:hidden}
     .yt-embed iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+    #app{ margin-top:12px; } /* space above README */
 
-    /* ========== MOBILE: phone portrait (smaller to ensure full fit) ========== */
+    /* ========== MOBILE: phone portrait (fit smaller) ========== */
     @media (max-width: 480px) and (orientation: portrait){
       .container{margin:10px auto 16px}
       .hero{max-width:170px;width:42%;margin:0.2rem auto 0.4rem}
-      #wx-dashboard{gap:12px}
+      #wx-dashboard{gap:12px; margin-bottom:22px;}
       .cards{gap:12px}
       .card{padding:16px 12px 42px}
       .card h2{font-size:calc(clamp(14px,4.0vw,18px) * 1.06)}
@@ -113,7 +111,7 @@
       .gear summary{width:28px;height:28px}
     }
 
-    /* ========== MOBILE: phone landscape only (side-by-side + tighter type) ========== */
+    /* ========== MOBILE: phone landscape only ========== */
     @media (max-width: 896px) and (orientation: landscape){
       .cards{grid-template-columns:1fr 1fr;gap:12px}
       .card{padding:14px 12px 40px}
@@ -134,7 +132,7 @@
     <img class="hero" src="/Images/WxManBran_Logo.png" alt="Two red hurricane warning flags" loading="lazy">
 
     <main id="wx-dashboard" aria-label="Live weather dashboard">
-      <header class="site-header"><div id="wx-conn">Connecting…</div></header>
+      <header class="site-header"><div id="wx-conn">Status: Offline</div></header>
 
       <section class="cards">
         <!-- Conditions -->
@@ -245,8 +243,8 @@
             <div class="panel">
               <label>Wind period
                 <select id="windPeriodCard">
-                  <option value="1">1 min</option>
-                  <option value="5" selected>5 min</option>
+                  <option value="1" selected>1 min</option>
+                  <option value="5">5 min</option>
                   <option value="15">15 min</option>
                   <option value="30">30 min</option>
                   <option value="60">60 min</option>
@@ -267,10 +265,6 @@
                 <line class="tick" x1="50" y1="6" x2="50" y2="10" transform="rotate(22.5 50 50)" />
                 <line class="tick" x1="50" y1="6" x2="50" y2="10" transform="rotate(45 50 50)" />
                 <line class="tick" x1="50" y1="6" x2="50" y2="10" transform="rotate(67.5 50 50)" />
-                <line class="tick major" x1="50" y1="6" x2="50" y2="12" transform="rotate(90 50 50)" />
-                <line class="tick" x1="50" y1="6" x2="50" y2="10" transform="rotate(112.5 50 50)" />
-                <line class="tick" x1="50" y1="6" x2="50" y2="10" transform="rotate(135 50 50)" />
-                <line class="tick" x1="50" y1="6" x2="50" y2="10" transform="rotate(157.5 50 50)" />
                 <line class="tick major" x1="50" y1="6" x2="50" y2="12" transform="rotate(180 50 50)" />
                 <line class="tick" x1="50" y1="6" x2="50" y2="10" transform="rotate(202.5 50 50)" />
                 <line class="tick" x1="50" y1="6" x2="50" y2="10" transform="rotate(225 50 50)" />
@@ -317,10 +311,23 @@
       const API = "https://api.wxmanbran.com/latest";
       const conn = document.getElementById('wx-conn');
 
-      // Defaults (match desired)
+      // Defaults
       const units = { temp:'F', dew:'F', slp:'mb', wind:'mph', rainrate:'inphr', rain:'in' };
 
-      // Bind unit selectors (guard if elements missing)
+      // Status helper: Live if any numeric field present; else Offline
+      function hasAnyData(d){
+        if (!d || typeof d!=='object') return false;
+        const keys = [
+          'iss_temp_F','iss_rh','iss_dew_F','iss_slp_inHg','iss_rainrate_inphr','iss_raintoday_in',
+          'iss_solar_wm2','iss_uv','iss_wind_mph','iss_wdir_deg','iss_wavg_mph','iss_wgust10_mph',
+          'an2_wind_mph','an2_wdir_deg'
+        ];
+        return keys.some(k => Number.isFinite(+d[k]));
+      }
+      function setStatusFromData(d){
+        if (conn) conn.textContent = hasAnyData(d) ? 'Status: Live (Polling)' : 'Status: Offline';
+      }
+
       function bindUnitSelect(id,key){
         const s=document.getElementById(id); if(!s) return;
         s.addEventListener('change',()=>{ units[key]=s.value; if (lastData) render(lastData); });
@@ -335,7 +342,7 @@
       const f2c=f=>(f-32)*5/9, inHg2hPa=i=>i*33.8638866667, in2mm=i=>i*25.4, mph2kt=m=>m*0.868976, mph2kmh=m=>m*1.609344, mph2mps=m=>m*0.44704;
       const windNum = m => units.wind==='kt'?mph2kt(m):units.wind==='kmh'?mph2kmh(m):units.wind==='mps'?mph2mps(m):m;
       const windUnit= () => units.wind==='kmh'?'km/h':(units.wind==='mps'?'m/s':units.wind);
-      const fmtTemp=(v,key)=>Number.isFinite(+v)?(units[key]==='C'?`${f2c(+v).toFixed(1)} °C`:`${(+v).toFixed(1)} °F`):'--';
+      const fmtTemp=(v,key)=>Number.isFinite(+v)?(units[key]==='C'?`${(f2c(+v)).toFixed(1)} °C`:`${(+v).toFixed(1)} °F`):'--';
       const fmtPress=v=>Number.isFinite(+v)?((units.slp==='hPa'||units.slp==='mb')?`${inHg2hPa(+v).toFixed(1)} ${units.slp}`:`${(+v).toFixed(3)} inHg`):'--';
       const fmtRainRate=v=>Number.isFinite(+v)?(units.rainrate==='mmphr'?`${in2mm(+v).toFixed(2)} mm/hr`:`${(+v).toFixed(2)} in/hr`):'--';
       const fmtRain=v=>Number.isFinite(+v)?(units.rain==='mm'?`${in2mm(+v).toFixed(2)} mm`:`${(+v).toFixed(2)} in`):'--';
@@ -347,11 +354,11 @@
       const rotate1 = needleRotator(document.getElementById('wx-needle'));
       const rotate2 = needleRotator(document.getElementById('wx-needle2'));
 
-      // Customize: close settings when clicking outside/ESC
+      // Close settings when clicking outside/ESC
       (function(){
         const gears = () => Array.from(document.querySelectorAll('details.gear'));
         document.addEventListener('click', (e)=>{ gears().forEach(d => { if (d.open && !d.contains(e.target)) d.removeAttribute('open'); }); });
-        document.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') gears().forEach(d => d.removeAttribute('open')); });
+        document.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') gears().forEach(d => d.removeAttribute('open'); }); });
         gears().forEach(d => d.addEventListener('toggle', ()=>{ if (d.open) gears().forEach(o => { if (o!==d) o.removeAttribute('open'); }); }));
       })();
 
@@ -384,9 +391,9 @@
         });
       })();
 
-      // Wind period & rolling buffers (up to 60 min)
+      // Wind period & rolling buffers (default 1 minute)
       const windPeriodSel = document.getElementById('windPeriodCard');
-      function windPeriodMinutes(){ const v = windPeriodSel?.value || '5'; return parseInt(v,10)||5; }
+      function windPeriodMinutes(){ const v = windPeriodSel?.value || '1'; return parseInt(v,10)||1; }
       windPeriodSel?.addEventListener('change', ()=> updateWindStats());
       let windBuf1 = [], windBuf2 = [];
       function pushWind(buf, mph){ const now = Date.now(); buf.push({t:now, v:+mph||0}); const cutoff = now - 60*60*1000; while(buf.length && buf[0].t < cutoff) buf.shift(); }
@@ -437,6 +444,9 @@
         updateWindStats();
         set(document.getElementById('wx-asof'), new Date(lastTs || Date.now()).toLocaleString());
         lastData = d;
+
+        // Update status text based on data presence
+        setStatusFromData(d);
       }
 
       function updateWindStats(){
@@ -457,36 +467,37 @@
         }
       }
 
-      function setConn(s){ if(conn) conn.textContent = s; }
       function isIOS(){ const ua = navigator.userAgent || navigator.vendor || window.opera; const touchMac = (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1); return /iPhone|iPad|iPod/i.test(ua) || touchMac; }
-
       const qs = new URLSearchParams(location.search);
       const force = qs.get('mode');
       const pollMS = Math.max(250, +(qs.get('pollms')||1000)|0);
 
-      // Initial fetch (no-store) with robust error guard
+      // Ensure default wind period = 1 minute in UI
+      const wpSel = document.getElementById('windPeriodCard');
+      if (wpSel) wpSel.value = '1';
+
+      // Initial fetch (no-store)
       fetch(API, { cache: "no-store" })
         .then(r=>r.ok?r.json():Promise.reject(r.status))
         .then(d=>{ render(d); })
-        .catch(err => { setConn('Error loading initial data'); console.error('Initial fetch error:', err); })
+        .catch(err => { if (conn) conn.textContent = 'Status: Offline'; console.error('Initial fetch error:', err); })
         .finally(() => {
           if (force === 'poll' || (!force && isIOS())) startPolling();
           else startLongPoll();
         });
 
       function startPolling(){
-        setConn(`Live: polling (${pollMS}ms)`);
         const tick = async ()=>{
           try{
             const r = await fetch(API, { cache: "no-store" });
-            if (r.ok) render(await r.json());
-          }catch(e){ console.error('Polling error:', e); }
+            if (r.ok) { const d = await r.json(); render(d); }
+            else if (conn) conn.textContent = 'Status: Offline';
+          }catch(e){ if (conn) conn.textContent = 'Status: Offline'; }
         };
         tick(); setInterval(tick, pollMS);
       }
 
       function startLongPoll(){
-        setConn('Live: long-poll');
         let failures = 0;
         (async function loop(){
           try{
@@ -497,25 +508,25 @@
             const r = await fetch(url, { cache: "no-store", signal: ctrl.signal });
             clearTimeout(t);
             if (!r.ok) throw new Error(String(r.status));
-            render(await r.json());
+            const d = await r.json();
+            render(d);
             failures = 0;
             setTimeout(loop, 0);
           }catch(e){
             failures++;
-            if (!force && failures >= 2){
-              setConn(`Live: polling (${pollMS}ms) (fallback)`); startPolling(); return;
-            }
+            // On LP trouble, keep status reflective of last data presence
+            if (conn) conn.textContent = lastData && hasAnyData(lastData) ? 'Status: Live (Polling)' : 'Status: Offline';
+            if (!force && failures >= 2){ startPolling(); return; }
             setTimeout(loop, 500);
           }
         })();
       }
 
-      // Snap fresh on tab return
       document.addEventListener('visibilitychange', () => {
         if (!document.hidden) fetch(API, { cache:"no-store" })
           .then(r => r.ok ? r.json() : null)
-          .then(d => { if (d) render(d); })
-          .catch(()=>{});
+          .then(d => { if (d) render(d); else if (conn) conn.textContent='Status: Offline'; })
+          .catch(()=>{ if (conn) conn.textContent='Status: Offline'; });
       });
 
     })();
