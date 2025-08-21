@@ -66,8 +66,8 @@ Observations captured are presented below chronologically with the most recent h
 
 
 ---
-
-<h2 align="center">Hurricane Helene (September 26, 2024) – Perry, FL</h2> 
+<h2 align="center" style="margin:0 0 2em">Hurricane Helene</h2>
+ 
 
 <br><br>
 
