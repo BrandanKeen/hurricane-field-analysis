@@ -1,8 +1,9 @@
 <!--
   WxManBran Live Dashboard — Phase 1
-  Version: v1-dashboard-final+mobile-fit2+phone-landscape+status-live-text+wind-1min+readme-spacing
-  Changes this rev:
-    • Status label now reads “Status: Live (Polling)” when data present; “Status: Offline” otherwise
+  Version: v1-dashboard-final+spacing-below-widget+render-harden-2
+  Changes:
+    • More space before README (“Hurricane Intercept & Field Data Analysis”)
+    • Safer render pipeline—data shows reliably; status updates only when numeric data present
 -->
 <!doctype html>
 <html lang="en">
@@ -28,10 +29,10 @@
     body{margin:0;background:var(--bg);color:var(--text);
       font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji";}
 
-    .container{max-width:1100px;margin:20px auto 32px;padding:0 16px}
+    .container{max-width:1100px;margin:20px auto 48px;padding:0 16px}
     .hero{display:block;margin:0 auto 1rem auto;max-width:420px;width:55%;min-width:240px;height:auto}
 
-    #wx-dashboard{display:grid;gap:22px; margin-bottom:32px;} /* space below widget */
+    #wx-dashboard{display:grid;gap:22px; margin-bottom:56px;} /* extra space before README */
     header.site-header{display:flex;justify-content:flex-end;align-items:center}
     #wx-conn{font-size:13px;color:var(--muted)}
 
@@ -51,12 +52,12 @@
     .menu-grid label{display:flex;align-items:center;gap:6px}
 
     /* Conditions grid (always 2 columns; packed RTL so top-right to bottom-left) */
-    .cond-grid{display:grid;gap:28px 34px;
+    .cond-grid{display:grid;gap:32px 34px;
       grid-template-columns:repeat(2,minmax(0,1fr));
-      grid-auto-flow:row dense;direction:rtl;margin-top:20px}
+      grid-auto-flow:row dense;direction:rtl;margin-top:22px}
     .cond-item{direction:ltr}
 
-    .cond-item{display:grid;gap:8px}
+    .cond-item{display:grid;gap:10px}
     .cond-item .label{font-weight:800;font-size:clamp(15px,1.9vw,19px); color:var(--title-ink)}
     .cond-item .value{font-weight:800;letter-spacing:.2px;font-variant-numeric:tabular-nums;font-size:clamp(28px,4.4vw,40px)}
     .asof{position:absolute;left:22px;bottom:14px;color:var(--muted);font-size:12px}
@@ -66,7 +67,7 @@
     .wind-wrap{display:grid;grid-template-columns:1fr;justify-items:center;gap:14px}
     .wind-values{width:100%;max-width:360px;text-align:center}
     .wind-values .speed{font-size:clamp(27px,3.8vw,35px);font-weight:900;font-variant-numeric:tabular-nums;color:var(--accent)}
-    .wind-values .wind-cardinal{font-size:14px;font-weight:800;color:#475569;margin-top:8px;margin-bottom:8px}
+    .wind-values .wind-cardinal{font-size:14px;font-weight:800;color:#475569;margin-top:8px;margin-bottom:10px}
     .wind-values .wind-line{font-size:14px;margin-top:6px;color:var(--title-ink)}
     .wind-values .wind-line .wlbl{font-weight:700}
     #wx-wind-avg,#wx-wind-gust,#wx-wind2-avg,#wx-wind2-gust,#wx-wind2-speed{color:var(--accent)}
@@ -89,17 +90,17 @@
     .markdown-body img.shrink{max-width:520px}
     .yt-embed{position:relative;padding-bottom:56.25%;height:0;margin:1.25rem 0;background:#000;border-radius:12px;overflow:hidden}
     .yt-embed iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
-    #app{ margin-top:12px; } /* space above README */
+    #app{ margin-top:48px; } /* extra space before “Hurricane Intercept & Field Data Analysis” */
 
     /* ========== MOBILE: phone portrait (fit smaller) ========== */
     @media (max-width: 480px) and (orientation: portrait){
-      .container{margin:10px auto 16px}
-      .hero{max-width:170px;width:42%;margin:0.2rem auto 0.4rem}
-      #wx-dashboard{gap:12px; margin-bottom:22px;}
-      .cards{gap:12px}
+      .container{margin:10px auto 20px}
+      .hero{max-width:170px;width:42%;margin:0.2rem auto 0.6rem}
+      #wx-dashboard{gap:14px; margin-bottom:44px;}
+      .cards{gap:14px}
       .card{padding:16px 12px 42px}
       .card h2{font-size:calc(clamp(14px,4.0vw,18px) * 1.06)}
-      .cond-grid{gap:14px 16px}
+      .cond-grid{gap:16px 18px}
       .cond-item .label{font-size:clamp(12px,3.4vw,14px)}
       .cond-item .value{font-size:clamp(20px,5.6vw,26px)}
       .asof{left:12px;bottom:10px;font-size:11px}
@@ -263,16 +264,10 @@
               <g id="ticks2">
                 <line class="tick major" x1="50" y1="6" x2="50" y2="12" />
                 <line class="tick" x1="50" y1="6" x2="50" y2="10" transform="rotate(22.5 50 50)" />
-                <line class="tick" x1="50" y1="6" x2="50" y2="10" transform="rotate(45 50 50)" />
-                <line class="tick" x1="50" y1="6" x2="50" y2="10" transform="rotate(67.5 50 50)" />
+                <line class="tick" x1="50" y1="6" x2="50" y2="10" transform="rotate(135 50 50)" />
                 <line class="tick major" x1="50" y1="6" x2="50" y2="12" transform="rotate(180 50 50)" />
-                <line class="tick" x1="50" y1="6" x2="50" y2="10" transform="rotate(202.5 50 50)" />
-                <line class="tick" x1="50" y1="6" x2="50" y2="10" transform="rotate(225 50 50)" />
-                <line class="tick" x1="50" y1="6" x2="50" y2="10" transform="rotate(247.5 50 50)" />
                 <line class="tick major" x1="50" y1="6" x2="50" y2="12" transform="rotate(270 50 50)" />
-                <line class="tick" x1="50" y1="6" x2="50" y2="10" transform="rotate(292.5 50 50)" />
                 <line class="tick" x1="50" y1="6" x2="50" y2="10" transform="rotate(315 50 50)" />
-                <line class="tick" x1="50" y1="6" x2="50" y2="10" transform="rotate(337.5 50 50)" />
               </g>
               <g class="labels" text-anchor="middle" dominant-baseline="central">
                 <text x="50" y="15">N</text><text x="85" y="50">E</text><text x="50" y="85">S</text><text x="15" y="50">W</text>
@@ -290,7 +285,7 @@
       </section>
     </main>
 
-    <!-- README (optional) -->
+    <!-- README (optional / your “Hurricane Intercept & Field Data Analysis”) -->
     <article class="markdown-body" id="app">Loading…</article>
   </div>
 
@@ -306,7 +301,7 @@
   </script>
 
   <script>
-    /* Live engine */
+    /* Live engine (hardened) */
     (() => {
       const API = "https://api.wxmanbran.com/latest";
       const conn = document.getElementById('wx-conn');
@@ -314,7 +309,7 @@
       // Defaults
       const units = { temp:'F', dew:'F', slp:'mb', wind:'mph', rainrate:'inphr', rain:'in' };
 
-      // Status helper: Live if any numeric field present; else Offline
+      // Status: Live only if at least one numeric field present
       function hasAnyData(d){
         if (!d || typeof d!=='object') return false;
         const keys = [
@@ -328,6 +323,7 @@
         if (conn) conn.textContent = hasAnyData(d) ? 'Status: Live (Polling)' : 'Status: Offline';
       }
 
+      // Unit dropdowns
       function bindUnitSelect(id,key){
         const s=document.getElementById(id); if(!s) return;
         s.addEventListener('change',()=>{ units[key]=s.value; if (lastData) render(lastData); });
@@ -338,16 +334,18 @@
       bindUnitSelect('uRainRateCard','rainrate');
       bindUnitSelect('uRainCard','rain');
 
-      // Conversions & formatters
+      // Conversions & formatters (tolerant of undefined)
       const f2c=f=>(f-32)*5/9, inHg2hPa=i=>i*33.8638866667, in2mm=i=>i*25.4, mph2kt=m=>m*0.868976, mph2kmh=m=>m*1.609344, mph2mps=m=>m*0.44704;
       const windNum = m => units.wind==='kt'?mph2kt(m):units.wind==='kmh'?mph2kmh(m):units.wind==='mps'?mph2mps(m):m;
       const windUnit= () => units.wind==='kmh'?'km/h':(units.wind==='mps'?'m/s':units.wind);
-      const fmtTemp=(v,key)=>Number.isFinite(+v)?(units[key]==='C'?`${(f2c(+v)).toFixed(1)} °C`:`${(+v).toFixed(1)} °F`):'--';
-      const fmtPress=v=>Number.isFinite(+v)?((units.slp==='hPa'||units.slp==='mb')?`${inHg2hPa(+v).toFixed(1)} ${units.slp}`:`${(+v).toFixed(3)} inHg`):'--';
-      const fmtRainRate=v=>Number.isFinite(+v)?(units.rainrate==='mmphr'?`${in2mm(+v).toFixed(2)} mm/hr`:`${(+v).toFixed(2)} in/hr`):'--';
-      const fmtRain=v=>Number.isFinite(+v)?(units.rain==='mm'?`${in2mm(+v).toFixed(2)} mm`:`${(+v).toFixed(2)} in`):'--';
-      const fmtWind=v=>Number.isFinite(+v)?`${windNum(+v).toFixed(1)} ${windUnit()}`:'--';
-      const toCard = d=>['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'][Math.round((((d%360)+360)%360)/22.5)%16];
+      const nfix = v => Number.isFinite(+v) ? +v : NaN;
+
+      const fmtTemp=(v,key)=>Number.isFinite(nfix(v))?(units[key]==='C'?`${(f2c(nfix(v))).toFixed(1)} °C`:`${nfix(v).toFixed(1)} °F`):'--';
+      const fmtPress=v=>Number.isFinite(nfix(v))?((units.slp==='hPa'||units.slp==='mb')?`${inHg2hPa(nfix(v)).toFixed(1)} ${units.slp}`:`${nfix(v).toFixed(3)} inHg`):'--';
+      const fmtRainRate=v=>Number.isFinite(nfix(v))?(units.rainrate==='mmphr'?`${in2mm(nfix(v)).toFixed(2)} mm/hr`:`${nfix(v).toFixed(2)} in/hr`):'--';
+      const fmtRain=v=>Number.isFinite(nfix(v))?(units.rain==='mm'?`${in2mm(nfix(v)).toFixed(2)} mm`:`${nfix(v).toFixed(2)} in`):'--';
+      const fmtWind=v=>Number.isFinite(nfix(v))?`${windNum(nfix(v)).toFixed(1)} ${windUnit()}`:'--';
+      const toCard = d=>['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'][Math.round((((nfix(d)%360)+360)%360)/22.5)%16];
 
       // Needle rotation (shortest path)
       function needleRotator(el){ let last=0,acc=0; return function(deg){ const a=((deg%360)+360)%360; const delta=((a-last+540)%360)-180; acc+=delta; last=a; el.style.transform=`rotate(${acc}deg)`; }; }
@@ -358,11 +356,11 @@
       (function(){
         const gears = () => Array.from(document.querySelectorAll('details.gear'));
         document.addEventListener('click', (e)=>{ gears().forEach(d => { if (d.open && !d.contains(e.target)) d.removeAttribute('open'); }); });
-        document.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') gears().forEach(d => d.removeAttribute('open'); }); });
+        document.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') gears().forEach(d => d.removeAttribute('open')); });
         gears().forEach(d => d.addEventListener('toggle', ()=>{ if (d.open) gears().forEach(o => { if (o!==d) o.removeAttribute('open'); }); }));
       })();
 
-      // Conditions customize (pack left by restoring original order)
+      // Conditions customize packer (restore original order when re-enabled)
       (function wireCustomizeCond(){
         const grid = document.getElementById('wx-values');
         if (!grid) return;
@@ -381,12 +379,8 @@
           cb.addEventListener('change', ()=>{
             const el = document.getElementById(cb.dataset.target);
             if(!el) return;
-            if(cb.checked){
-              insertAtOriginalPosition(el);
-              el.classList.remove('hidden');
-            } else {
-              el.classList.add('hidden');
-            }
+            if(cb.checked){ insertAtOriginalPosition(el); el.classList.remove('hidden'); }
+            else { el.classList.add('hidden'); }
           });
         });
       })();
@@ -396,7 +390,7 @@
       function windPeriodMinutes(){ const v = windPeriodSel?.value || '1'; return parseInt(v,10)||1; }
       windPeriodSel?.addEventListener('change', ()=> updateWindStats());
       let windBuf1 = [], windBuf2 = [];
-      function pushWind(buf, mph){ const now = Date.now(); buf.push({t:now, v:+mph||0}); const cutoff = now - 60*60*1000; while(buf.length && buf[0].t < cutoff) buf.shift(); }
+      function pushWind(buf, mph){ const now = Date.now(); buf.push({t:now, v:Number.isFinite(+mph)?+mph:0}); const cutoff = now - 60*60*1000; while(buf.length && buf[0].t < cutoff) buf.shift(); }
       function computeAvgAndGust(buf, minutes){
         const cutoff = Date.now() - minutes*60*1000; const win = buf.filter(s=>s.t>=cutoff);
         if (!win.length) return {avg:NaN, gust:NaN};
@@ -417,24 +411,24 @@
 
         set(document.getElementById('wx-temp'), fmtTemp(d.iss_temp_F, 'temp'));
         set(document.getElementById('wx-dew'),  fmtTemp(d.iss_dew_F,  'dew'));
-        set(document.getElementById('wx-rh'),   Number.isFinite(+d.iss_rh) ? `${Math.round(+d.iss_rh)} %` : '--');
+        set(document.getElementById('wx-rh'),   Number.isFinite(nfix(d.iss_rh)) ? `${Math.round(nfix(d.iss_rh))} %` : '--');
         set(document.getElementById('wx-slp'),  fmtPress(d.iss_slp_inHg));
         set(document.getElementById('wx-rainrate'),  fmtRainRate(d.iss_rainrate_inphr));
         set(document.getElementById('wx-raintoday'), fmtRain(d.iss_raintoday_in));
-        set(document.getElementById('wx-solar'), Number.isFinite(+d.iss_solar_wm2) ? `${Math.round(+d.iss_solar_wm2)} W/m²` : '--');
-        set(document.getElementById('wx-uv'),   Number.isFinite(+d.iss_uv) ? (+d.iss_uv).toFixed(1) : '--');
+        set(document.getElementById('wx-solar'), Number.isFinite(nfix(d.iss_solar_wm2)) ? `${Math.round(nfix(d.iss_solar_wm2))} W/m²` : '--');
+        set(document.getElementById('wx-uv'),   Number.isFinite(nfix(d.iss_uv)) ? (nfix(d.iss_uv)).toFixed(1) : '--');
 
-        const dir1 = +d.iss_wdir_deg, spd1 = +d.iss_wind_mph;
+        const dir1 = nfix(d.iss_wdir_deg), spd1 = nfix(d.iss_wind_mph);
         if (Number.isFinite(dir1)) rotate1(dir1);
         if (Number.isFinite(spd1)) pushWind(windBuf1, spd1);
         set(document.getElementById('wx-wind-speed'), fmtWind(spd1));
         set(document.getElementById('wx-wind-cardinal'), Number.isFinite(dir1) ? `${toCard(dir1)} ${Math.round(((dir1%360)+360)%360)}°` : '--');
 
-        const hasAn2 = Number.isFinite(+d.an2_wind_mph) || Number.isFinite(+d.an2_wdir_deg);
+        const hasAn2 = Number.isFinite(nfix(d.an2_wind_mph)) || Number.isFinite(nfix(d.an2_wdir_deg));
         const an2Card = document.getElementById('wx-wind2');
         if (an2Card) an2Card.style.display = hasAn2 ? '' : 'none';
         if (hasAn2){
-          const dir2 = +d.an2_wdir_deg, spd2 = +d.an2_wind_mph;
+          const dir2 = nfix(d.an2_wdir_deg), spd2 = nfix(d.an2_wind_mph);
           if (Number.isFinite(dir2)) rotate2(dir2);
           if (Number.isFinite(spd2)) pushWind(windBuf2, spd2);
           set(document.getElementById('wx-wind2-speed'), fmtWind(spd2));
@@ -514,8 +508,6 @@
             setTimeout(loop, 0);
           }catch(e){
             failures++;
-            // On LP trouble, keep status reflective of last data presence
-            if (conn) conn.textContent = lastData && hasAnyData(lastData) ? 'Status: Live (Polling)' : 'Status: Offline';
             if (!force && failures >= 2){ startPolling(); return; }
             setTimeout(loop, 500);
           }
