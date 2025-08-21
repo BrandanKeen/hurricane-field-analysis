@@ -1,9 +1,9 @@
 <!--
   WxManBran Live Dashboard — Phase 1
-  Version: v1-dashboard-arcwedge+labels-outside+mobile-fit
+  Version: v1-dashboard-arcsector-needle+labels-outside+mobile-fit
   Notes:
-    • Wind needle is an arc-based inward wedge; base stays attached to ring
-    • Compass labels moved outside ring so needle never covers them
+    • Wind needle is a true circular-sector wedge; base follows ring via SVG arc
+    • Compass labels moved outside ring so wedge never covers them
     • Default wind period = 1 min; Sustained/Gust labels black/bold; values blue
     • Status shows "Status: Live (Long-poll)" or "Status: Live (Polling)" when data present,
       and "Status: Offline" if payload has no measurements (only timestamps)
@@ -27,7 +27,7 @@
     :root{
       --card:#fff; --bg:#f6f7f9; --text:#0b1220; --muted:#667085; --border:#e6e8ee; --shadow:0 6px 16px rgba(0,0,0,.06);
       --temp:#d62728; --dew:#2ca02c; --rh:#b58900; --slp:#111111; --rainrate:#6f3fa4; --raintotal:#7b3f00; --solar:#f97316; --uv:#1e1b4b; --accent:#2563eb; --title-ink:#111;
-      --needle:#2f2f2f;       /* black needle */
+      --needle:#111111;       /* black needle */
       --title-scale:1.35;
     }
     html,body{height:100%}
@@ -209,7 +209,7 @@
                 <text x="16" y="84">SW</text>
                 <text x="16" y="16">NW</text>
               </g>
-              <!-- Arc-based inward wedge; path set by JS -->
+              <!-- Arc-sector inward wedge; path set by JS -->
               <g id="wx-needle" class="arrow"><path id="wx-needle-path"/></g>
             </svg>
             <div class="wind-values" aria-live="polite">
@@ -326,7 +326,7 @@
   </script>
 
   <script>
-    /* ======== Live engine + arc-wedge needle ======== */
+    /* ======== Live engine + circular-sector (arc) needle ======== */
     (() => {
       const API = "https://api.wxmanbran.com/latest";
       const conn = document.getElementById('wx-conn');
@@ -345,19 +345,39 @@
       const fmtWind=v=>!isFinite(+v)?'--':`${windNum(+v).toFixed(1)} ${windUnit()}`;
       const toCard = d=>['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'][Math.round((((d%360)+360)%360)/22.5)%16];
 
-      /* Build arc-based wedge path (base = arc on ring, tip points inward) */
-      function sectorPath({R=44, tipR=20, halfWidthDeg=7}={}){
-        const cx=50, cy=50;
-        const a1=-halfWidthDeg, a2=halfWidthDeg;
-        const toXY=(deg,r)=>{ const rad=deg*Math.PI/180; return [cx + r*Math.sin(rad), cy - r*Math.cos(rad)]; };
-        const [x1,y1]=toXY(a1,R), [x2,y2]=toXY(a2,R), [xt,yt]=toXY(0,tipR);
-        return `M ${x1.toFixed(3)} ${y1.toFixed(3)} A ${R} ${R} 0 0 1 ${x2.toFixed(3)} ${y2.toFixed(3)} L ${xt.toFixed(3)} ${yt.toFixed(3)} Z`;
+      /* Create a true circular-sector path: base = arc on ring, tip at center radius */
+      function sectorPath({ R = 44, tipR = 20, halfWidthDeg = 7, inward = true } = {}) {
+        const cx = 50, cy = 50;
+        const toXY = (deg, r) => {
+          const rad = (deg * Math.PI) / 180;
+          return [cx + r * Math.sin(rad), cy - r * Math.cos(rad)];
+        };
+        const baseR = inward ? R : tipR;
+        const tipRr = inward ? tipR : R;
+        const a1 = -halfWidthDeg, a2 = +halfWidthDeg;
+
+        const [x1, y1] = toXY(a1, baseR);
+        const [x2, y2] = toXY(a2, baseR);
+        const [xt, yt] = toXY(0,  tipRr);
+
+        return `M ${x1.toFixed(3)} ${y1.toFixed(3)} ` +
+               `A ${baseR} ${baseR} 0 0 1 ${x2.toFixed(3)} ${y2.toFixed(3)} ` +
+               `L ${xt.toFixed(3)} ${yt.toFixed(3)} Z`;
       }
+
+      /* Build (or rebuild) the needle inside a group as a sector wedge */
+      function buildNeedle(groupId){
+        const g = document.getElementById(groupId);
+        if (!g) return;
+        const inward = true; // dashboard default: pointing toward center
+        const d = sectorPath({ R:44, tipR:20, halfWidthDeg:7, inward });
+        const pid = `${groupId}-path`;
+        g.innerHTML = `<path id="${pid}" d="${d}"/>`;
+      }
+
       function initNeedlePaths(){
-        const p1=document.getElementById('wx-needle-path');
-        if(p1) p1.setAttribute('d', sectorPath({R:44, tipR:20, halfWidthDeg:7}));
-        const p2=document.getElementById('wx-needle2-path');
-        if(p2) p2.setAttribute('d', sectorPath({R:44, tipR:20, halfWidthDeg:7}));
+        buildNeedle('wx-needle');
+        buildNeedle('wx-needle2');
       }
       initNeedlePaths();
 
@@ -402,7 +422,7 @@
       })();
 
       /* Wind period (default 1 min) and rolling buffers */
-      const windPeriodSel = document.getElementById('windPeriodCard'); // the only selector (in-Card)
+      const windPeriodSel = document.getElementById('windPeriodCard');
       function windPeriodMinutes(){ const v = windPeriodSel?.value || '1'; return parseInt(v,10)||1; }
       windPeriodSel?.addEventListener('change', ()=> updateWindStats());
       let windBuf1 = [], windBuf2 = [];
