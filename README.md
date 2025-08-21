@@ -45,6 +45,8 @@ Observations captured are presented below chronologically with the most recent h
 
 ![Multi-Panel Summary](Images/Milton/Hurricane_Milton_MultiPanel.png)
 
+<br>
+
 ### Plots:
 
 - [Pressure Time Series](Images/Milton/Hurricane_Milton_MSLP.png)
@@ -65,8 +67,9 @@ Observations captured are presented below chronologically with the most recent h
 
 ---
 
-<h2 align="center">Hurricane Helene (September 26, 2024) – Perry, FL</h2> <br><br>
+<h2 align="center">Hurricane Helene (September 26, 2024) – Perry, FL</h2> 
 
+<br><br>
 
 <div align="center" style="display:flex;justify-content:center;gap:12px;flex-wrap:wrap;">
   <a href="Images/Helene/Helene_animated.gif" target="_blank" rel="noopener"
@@ -88,6 +91,8 @@ Observations captured are presented below chronologically with the most recent h
 ---
 
 ![Multi-Panel Summary](Images/Helene/Hurricane_Helene_MultiPanel.png)
+
+<br>
 
 ### Plots:
 
