@@ -2,8 +2,7 @@
   WxManBran Live Dashboard — Phase 1
   Version: v1-dashboard-final+needle-black-triangle
   Change:
-    • Wind needle is a circular-sector wedge (tail on ring r=44, tip inward)
-    • Compass labels spaced by polar math with per-label optical tweaks
+    • Wind needle is a black triangular pointer (tail on ring, tip points inward)
 -->
 <!doctype html>
 <html lang="en">
@@ -23,7 +22,7 @@
     :root{
       --card:#fff; --bg:#f6f7f9; --text:#0b1220; --muted:#667085; --border:#e6e8ee; --shadow:0 6px 16px rgba(0,0,0,.06);
       --temp:#d62728; --dew:#2ca02c; --rh:#b58900; --slp:#111111; --rainrate:#6f3fa4; --raintotal:#7b3f00; --solar:#f97316; --uv:#1e1b4b; --accent:#2563eb; --title-ink:#111;
-      --needle:#2f2f2f;
+      --needle:#2f2f2f;               /* NEW: needle color (black/charcoal) */
       --title-scale:1.35;
     }
     html,body{height:100%}
@@ -76,6 +75,7 @@
     .tick.major{stroke:#b7bfca;stroke-width:1.4}
     .labels{fill:#4a5568;font-size:6px;font-weight:700}
 
+    /* NEW: needle color now black/charcoal */
     .arrow{fill:var(--needle);stroke:var(--needle)}
     #wx-needle,#wx-needle2{transform-box:fill-box;transform-origin:50% 50%;transition:transform 140ms ease-out}
 
@@ -146,6 +146,9 @@
             <div id="item-solar" class="cond-item"><div class="label">Solar</div><div id="wx-solar" class="value value-solar">--</div></div>
           </div>
           <div class="asof">As of <span id="wx-asof">--</span></div>
+
+          <!-- Conditions gear omitted here to keep focus; leave your existing settings block if present -->
+          <!-- (Use your current version with units/customize; no changes needed for the needle) -->
         </article>
 
         <!-- Wind -->
@@ -182,7 +185,7 @@
                 <text x="22" y="78">SW</text>
                 <text x="22" y="22">NW</text>
               </g>
-              <!-- JS will replace contents with a sector path on load -->
+              <!-- NEW: black triangular pointer (short wedge), tail on ring (y=6), tip points inward -->
               <g id="wx-needle" class="arrow">
                 <polygon points="50,38 57,6 43,6" />
               </g>
@@ -194,6 +197,8 @@
               <div class="wind-line"><span class="wlbl">Gust</span> (<span id="wx-wind-period2">--</span>): <span id="wx-wind-gust">--</span></div>
             </div>
           </div>
+
+          <!-- Keep your existing wind settings block if present -->
         </article>
 
         <!-- Optional Anemometer 2 -->
@@ -223,7 +228,7 @@
               <g class="labels" text-anchor="middle" dominant-baseline="central">
                 <text x="50" y="15">N</text><text x="85" y="50">E</text><text x="50" y="85">S</text><text x="15" y="50">W</text>
               </g>
-              <!-- JS will replace contents with a sector path on load -->
+              <!-- Matching black pointer for anemometer 2 -->
               <g id="wx-needle2" class="arrow">
                 <polygon points="50,38 57,6 43,6" />
               </g>
@@ -253,7 +258,7 @@
   </script>
 
   <script>
-    /* Live engine (data/render unchanged; added compass helpers + label tweaks) */
+    /* Live engine (unchanged apart from needle shape color via CSS) */
     (() => {
       const API = "https://api.wxmanbran.com/latest";
       const conn = document.getElementById('wx-conn');
@@ -285,73 +290,7 @@
       const fmtWind=v=>Number.isFinite(nfix(v))?`${windNum(nfix(v)).toFixed(1)} ${windUnit()}`:'--';
       const toCard = d=>['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'][Math.round((((nfix(d)%360)+360)%360)/22.5)%16];
 
-      /* ===== Compass helpers: label spacing + sector needle (with optical tweaks) ===== */
-      const LABEL_OFFSET = 8; // base outward offset from ring (SVG units)
-
-      function labelXY(deg, R=44, offset=LABEL_OFFSET) {
-        const cx=50, cy=50, rad=(deg*Math.PI)/180, r=R+offset;
-        return [cx + r*Math.sin(rad), cy - r*Math.cos(rad)];
-      }
-
-      // Per-label micro-tweaks (negative pulls closer to ring)
-      function radialAdjustFor(label){
-        const tweak = {
-          N:  0,
-          E:  0,
-          S:  0,
-          W: -2,     // bring West in a touch
-          NE:-1.5,   // bring NE slightly closer
-          SE:  0,
-          SW:  0,
-          NW:-1.0    // small balance tweak
-        };
-        return tweak[label] ?? 0;
-      }
-
-      function applyLabelOffsets(svgId){
-        const svg = document.getElementById(svgId); if(!svg) return;
-        const labels = svg.querySelectorAll('.labels text');
-        // DOM order: N, E, S, W, NE, SE, SW, NW (second compass may only have 4)
-        const angles = [0,90,180,270,45,135,225,315];
-
-        labels.forEach((t,i)=>{
-          const name = (t.textContent || '').trim();
-          const offset = LABEL_OFFSET + radialAdjustFor(name);
-          const [x,y] = labelXY(angles[i], 44, offset);
-          t.setAttribute('x', x.toFixed(2));
-          t.setAttribute('y', y.toFixed(2));
-        });
-      }
-
-      function sectorPath({ R=44, tipR=20, halfWidthDeg=7 } = {}) {
-        const cx=50, cy=50;
-        const toXY=(deg,r)=>{ const t=(deg*Math.PI)/180; return [cx + r*Math.sin(t), cy - r*Math.cos(t)]; };
-        const a1=-halfWidthDeg, a2=+halfWidthDeg;
-        const [x1,y1]=toXY(a1,R), [x2,y2]=toXY(a2,R), [xt,yt]=toXY(0,tipR);
-        // Arc along ring from a1 to a2 (small arc, sweep=1), then line to tip, close
-        return `M ${x1.toFixed(3)} ${y1.toFixed(3)} A ${R} ${R} 0 0 1 ${x2.toFixed(3)} ${y2.toFixed(3)} L ${xt.toFixed(3)} ${yt.toFixed(3)} Z`;
-      }
-
-      function buildNeedle(groupId){
-        const g=document.getElementById(groupId); if(!g) return;
-        const d=sectorPath({ R:44, tipR:20, halfWidthDeg:7 });
-        g.innerHTML = `<path d="${d}" fill="currentColor"/>`;
-      }
-      /* ===== /Compass helpers ===== */
-
-      // Build wedges + place labels (safe no-ops if second compass hidden)
-      buildNeedle('wx-needle');   applyLabelOffsets('wx-wind-compass');
-      buildNeedle('wx-needle2');  applyLabelOffsets('wx-wind2-compass');
-
-      function needleRotator(el){
-        let last=0,acc=0;
-        return function(deg){
-          const a=((deg%360)+360)%360;
-          const delta=((a-last+540)%360)-180;
-          acc+=delta; last=a;
-          el.style.transform=`rotate(${acc}deg)`;
-        };
-      }
+      function needleRotator(el){ let last=0,acc=0; return function(deg){ const a=((deg%360)+360)%360; const delta=((a-last+540)%360)-180; acc+=delta; last=a; el.style.transform=`rotate(${acc}deg)`; }; }
       const rotate1 = needleRotator(document.getElementById('wx-needle'));
       const rotate2 = needleRotator(document.getElementById('wx-needle2'));
 
@@ -386,7 +325,7 @@
       })();
 
       const windPeriodSel = document.getElementById('windPeriodCard');
-      function windPeriodMinutes(){ const v = windPeriodSel?.value || '1'; return parseInt(v,10)||1; }
+      function windPeriodMinutes(){ const v = windPeriodSel?.value || '1'; return parseInt(v,10)||1; } // default 1 min
       windPeriodSel?.addEventListener('change', ()=> updateWindStats());
       let windBuf1 = [], windBuf2 = [];
       function pushWind(buf, mph){ const now = Date.now(); buf.push({t:now, v:Number.isFinite(+mph)?+mph:0}); const cutoff = now - 60*60*1000; while(buf.length && buf[0].t < cutoff) buf.shift(); }
