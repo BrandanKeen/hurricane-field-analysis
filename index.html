@@ -1,14 +1,9 @@
 <!--
   WxManBran Live Dashboard — Phase 1
-  Version: v1-dashboard-final+compass-needle+labels+helene-stack-fix+yt-embed+img-click
-  This build:
-    • Compass labels via rotate+translate (no clipping)
-    • Needle = sector wedge with arc base on r=44; shortest-path rotation
-    • Settings intact (Conditions gear + Wind clock gear)
-    • Wind units + Sustained/Gust Period
-    • Helene section: stack two images (radar slightly smaller) — visibility fix
-    • YouTube: auto-embed links; larger thumbnails fallback
-    • All images: click opens that exact image in a new tab
+  Version: v1-dashboard-final+prime-fetch+helene-stack-safe
+  Changes in this build:
+    • Prime fetch before long-poll so data renders immediately when available
+    • Helene stack: safe DOM move (no unwrapping/removal), images visible again
 -->
 <!doctype html>
 <html lang="en">
@@ -105,7 +100,7 @@
       max-width:900px;
       margin-left:auto;margin-right:auto;
     }
-    .helene-stack a{ display:block; }       /* ensure clickable area fills the row */
+    .helene-stack a{ display:block; }       /* clickable area fills the row */
     .helene-stack img{
       width:100% !important;
       height:clamp(300px, 45vw, 520px);
@@ -385,55 +380,41 @@
       }catch{ container.textContent=''; }
 
       try{
-        heleneStack(container);     // stack/normalize Helene images
+        heleneStack(container);     // stack/normalize Helene images (safe)
         enhanceYouTube(container);  // convert YouTube links to embedded players
         enhanceImages(container);   // make all images open themselves in a new tab
       }catch(e){
         console && console.warn && console.warn('README enhancement skipped:', e);
       }
 
-      // Stack the first two images under the "Hurricane Helene" heading.
-      // Minimal & safe: just move images into a wrapper and size them.
+      // SAFER Helene stack: do NOT unwrap or remove anything; just move first two images after the Helene heading
       function heleneStack(root){
         const heading = Array.from(root.querySelectorAll('h1,h2,h3,h4'))
-          .find(h => /hurricane\s+helene/i.test(h.textContent));
+          .find(h => /helene/i.test(h.textContent));
         if(!heading) return;
 
-        const blockEls = [];
-        for(let el = heading.nextElementSibling; el && !/^H[1-6]$/.test(el.tagName); el = el.nextElementSibling){
-          blockEls.push(el);
-        }
-        const imgs = blockEls.flatMap(el => Array.from(el.querySelectorAll('img')));
-        if(imgs.length < 2) return;
-
+        // Insert wrapper directly AFTER the heading to avoid confusing anchor/paragraph layouts
         const wrapper = document.createElement('div');
         wrapper.className = 'helene-stack';
+        heading.parentNode.insertBefore(wrapper, heading.nextSibling);
 
-        // Insert wrapper before the first image's paragraph or the image itself
-        const firstAnchor = imgs[0].closest('p') || imgs[0];
-        (firstAnchor.closest('p') || firstAnchor).parentNode.insertBefore(wrapper, firstAnchor.closest('p') || firstAnchor);
+        // Collect images from following siblings until next heading
+        const imgs = [];
+        for (let node = wrapper.nextSibling; node && !(node.tagName && /^H[1-6]$/.test(node.tagName)); node = node.nextSibling){
+          if (node && node.querySelectorAll){
+            imgs.push(...node.querySelectorAll('img'));
+          }
+        }
+        if (imgs.length < 2) { wrapper.remove(); return; }
 
-        const parentsToCheck = new Set();
-
+        // Move the first two images (or their containing links) into the stack
         imgs.slice(0,2).forEach((img, idx)=>{
-          // If image was inside a link, unwrap it to avoid cross-link bugs
-          const link = img.closest('a'); 
-          if(link){ link.replaceWith(img); }
-
-          const p = img.closest('p'); if(p) parentsToCheck.add(p);
-
-          // Normalize size attributes
+          const carrier = img.closest('a') || img; // keep existing link intact
+          // normalize size on the <img> itself
           img.removeAttribute('width'); img.removeAttribute('height');
           img.style.maxWidth = '100%';
-          if(idx===0) img.classList.add('radar');
-
-          // Move image into the wrapper
-          wrapper.appendChild(img);
-        });
-
-        // Clean up any now-empty <p> wrappers
-        parentsToCheck.forEach(p=>{
-          if(!p.textContent.trim() && p.querySelectorAll('img').length===0) p.remove();
+          if (idx === 0) img.classList.add('radar');
+          wrapper.appendChild(carrier);
         });
       }
 
@@ -497,23 +478,19 @@
             link.rel = 'noopener';
             return;
           }
-          wrapImageInLink(img);
+          const a = document.createElement('a');
+          a.href = img.currentSrc || img.src;
+          a.target = '_blank';
+          a.rel = 'noopener';
+          img.parentNode.insertBefore(a, img);
+          a.appendChild(img);
         });
-      }
-
-      function wrapImageInLink(img){
-        const a = document.createElement('a');
-        a.href = img.currentSrc || img.src;
-        a.target = '_blank';
-        a.rel = 'noopener';
-        img.parentNode.insertBefore(a, img);
-        a.appendChild(img);
       }
     })();
   </script>
 
   <script>
-    /* Live engine: API fetch, render, rotation, settings wiring (unchanged logic; light retry retained) */
+    /* Live engine: unchanged logic + prime fetch before long-poll */
     (() => {
       const API = "https://api.wxmanbran.com/latest";
       const conn = document.getElementById('wx-conn');
@@ -547,9 +524,11 @@
       const fmtPress=v=>Number.isFinite(nfix(v))?((units.slp==='hPa'||units.slp==='mb')?`${inHg2hPa(nfix(v)).toFixed(1)} ${units.slp}`:`${nfix(v).toFixed(3)} inHg`):'--';
       const fmtRainRate=v=>Number.isFinite(nfix(v))?(units.rainrate==='mmphr'?`${in2mm(nfix(v)).toFixed(2)} mm/hr`:`${nfix(v).toFixed(2)} in/hr`):'--';
       const fmtRain=v=>Number.isFinite(nfix(v))?(units.rain==='mm'?`${in2mm(nfix(v)).toFixed(2)} mm`:`${nfix(v).toFixed(2)} in`):'--';
-      const fmtWind=v=>Number.isFinite(nfix(v))?`${windNum(nfix(v)).toFixed(1)} ${windUnit()}`:'--';
+      const fmtWind=v=>Number.isFinite(nfix(v))?`${windNum(nfix(v)).toFixed(1)} ${w
+      indUnit()}`:'--';
       const toCard = d=>['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'][Math.round((((nfix(d)%360)+360)%360)/22.5)%16];
 
+      /* Needle builder */
       function sectorPath({ R=44, tipR=20, halfWidthDeg=7 } = {}) {
         const cx=50, cy=50;
         const toXY=(deg,r)=>{ const t=(deg*Math.PI)/180; return [cx + r*Math.sin(t), cy - r*Math.cos(t)]; };
@@ -565,6 +544,7 @@
       buildNeedle('wx-needle');
       buildNeedle('wx-needle2');
 
+      /* Shortest-path rotation (also set SVG transform attribute) */
       function needleRotator(el){
         let last=0,acc=0;
         return function(deg){
@@ -578,6 +558,7 @@
       const rotate1 = needleRotator(document.getElementById('wx-needle'));
       const rotate2 = needleRotator(document.getElementById('wx-needle2'));
 
+      /* details/gear behavior */
       (function(){
         const gears = () => Array.from(document.querySelectorAll('details.gear'));
         document.addEventListener('click', (e)=>{ gears().forEach(d => { if (d.open && !d.contains(e.target)) d.removeAttribute('open'); }); });
@@ -585,6 +566,7 @@
         gears().forEach(d => d.addEventListener('toggle', ()=>{ if (d.open) gears().forEach(o => { if (o!==d) o.removeAttribute('open'); }); }));
       })();
 
+      /* Conditions visibility wiring */
       (function wireCustomizeCond(){
         const grid = document.getElementById('wx-values');
         if (!grid.__order) grid.__order = Array.from(grid.children).map(el=>el.id);
@@ -596,7 +578,7 @@
             const next = document.getElementById(order[j]);
             if (isVisible(next)) { grid.insertBefore(el, next); return; }
           }
-          grid.appendChild(el);
+        grid.appendChild(el);
         }
         document.querySelectorAll('#gear-conditions input[type="checkbox"][data-target]').forEach(cb=>{
           cb.addEventListener('change', ()=>{
@@ -608,6 +590,7 @@
         });
       })();
 
+      /* Wind stats buffers */
       const windPeriodSel = document.getElementById('windPeriodCard');
       function windPeriodMinutes(){ const v = windPeriodSel?.value || '1'; return parseInt(v,10)||1; }
       windPeriodSel?.addEventListener('change', ()=> updateWindStats());
@@ -675,6 +658,7 @@
         }
       }
 
+      /* fetch cycle */
       function isIOS(){ const ua = navigator.userAgent || navigator.vendor || window.opera; const touchMac = (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1); return /iPhone|iPad|iPod/i.test(ua) || touchMac; }
       const qs = new URLSearchParams(location.search);
       const force = qs.get('mode');
@@ -682,6 +666,7 @@
 
       const wpSel = document.getElementById('windPeriodCard'); if (wpSel) wpSel.value = '1';
 
+      // initial fetch with simple retry
       let initialTried = false;
       const initialFetch = () => fetch(API, { cache: "no-store" })
         .then(r=>r.ok?r.json():Promise.reject(r.status))
@@ -689,6 +674,7 @@
         .catch(()=>{ conn.textContent = 'Status: Offline'; if (!initialTried) setTimeout(initialFetch, 1200); });
 
       initialFetch();
+
       (function start(){
         if (force === 'poll' || (!force && isIOS())) startPolling();
         else startLongPoll();
@@ -705,7 +691,15 @@
         tick(); setInterval(tick, pollMS);
       }
 
-      function startLongPoll(){
+      async function startLongPoll(){
+        // PRIME: if we have no timestamp yet, try to paint a snapshot once before looping
+        if (lastTs === 0){
+          try{
+            const r = await fetch(API, { cache: "no-store" });
+            if (r.ok) render(await r.json());
+          }catch{}
+        }
+
         let failures = 0;
         (async function loop(){
           try{
