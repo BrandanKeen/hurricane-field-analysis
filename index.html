@@ -475,10 +475,12 @@ function applyPeriod(){
   windPeriodSel?.addEventListener(ev, () => { requestAnimationFrame(applyPeriod); }, { passive: true });
 });
 
-// Initialize once on load
+// Buffers must exist before first compute
+let windBuf1 = [];
+
+// Initialize once on load (after buffers)
 applyPeriod();
 
-      let windBuf1 = [];
       function pushWind(buf, mph){ const now = Date.now(); buf.push({t:now, v:Number.isFinite(+mph)?+mph:0}); const cutoff = now - 60*60*1000; while(buf.length && buf[0].t < cutoff) buf.shift(); }
       function computeAvgAndGust(buf, minutes){ const cutoff = Date.now() - minutes*60*1000; const win = buf.filter(s=>s.t>=cutoff); if (!win.length) return {avg:NaN, gust:NaN}; const avg = win.reduce((a,s)=>a+s.v,0)/win.length; const gust = win.reduce((m,s)=> s.v>m?s.v:m, 0); return {avg, gust}; }
 
