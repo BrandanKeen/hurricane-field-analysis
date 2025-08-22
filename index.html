@@ -63,13 +63,25 @@
     .asof{position:absolute;left:22px;bottom:14px;color:var(--muted);font-size:12px}
     .hidden{display:none!important}
 
-    /* Wind — revert to original cosmetics (big values grid) */
-    .wind-wrap{display:grid;grid-template-columns:1fr;justify-items:center;gap:14px}
-    .wind-values{width:100%;max-width:360px;text-align:center;display:grid;grid-template-columns:1fr 1fr;gap:10px 18px}
-    .wind-values .big{font-weight:800;font-size:clamp(26px,4.2vw,38px)}
-    .wind-values .small{color:#6c6c6c}
-    .wind-values .speed{font-size:clamp(27px,3.8vw,35px);font-weight:900;font-variant-numeric:tabular-nums;color:var(--accent)}
-    .wind-values .wind-cardinal{font-size:14px;font-weight:800;color:#475569;margin-top:8px;margin-bottom:10px}
+/* Wind — original cosmetics */
+.wind-wrap{display:grid;grid-template-columns:1fr;justify-items:center;gap:14px}
+.wind-main{ text-align:center; }
+.wind-speed{
+  font-weight:900;
+  font-size:clamp(40px,6.6vw,60px);
+  line-height:1.05;
+  color:#2563eb;
+}
+.wind-cardinal{
+  margin-top:8px;
+  font-weight:800;
+  font-size:18px;
+  color:#64748b;
+}
+.wind-line{ margin-top:16px; font-size:20px; }
+.wind-line .label{ font-weight:800; color:#111; }
+.wind-number{ color:#2563eb; font-weight:800; }
+
 
     /* Compass */
     .compass{width:100%;max-width:340px;min-width:220px;aspect-ratio:1/1;overflow:visible;}
@@ -213,31 +225,39 @@
                 <line class="tick" x1="50" y1="6" x2="50" y2="10" transform="rotate(315 50 50)" />
                 <line class="tick" x1="50" y1="6" x2="50" y2="10" transform="rotate(337.5 50 50)" />
               </g>
-              <!-- Cardinal labels -->
-              <g class="labels">
-                <g transform="rotate(0 50 50)"><text x="50" y="50" text-anchor="middle" dominant-baseline="middle" transform="translate(0,-47)">N</text></g>
-                <g transform="rotate(90 50 50)"><text x="50" y="50" text-anchor="middle" dominant-baseline="middle" transform="translate(0,-47)">E</text></g>
-                <g transform="rotate(180 50 50)"><text x="50" y="50" text-anchor="middle" dominant-baseline="middle" transform="translate(0,-47)">S</text></g>
-                <g transform="rotate(270 50 50)"><text x="50" y="50" text-anchor="middle" dominant-baseline="middle" transform="translate(0,-47)">W</text></g>
-              </g>
+              
+<!-- Cardinal labels (8-point) -->
+<g class="labels">
+  <g transform="rotate(0 50 50)"><text  x="50" y="50" text-anchor="middle" dominant-baseline="middle" transform="translate(0,-47)">N</text></g>
+  <g transform="rotate(45 50 50)"><text x="50" y="50" text-anchor="middle" dominant-baseline="middle" transform="translate(0,-47)">NE</text></g>
+  <g transform="rotate(90 50 50)"><text x="50" y="50" text-anchor="middle" dominant-baseline="middle" transform="translate(0,-47)">E</text></g>
+  <g transform="rotate(135 50 50)"><text x="50" y="50" text-anchor="middle" dominant-baseline="middle" transform="translate(0,-47)">SE</text></g>
+  <g transform="rotate(180 50 50)"><text x="50" y="50" text-anchor="middle" dominant-baseline="middle" transform="translate(0,-47)">S</text></g>
+  <g transform="rotate(225 50 50)"><text x="50" y="50" text-anchor="middle" dominant-baseline="middle" transform="translate(0,-47)">SW</text></g>
+  <g transform="rotate(270 50 50)"><text x="50" y="50" text-anchor="middle" dominant-baseline="middle" transform="translate(0,-47)">W</text></g>
+  <g transform="rotate(315 50 50)"><text x="50" y="50" text-anchor="middle" dominant-baseline="middle" transform="translate(0,-47)">NW</text></g>
+</g>
+
 
               <g id="wx-needle" class="needle">
                 <polygon points="50,38 57,6 43,6" />
               </g>
             </svg>
 
-            <div class="wind-values">
-              <div class="speed big" id="wx-wind-speed">--</div>
-              <div class="small" id="wx-wind-cardinal">--</div>
+<div class="wind-main">
+  <div id="wx-wind-speed" class="wind-speed">--</div>
+  <div id="wx-wind-cardinal" class="wind-cardinal">--</div>
 
-              <div class="small">Sustained (avg)</div>
-              <div class="small">Gust</div>
-              <div class="big" id="wx-wind-avg">--</div>
-              <div class="big" id="wx-wind-gust">--</div>
+  <div class="wind-line">
+    <span class="label">Sustained</span> (<span id="wx-wind-period">--</span>):
+    <span id="wx-wind-avg" class="wind-number">--</span>
+  </div>
+  <div class="wind-line">
+    <span class="label">Gust</span> (<span id="wx-wind-period2">--</span>):
+    <span id="wx-wind-gust" class="wind-number">--</span>
+  </div>
+</div>
 
-              <div class="small">Period</div>
-              <div class="small" id="wx-wind-period">--</div>
-            </div>
 
             <details class="gear" id="gear-wind">
               <summary aria-label="Wind settings">
@@ -467,6 +487,8 @@
         set(document.getElementById('wx-wind-avg'),  isNaN(a1.avg)?'--':`${windNum(a1.avg).toFixed(1)} ${windUnit()}`);
         set(document.getElementById('wx-wind-gust'), isNaN(a1.gust)?'--':`${windNum(a1.gust).toFixed(1)} ${windUnit()}`);
         set(document.getElementById('wx-wind-period'), `${mins} min`);
+        set(document.getElementById('wx-wind-period2'), `${mins} min`);
+
       }
 
       /* fetch cycle (simple polling; server also supports streaming) */
