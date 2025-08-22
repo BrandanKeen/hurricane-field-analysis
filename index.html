@@ -483,6 +483,46 @@ applyPeriod();
 
       function pushWind(buf, mph){ const now = Date.now(); buf.push({t:now, v:Number.isFinite(+mph)?+mph:0}); const cutoff = now - 60*60*1000; while(buf.length && buf[0].t < cutoff) buf.shift(); }
       function computeAvgAndGust(buf, minutes){ const cutoff = Date.now() - minutes*60*1000; const win = buf.filter(s=>s.t>=cutoff); if (!win.length) return {avg:NaN, gust:NaN}; const avg = win.reduce((a,s)=>a+s.v,0)/win.length; const gust = win.reduce((m,s)=> s.v>m?s.v:m, 0); return {avg, gust}; }
+      /* Use server history so numbers are consistent across devices/reloads */
+const USE_SERVER_WINDOW = true;
+
+async function computeWindowFromServer(minutes){
+  const since = Date.now() - minutes*60*1000;
+  const candidates = [
+    API.replace(/\/latest$/,'/history') + `?since=${since}`,
+    API + `?since=${since}`
+  ];
+  for (const url of candidates){
+    try{
+      const r = await fetch(url, { cache:'no-store' });
+      if (!r.ok) continue;
+
+      const ct = (r.headers.get('content-type') || '').toLowerCase();
+      let rows = [];
+
+      if (ct.includes('ndjson') || ct.includes('x-ndjson')){
+        const text = await r.text();
+        rows = text.trim() ? text.trim().split(/\n+/).map(s=>JSON.parse(s)) : [];
+      } else {
+        const json = await r.json();
+        rows = Array.isArray(json) ? json : (Array.isArray(json?.data) ? json.data : []);
+      }
+
+      if (!rows.length) return {avg:NaN, gust:NaN};
+
+      const speeds = rows.map(o => Number.isFinite(+o.iss_wind_mph) ? +o.iss_wind_mph : NaN)
+                         .filter(Number.isFinite);
+      if (!speeds.length) return {avg:NaN, gust:NaN};
+
+      const avg  = speeds.reduce((a,b)=>a+b,0) / speeds.length;
+      const gust = Math.max(...speeds);
+      return {avg, gust};
+    }catch(e){
+      // try next shape
+    }
+  }
+  return null; // no history endpoint responded
+}
 
       function set(el,txt){ if(el && el.textContent !== txt) el.textContent = txt; }
 
@@ -527,15 +567,28 @@ applyPeriod();
         setStatus();
       }
 
-      function updateWindStats(){
-        const mins = windPeriodMinutes();
-        const a1 = computeAvgAndGust(windBuf1, mins);
-        set(document.getElementById('wx-wind-avg'),  isNaN(a1.avg)?'--':`${windNum(a1.avg).toFixed(1)} ${windUnit()}`);
-        set(document.getElementById('wx-wind-gust'), isNaN(a1.gust)?'--':`${windNum(a1.gust).toFixed(1)} ${windUnit()}`);
-        set(document.getElementById('wx-wind-period'), `${mins} min`);
-        set(document.getElementById('wx-wind-period2'), `${mins} min`);
+      async function updateWindStats(){
+  const mins = windPeriodMinutes();
 
-      }
+  let stats = null;
+  if (USE_SERVER_WINDOW){
+    stats = await computeWindowFromServer(mins); // {avg,gust} or null
+  }
+  if (stats === null){
+    // Fallback to local buffer if history is unavailable
+    stats = computeAvgAndGust(windBuf1, mins);
+  }
+
+  const avgTxt  = isNaN(stats.avg)  ? '--' : `${windNum(stats.avg).toFixed(1)} ${windUnit()}`;
+  const gustTxt = isNaN(stats.gust) ? '--' : `${windNum(stats.gust).toFixed(1)} ${windUnit()}`;
+
+  set(document.getElementById('wx-wind-avg'),  avgTxt);
+  set(document.getElementById('wx-wind-gust'), gustTxt);
+
+  const ptxt = `${mins} min`;
+  set(document.getElementById('wx-wind-period'),  ptxt);
+  set(document.getElementById('wx-wind-period2'), ptxt);
+}
 
       /* fetch cycle (simple polling; server also supports streaming) */
       async function tick(){
