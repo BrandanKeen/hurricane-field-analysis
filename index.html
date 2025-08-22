@@ -486,43 +486,59 @@ applyPeriod();
       /* Use server history so numbers are consistent across devices/reloads */
 const USE_SERVER_WINDOW = true;
 
-async function computeWindowFromServer(minutes){
-  const since = Date.now() - minutes*60*1000;
-  const candidates = [
+// Returns {avg, gust} when usable history exists, otherwise null to trigger fallback
+async function computeWindowFromServer(minutes, endTsMs){
+  const end = Number.isFinite(endTsMs) && endTsMs > 0 ? endTsMs : Date.now();
+  const since = end - minutes * 60 * 1000;
+
+  const urls = [
     API.replace(/\/latest$/,'/history') + `?since=${since}`,
     API + `?since=${since}`
   ];
-  for (const url of candidates){
+
+  for (const url of urls){
     try{
       const r = await fetch(url, { cache:'no-store' });
       if (!r.ok) continue;
 
       const ct = (r.headers.get('content-type') || '').toLowerCase();
-      let rows = [];
 
+      // NDJSON snapshot
       if (ct.includes('ndjson') || ct.includes('x-ndjson')){
         const text = await r.text();
-        rows = text.trim() ? text.trim().split(/\n+/).map(s=>JSON.parse(s)) : [];
-      } else {
-        const json = await r.json();
-        rows = Array.isArray(json) ? json : (Array.isArray(json?.data) ? json.data : []);
+        const lines = text.trim() ? text.trim().split(/\n+/) : [];
+        const speeds = lines.map(s => {
+          try { const o = JSON.parse(s); return Number.isFinite(+o.iss_wind_mph) ? +o.iss_wind_mph : NaN; }
+          catch { return NaN; }
+        }).filter(Number.isFinite);
+        if (!speeds.length) continue; // no usable data, try next url
+        const avg  = speeds.reduce((a,b)=>a+b,0) / speeds.length;
+        const gust = Math.max(...speeds);
+        return { avg, gust };
       }
 
-      if (!rows.length) return {avg:NaN, gust:NaN};
+      // JSON array or {data:[...]} — ignore single-object responses
+      const body = await r.json();
+      const rows = Array.isArray(body) ? body
+                  : (body && Array.isArray(body.data) ? body.data : null);
+      if (!rows || !rows.length) continue;
 
       const speeds = rows.map(o => Number.isFinite(+o.iss_wind_mph) ? +o.iss_wind_mph : NaN)
                          .filter(Number.isFinite);
-      if (!speeds.length) return {avg:NaN, gust:NaN};
+      if (!speeds.length) continue;
 
       const avg  = speeds.reduce((a,b)=>a+b,0) / speeds.length;
       const gust = Math.max(...speeds);
-      return {avg, gust};
+      return { avg, gust };
     }catch(e){
-      // try next shape
+      // try next url shape
     }
   }
-  return null; // no history endpoint responded
+
+  // No supported history → tell caller to fall back to local buffer
+  return null;
 }
+
 
       function set(el,txt){ if(el && el.textContent !== txt) el.textContent = txt; }
 
@@ -573,15 +589,27 @@ async function computeWindowFromServer(minutes){
         setStatus();
       }
 
-      async function updateWindStats(){
-  const mins = windPeriodMinutes();
+// cache server window by lastTs + period to avoid re-fetching every tick
+let _serverWinCache = { ts: 0, minutes: 0, stats: null };
 
+async function updateWindStats(){
+  const mins = windPeriodMinutes();
   let stats = null;
+
   if (USE_SERVER_WINDOW){
-    stats = await computeWindowFromServer(mins); // {avg,gust} or null
+    const canReuse = (_serverWinCache.ts === lastTs && _serverWinCache.minutes === mins && _serverWinCache.stats);
+    if (canReuse){
+      stats = _serverWinCache.stats;
+    } else {
+      // base window on latest server timestamp (lastTs), not client clock
+      const s = await computeWindowFromServer(mins, lastTs);
+      if (s){ _serverWinCache = { ts: lastTs, minutes: mins, stats: s }; }
+      stats = s; // might still be null → fall back below
+    }
   }
-  if (stats === null){
-    // Fallback to local buffer if history is unavailable
+
+  // Fallback if server not available OR returned unusable numbers
+  if (stats === null || (isNaN(stats.avg) && isNaN(stats.gust))){
     stats = computeAvgAndGust(windBuf1, mins);
   }
 
@@ -595,6 +623,7 @@ async function computeWindowFromServer(minutes){
   set(document.getElementById('wx-wind-period'),  ptxt);
   set(document.getElementById('wx-wind-period2'), ptxt);
 }
+
 
 // Faster fallback polling (1s when live, 3s when stale/offline)
 const POLL_MS_ACTIVE = 1000;
