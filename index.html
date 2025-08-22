@@ -530,7 +530,13 @@ async function computeWindowFromServer(minutes){
       let lastTs = 0, lastData = null;
 
       function isStale(){ return !lastTs || (Date.now() - lastTs) > STALE_MS; }
-      function setStatus(){ conn.textContent = isStale() ? 'Status: Offline' : 'Status: Live (Polling)'; }
+      let usingStream = false;
+      function setStatus(){
+        conn.textContent = isStale()
+          ? 'Status: Offline'
+          : `Status: Live (${usingStream ? 'Streaming' : 'Polling'})`;
+      }
+
 
       function blankAll(){
         ['wx-temp','wx-slp','wx-dew','wx-rh','wx-rainrate','wx-raintoday','wx-solar','wx-uv',
@@ -590,23 +596,70 @@ async function computeWindowFromServer(minutes){
   set(document.getElementById('wx-wind-period2'), ptxt);
 }
 
-      /* fetch cycle (simple polling; server also supports streaming) */
-      async function tick(){
-        try{
-          const r = await fetch(API, {cache:'no-store'});
-          if (r.ok){ render(await r.json()); }
-          else setStatus();
-        }catch{ setStatus(); }
-        setTimeout(tick, 5000);
-      }
-      tick();
+/* fetch cycle — prefer streaming/long-poll, fallback to 5s polling */
+function startPolling(){
+  usingStream = false;
+  const tick = async ()=>{
+    // If streaming got enabled elsewhere, stop this polling loop.
+    if (usingStream) return;
+    try{
+      const r = await fetch(API, { cache: 'no-store' });
+      if (r.ok) render(await r.json());
+      else setStatus();
+    }catch{
+      setStatus();
+    }finally{
+      setTimeout(tick, 5000);
+    }
+  };
+  tick();
+}
 
-      document.addEventListener('visibilitychange', () => {
-        if (!document.hidden) fetch(API, { cache:"no-store" })
-          .then(r => r.ok ? r.json() : null)
-          .then(d => { if (d) render(d); else setStatus(); })
-          .catch(()=> setStatus());
-      });
+async function startStream(){
+  try{
+    usingStream = true;
+    // If your backend supports it, this endpoint should stream NDJSON lines.
+    const resp = await fetch(API + '?stream=1', { cache: 'no-store' });
+    if (!resp.ok || !resp.body) throw new Error('no stream');
+
+    const reader  = resp.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+
+    for(;;){
+      const { value, done } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+
+      let idx;
+      while ((idx = buffer.indexOf('\n')) !== -1){
+        const line = buffer.slice(0, idx).trim();
+        buffer = buffer.slice(idx + 1);
+        if (!line) continue;
+        try { render(JSON.parse(line)); } catch {}
+      }
+    }
+
+    // Stream ended gracefully — try to restart shortly.
+    usingStream = false;
+    setTimeout(startStream, 250);
+  }catch(e){
+    // Streaming unavailable or failed — fall back to polling.
+    usingStream = false;
+    startPolling();
+  }
+}
+
+// Start in streaming mode if possible; otherwise polling will take over.
+startStream();
+
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden){
+    // On focus, try to upgrade to streaming again.
+    if (!usingStream) startStream();
+  }
+});
+
     })();
   </script>
 </body>
