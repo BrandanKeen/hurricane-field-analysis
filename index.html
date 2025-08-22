@@ -1,25 +1,23 @@
-<!--
-  WxManBran Live Dashboard — Phase 1
-  Version: v1-dashboard-final+data-fix+helene-center
-  Highlights:
-    • Helene images centered & stacked; radar slightly smaller
-    • Live data engine parse fixes (fmtWind line & gear handler)
-    • Prime fetch + long-poll (fallback to polling)
-    • Compass labels & sector needle wedge retained
-    • Settings intact (Conditions gear + Wind clock, Sustained/Gust Period)
--->
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <title>Weatherman Bran</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="theme-color" content="#e11d48">
+
+  <link rel="icon" type="image/svg+xml" href="/Images/favicon.svg">
+  <link rel="apple-touch-icon" href="/Images/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/Images/icon-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/Images/icon-512.png">
   <link rel="stylesheet" href="https://unpkg.com/github-markdown-css@5.8.1/github-markdown-light.css">
+
   <style>
     :root{
-      --bg:#fff; --ink:#2a2a2a; --muted:#6b6b6b;
-      --border:#e7e7e7; --card:#fff; --title-ink:#111;
-      --ring:#ddd; --tick:#bbb; --needle:#2f2f2f;
+      --card:#fff; --bg:#f6f7f9; --text:#0b1220; --muted:#667085; --border:#e6e8ee; --shadow:0 6px 16px rgba(0,0,0,.06);
+      /* value colors */
+      --temp:#d62728; --dew:#2ca02c; --rh:#b58900; --slp:#111111; --rainrate:#6f3fa4; --raintotal:#7b3f00; --solar:#f97316; --uv:#1e1b4b;
+      --accent:#2563eb; --title-ink:#111; --needle:#2f2f2f;
       --title-scale:1.35;
     }
     html,body{height:100%}
@@ -29,79 +27,117 @@
     .container{max-width:1100px;margin:20px auto 48px;padding:0 16px}
     .hero{display:block;margin:0 auto 1rem auto;max-width:420px;width:55%;min-width:240px;height:auto}
 
-    #wx-dashboard{display:grid;gap:22px; margin-bottom:56px;}
+    #wx-dashboard{display:grid;gap:22px;margin-bottom:56px;}
     header.site-header{display:flex;justify-content:flex-end;align-items:center}
     #wx-conn{font-size:13px;color:var(--muted)}
 
-    .cards{display:grid;gap:22px}
-    @media (min-width:880px){ .cards{grid-template-columns:1fr 1fr} }
+    /* Center the two cards on wide screens */
+    .cards{display:grid;gap:22px;justify-content:center}
+    @media (min-width:880px){
+      .cards{grid-template-columns:repeat(2,minmax(360px,520px))}
+    }
+    @media (max-width:879.98px){
+      .cards{grid-template-columns:minmax(280px,700px)}
+    }
 
-    .card{position:relative;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px 16px 44px}
-    .card h2{margin: 0 0 10px;font-size:clamp(18px, calc(3vw*var(--title-scale)), 23px); letter-spacing:.3px}
+    .card{position:relative;background:var(--card);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);padding:34px 22px 60px}
+    .card h2{margin:0 0 26px;text-align:center;font-weight:800;font-size:calc(clamp(18px,2.2vw,22px) * var(--title-scale))}
 
-    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-    .gear{position:absolute;bottom:10px;right:10px}
-    .gear summary{list-style:none;cursor:pointer;display:grid;place-items:center;width:36px;height:36px;border-radius:10px;border:1px solid var(--border);background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.06)}
-    .gear svg{width:18px;height:18px;color:#4a4a4a}
-    .gear .panel{position:absolute;right:0;bottom:40px;min-width:290px;background:#fff;border:1px solid var(--border);border-radius:12px;box-shadow:0 16px 48px rgba(0,0,0,.16);padding:10px;display:grid;gap:10px}
+    .gear{position:absolute;right:12px;bottom:12px}
+    .gear summary{list-style:none;cursor:pointer;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:#fff;border:1px solid var(--border);box-shadow:0 2px 8px rgba(0,0,0,.06)}
+    .gear summary::-webkit-details-marker{display:none}
+    .gear[open] summary{box-shadow:0 6px 18px rgba(0,0,0,.12)}
+    .gear .panel{position:absolute;right:0;bottom:40px;min-width:290px;background:#fff;border:1px solid var(--border);border-radius:12px;box-shadow:0 16px 34px rgba(0,0,0,.16);padding:10px;display:grid;gap:10px}
     .menu-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 10px;font-size:13px}
     .menu-grid label{display:flex;align-items:center;gap:6px}
+    /* push Total rain selector to the right column */
+    .menu-grid label.total-right{grid-column:2}
 
-    .cond-grid{display:grid;gap:32px 34px;
-      grid-template-columns:repeat(2,minmax(0,1fr));
-      grid-auto-flow:row dense;margin-top:22px}
+    /* Conditions layout; “snake” order when items are hidden */
+    .cond-grid{display:grid;gap:32px 34px;grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-flow:row dense;direction:rtl;margin-top:22px}
     .cond-item{direction:ltr}
-
-    .cond-item{display:grid;gap:10px}
     .cond-item .label{font-weight:800;font-size:clamp(15px,1.9vw,19px); color:var(--title-ink)}
     .cond-item .value{font-weight:800;letter-spacing:.2px;font-variant-numeric:tabular-nums;font-size:clamp(28px,4.4vw,40px)}
+    .value-temp{color:var(--temp)} .value-dew{color:var(--dew)} .value-rh{color:var(--rh)} .value-slp{color:var(--slp)}
+    .value-rainrate{color:var(--rainrate)} .value-raintoday{color:var(--raintotal)} .value-solar{color:var(--solar)} .value-uv{color:var(--uv)}
     .asof{position:absolute;left:22px;bottom:14px;color:var(--muted);font-size:12px}
     .hidden{display:none!important}
 
+    /* Wind — revert to original cosmetics (big values grid) */
     .wind-wrap{display:grid;grid-template-columns:1fr;justify-items:center;gap:14px}
     .wind-values{width:100%;max-width:360px;text-align:center;display:grid;grid-template-columns:1fr 1fr;gap:10px 18px}
     .wind-values .big{font-weight:800;font-size:clamp(26px,4.2vw,38px)}
     .wind-values .small{color:#6c6c6c}
+    .wind-values .speed{font-size:clamp(27px,3.8vw,35px);font-weight:900;font-variant-numeric:tabular-nums;color:var(--accent)}
+    .wind-values .wind-cardinal{font-size:14px;font-weight:800;color:#475569;margin-top:8px;margin-bottom:10px}
 
-    .compass{width:280px;height:280px}
-    .compass .ring{fill:none;stroke:var(--ring);stroke-width:2}
-    .compass .tick{stroke:var(--tick);stroke-width:1;transform-origin:50% 50%}
-    .compass .tick.major{stroke-width:1.8}
-    .compass text{font-size:7px;fill:#888;font-weight:600}
-    .needle{transform-origin:50% 50%;transition:transform .6s cubic-bezier(.24,.86,.33,1);fill:var(--needle)}
-    .needle-wedge{fill:#eee;opacity:.75}
+    /* Compass */
+    .compass{width:100%;max-width:340px;min-width:220px;aspect-ratio:1/1;overflow:visible;}
+    .ring{fill:none;stroke:#dfe5ee;stroke-width:2}
+    .tick{stroke:#cdd3dc;stroke-width:1}
+    .tick.major{stroke:#b7bfca;stroke-width:1.4}
+    .labels{fill:#4a5568;font-size:6px;font-weight:700}
+    .needle{fill:var(--needle);stroke:var(--needle)}
+    #wx-needle,#wx-needle2{transform-box:view-box;transform-origin:50px 50px;transition:transform 140ms ease-out}
 
-    .markdown-body img{max-width:100%;height:auto;border-radius:10px;border:1px solid var(--border);box-shadow:0 6px 24px rgba(0,0,0,.08)}
-    .flex2{display:grid;gap:18px}
-    @media (min-width:880px){ .flex2{grid-template-columns:1fr 1fr} }
+    /* README area */
+    .markdown-body{box-sizing:border-box;padding:0}
+    #app{ margin-top:48px; }
 
-    .plots h2{margin-top:22px}
-    .plots .grid{display:grid;gap:14px}
+    /* Phones */
+    @media (max-width: 480px){
+      .container{margin:10px auto 20px}
+      .hero{max-width:170px;width:42%;margin:.2rem auto .6rem}
+      #wx-dashboard{gap:14px;margin-bottom:44px;}
+      .cards{gap:14px}
+      .card{padding:16px 12px 42px}
+      .card h2{font-size:calc(clamp(14px,4.0vw,18px) * 1.06)}
+      .cond-grid{gap:16px 18px}
+      .cond-item .label{font-size:clamp(12px,3.4vw,14px)}
+      .cond-item .value{font-size:clamp(20px,5.6vw,26px)}
+      .asof{left:12px;bottom:10px;font-size:11px}
+      .compass{max-width:220px;min-width:170px}
+      .wind-values{max-width:300px}
+      .wind-values .speed{font-size:clamp(20px,6.2vw,28px)}
+    }
   </style>
 </head>
-<body>
+<body class="theme-classic" data-color="values">
   <div class="container">
-    <img src="https://wxmanbran.com/images/banner_helene.png" alt="Weatherman Bran" class="hero" />
+    <img class="hero" src="/Images/WxManBran_Logo.png" alt="Two red hurricane warning flags" loading="lazy">
 
-    <header class="site-header">
-      <div id="wx-conn">Status: Offline</div>
-    </header>
+    <main id="wx-dashboard" aria-label="Live weather dashboard">
+      <header class="site-header"><div id="wx-conn">Status: Offline</div></header>
 
-    <main id="wx-dashboard">
       <section class="cards">
-
         <!-- Conditions -->
-        <article class="card" aria-label="Conditions">
+        <article class="card" aria-label="Current Conditions">
           <h2>Conditions</h2>
 
+          <div id="wx-values" class="cond-grid" aria-live="polite">
+            <!-- Order is fixed row-major (1→8) -->
+            <div id="item-temp" class="cond-item"><div class="label">Temperature</div><div id="wx-temp" class="value value-temp">--</div></div>
+            <div id="item-slp" class="cond-item"><div class="label">Pressure</div><div id="wx-slp" class="value value-slp">--</div></div>
+            <div id="item-dew" class="cond-item"><div class="label">Dewpoint</div><div id="wx-dew" class="value value-dew">--</div></div>
+            <div id="item-rh" class="cond-item"><div class="label">Relative Humidity</div><div id="wx-rh" class="value value-rh">--</div></div>
+            <div id="item-rainrate" class="cond-item"><div class="label">Rain Rate</div><div id="wx-rainrate" class="value value-rainrate">--</div></div>
+            <div id="item-raintoday" class="cond-item"><div class="label">Total Accumulation</div><div id="wx-raintoday" class="value value-raintoday">--</div></div>
+            <div id="item-solar" class="cond-item"><div class="label">Solar</div><div id="wx-solar" class="value value-solar">--</div></div>
+            <div id="item-uv" class="cond-item"><div class="label">UV</div><div id="wx-uv" class="value value-uv">--</div></div>
+          </div>
+
+          <div class="asof">As of <span id="wx-asof">--</span></div>
+
+          <!-- Conditions settings (units & visibility) -->
           <details class="gear" id="gear-conditions">
-            <summary aria-label="Customize Conditions">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M19.14,12.94a7.8,7.8,0,0,0,.06-1,7.8,7.8,0,0,0-.06-1l2.11-1.65a.5.5,0,0,0,.12-.66l-2-3.46a.5.5,0,0,0-.61-.22l-2.49,1a7.27,7.27,0,0,0-1.73-1L14.5,2.5a.5.5,0,0,0-.5-.5H10a.5.5,0,0,0-.5.5L9,4.91a7.27,7.27,0,0,0-1.73,1l-2.49-1a.5.5,0,0,0-.61.22l-2,3.46a.5.5,0,0,0,.12.66L3.86,10a7.8,7.8,0,0,0-.06,1,7.8,7.8,0,0,0,.06,1L1.75,13.65a.5.5,0,0,0-.12.66l2,3.46a.5.5,0,0,0,.61.22l2.49-1a7.27,7.27,0,0,0,1.73,1L9.5,21.5a.5.5,0,0,0,.5.5h4a.5.5,0,0,0,.5-.5l.5-2.41a7.27,7.27,0,0,0,1.73-1l2.49,1a.5.5,0,0,0,.61-.22l2-3.46a.5.5,0,0,0-.12-.66ZM12,15.5A3.5,3.5,0,1,1,15.5,12,3.5,3.5,0,0,1,12,15.5Z"/>
+            <summary aria-label="Conditions settings">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M12 8.5a3.5 3.5 0 1 1 0 7 3.5 3.5 0 0 1 0-7Z" stroke="#334155" stroke-width="1.6"/>
+                <path d="M20 12a8 8 0 0 0-.09-1.2l2.01-1.56-2-3.46-2.42.7a8 8 0 0 0-2.08-1.2L15 2h-6l-.42 2.28a8 8 0 0 0-2.08 1.2l-2.42-.7-2 3.46L4.09 10.8A8 8 0 0 0 4 12c0 .41.03.81.09 1.2l-2.01 1.56 2 3.46 2.42-.7c.63.49 1.32.9 2.08 1.2L9 22h6l.42-2.28c.76-.3 1.45-.71 2.08-1.2l2.42.7 2-3.46-2.01-1.56c.06-.39.09-.79.09-1.2Z" stroke="#334155" stroke-width="1.2" opacity=".5"/>
               </svg>
             </summary>
             <div class="panel">
-              <!-- Units in the 1→8 card order -->
+              <!-- Units in the card order 1,2,3,5,6 -->
               <div class="menu-grid">
                 <label>Temperature
                   <select id="uTempCard">
@@ -128,7 +164,7 @@
                     <option value="mmphr">mm/hr</option>
                   </select>
                 </label>
-                <label>Total rain
+                <label class="total-right">Total rain
                   <select id="uRainCard">
                     <option value="in" selected>in</option>
                     <option value="mm">mm</option>
@@ -138,7 +174,7 @@
 
               <hr style="border:none;border-top:1px solid var(--border);margin:6px 2px">
 
-              <!-- Visibility checkboxes in matching 1→8 order -->
+              <!-- Visibility checkboxes in the exact 1→8 order -->
               <div class="menu-grid">
                 <label><input type="checkbox" data-target="item-temp" checked> Temperature</label>
                 <label><input type="checkbox" data-target="item-slp" checked> Pressure</label>
@@ -151,20 +187,6 @@
               </div>
             </div>
           </details>
-
-          <!-- Card values laid out row-major (1→8) -->
-          <div id="wx-values" class="cond-grid" aria-live="polite">
-            <div id="item-temp" class="cond-item"><div class="label">Temperature</div><div id="wx-temp" class="value value-temp">--</div></div>
-            <div id="item-slp" class="cond-item"><div class="label">Pressure</div><div id="wx-slp" class="value value-slp">--</div></div>
-            <div id="item-dew" class="cond-item"><div class="label">Dewpoint</div><div id="wx-dew" class="value value-dew">--</div></div>
-            <div id="item-rh" class="cond-item"><div class="label">Relative Humidity</div><div id="wx-rh" class="value value-rh">--</div></div>
-            <div id="item-rainrate" class="cond-item"><div class="label">Rain Rate</div><div id="wx-rainrate" class="value value-rainrate">--</div></div>
-            <div id="item-raintoday" class="cond-item"><div class="label">Total Accumulation</div><div id="wx-raintoday" class="value value-raintoday">--</div></div>
-            <div id="item-solar" class="cond-item"><div class="label">Solar</div><div id="wx-solar" class="value value-solar">--</div></div>
-            <div id="item-uv" class="cond-item"><div class="label">UV</div><div id="wx-uv" class="value value-uv">--</div></div>
-          </div>
-
-          <div id="wx-asof" class="asof">--</div>
         </article>
 
         <!-- Wind -->
@@ -191,19 +213,21 @@
                 <line class="tick" x1="50" y1="6" x2="50" y2="10" transform="rotate(315 50 50)" />
                 <line class="tick" x1="50" y1="6" x2="50" y2="10" transform="rotate(337.5 50 50)" />
               </g>
-              <text x="50" y="13" text-anchor="middle">N</text>
-              <text x="87" y="53" text-anchor="middle">E</text>
-              <text x="50" y="95" text-anchor="middle">S</text>
-              <text x="12" y="53" text-anchor="middle">W</text>
-              <polygon class="needle-wedge" points="50,50 50,28 52,28 52,50"/>
+              <!-- Cardinal labels -->
+              <g class="labels">
+                <g transform="rotate(0 50 50)"><text x="50" y="50" text-anchor="middle" dominant-baseline="middle" transform="translate(0,-47)">N</text></g>
+                <g transform="rotate(90 50 50)"><text x="50" y="50" text-anchor="middle" dominant-baseline="middle" transform="translate(0,-47)">E</text></g>
+                <g transform="rotate(180 50 50)"><text x="50" y="50" text-anchor="middle" dominant-baseline="middle" transform="translate(0,-47)">S</text></g>
+                <g transform="rotate(270 50 50)"><text x="50" y="50" text-anchor="middle" dominant-baseline="middle" transform="translate(0,-47)">W</text></g>
+              </g>
+
               <g id="wx-needle" class="needle">
-                <polygon points="50,50 52,50 50.5,13"/>
-                <circle cx="50.5" cy="50" r="2.5"/>
+                <polygon points="50,38 57,6 43,6" />
               </g>
             </svg>
 
             <div class="wind-values">
-              <div class="big" id="wx-wind-speed">--</div>
+              <div class="speed big" id="wx-wind-speed">--</div>
               <div class="small" id="wx-wind-cardinal">--</div>
 
               <div class="small">Sustained (avg)</div>
@@ -215,10 +239,11 @@
               <div class="small" id="wx-wind-period">--</div>
             </div>
 
-            <details class="gear">
+            <details class="gear" id="gear-wind">
               <summary aria-label="Wind settings">
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M19.14,12.94a7.8,7.8,0,0,0,.06-1,7.8,7.8,0,0,0-.06-1l2.11-1.65a.5.5,0,0,0,.12-.66l-2-3.46a.5.5,0,0,0-.61-.22l-2.49,1a7.27,7.27,0,0,0-1.73-1L14.5,2.5a.5.5,0,0,0-.5-.5H10a.5.5,0,0,0-.5.5L9,4.91a7.27,7.27,0,0,0-1.73,1l-2.49-1a.5.5,0,0,0-.61.22l-2,3.46a.5.5,0,0,0,.12.66L3.86,10a7.8,7.8,0,0,0-.06,1,7.8,7.8,0,0,0,.06,1L1.75,13.65a.5.5,0,0,0-.12.66l2,3.46a.5.5,0,0,0,.61.22l2.49-1a7.27,7.27,0,0,0,1.73,1L9.5,21.5a.5.5,0,0,0,.5.5h4a.5.5,0,0,0,.5-.5l.5-2.41a7.27,7.27,0,0,0,1.73-1l2.49,1a.5.5,0,0,0,.61-.22l2-3.46a.5.5,0,0,0-.12-.66ZM12,15.5A3.5,3.5,0,1,1,15.5,12,3.5,3.5,0,0,1,12,15.5Z"/>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <circle cx="12" cy="12" r="8" stroke="#334155" stroke-width="1.6"/>
+                  <path d="M12 7v5l3 2" stroke="#334155" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
               </summary>
               <div class="panel">
@@ -231,13 +256,14 @@
                       <option value="mps">m/s</option>
                     </select>
                   </label>
-                  <label title="Averaging window for sustained/gust numbers">Period (minutes)
-                    <select id="uWindPeriod">
-                      <option value="1" selected>1</option>
-                      <option value="2">2</option>
-                      <option value="5">5</option>
-                      <option value="10">10</option>
-                      <option value="15">15</option>
+                  <label>Sustained/Gust Period
+                    <select id="windPeriodCard">
+                      <option value="1" selected>1 min</option>
+                      <option value="2">2 min</option>
+                      <option value="5">5 min</option>
+                      <option value="10">10 min</option>
+                      <option value="15">15 min</option>
+                      <option value="60">60 min</option>
                     </select>
                   </label>
                 </div>
@@ -245,133 +271,77 @@
             </details>
           </div>
         </article>
-
-        <!-- Optional second anemometer -->
-        <article class="card" id="wx-wind2" aria-label="Wind (Tower)">
-          <h2>Wind (Tower)</h2>
-          <div class="wind-wrap">
-            <svg id="wx-wind2-compass" class="compass" viewBox="0 0 100 100" role="img" aria-label="Wind compass (tower)">
-              <circle class="ring" cx="50" cy="50" r="44" />
-              <g id="ticks2">
-                <line class="tick major" x1="50" y1="6" x2="50" y2="12" />
-                <line class="tick" x1="50" y1="6" x2="50" y2="10" transform="rotate(22.5 50 50)" />
-                <line class="tick" x1="50" y1="6" x2="50" y2="10" transform="rotate(45 50 50)" />
-                <line class="tick" x1="50" y1="6" x2="50" y2="10" transform="rotate(67.5 50 50)" />
-                <line class="tick major" x1="50" y1="6" x2="50" y2="12" transform="rotate(90 50 50)" />
-                <line class="tick" x1="50" y1="6" x2="50" y2="10" transform="rotate(112.5 50 50)" />
-                <line class="tick" x1="50" y1="6" x2="50" y2="10" transform="rotate(135 50 50)" />
-                <line class="tick" x1="50" y1="6" x2="50" y2="10" transform="rotate(157.5 50 50)" />
-                <line class="tick major" x1="50" y1="6" x2="50" y2="12" transform="rotate(180 50 50)" />
-                <line class="tick" x1="50" y1="6" x2="50" y2="10" transform="rotate(202.5 50 50)" />
-                <line class="tick" x1="50" y1="6" x2="50" y2="10" transform="rotate(225 50 50)" />
-                <line class="tick" x1="50" y1="6" x2="50" y2="10" transform="rotate(247.5 50 50)" />
-                <line class="tick major" x1="50" y1="6" x2="50" y2="12" transform="rotate(270 50 50)" />
-                <line class="tick" x1="50" y1="6" x2="50" y2="10" transform="rotate(292.5 50 50)" />
-                <line class="tick" x1="50" y1="6" x2="50" y2="10" transform="rotate(315 50 50)" />
-                <line class="tick" x1="50" y1="6" x2="50" y2="10" transform="rotate(337.5 50 50)" />
-              </g>
-              <text x="50" y="13" text-anchor="middle">N</text>
-              <text x="87" y="53" text-anchor="middle">E</text>
-              <text x="50" y="95" text-anchor="middle">S</text>
-              <text x="12" y="53" text-anchor="middle">W</text>
-              <polygon class="needle-wedge" points="50,50 50,28 52,28 52,50"/>
-              <g id="wx-needle2" class="needle">
-                <polygon points="50,50 52,50 50.5,13"/>
-                <circle cx="50.5" cy="50" r="2.5"/>
-              </g>
-            </svg>
-
-            <div class="wind-values">
-              <div class="big" id="wx-wind2-speed">--</div>
-              <div class="small" id="wx-wind2-cardinal">--</div>
-
-              <div class="small">Sustained (avg)</div>
-              <div class="small">Gust</div>
-              <div class="big" id="wx-wind2-avg">--</div>
-              <div class="big" id="wx-wind2-gust">--</div>
-
-              <div class="small">Period</div>
-              <div class="small" id="wx-wind-period2">--</div>
-            </div>
-          </div>
-        </article>
-
-      </section>
-
-      <!-- Plots & Media -->
-      <section class="plots markdown-body">
-        <h2>Live Radar & Satellite</h2>
-        <div class="flex2">
-          <img src="https://wxmanbran.com/images/helene_radar.png" alt="Helene radar">
-          <img src="https://wxmanbran.com/images/helene_satellite.png" alt="Helene satellite">
-        </div>
-
-        <h2>Forecast & Analysis Plots</h2>
-        <div class="grid">
-          <a href="https://wxmanbran.com/images/helene_plot1.png"><img src="https://wxmanbran.com/images/helene_plot1.png" alt="Plot 1"></a>
-          <a href="https://wxmanbran.com/images/helene_plot2.png"><img src="https://wxmanbran.com/images/helene_plot2.png" alt="Plot 2"></a>
-          <a href="https://wxmanbran.com/images/helene_plot3.png"><img src="https://wxmanbran.com/images/helene_plot3.png" alt="Plot 3"></a>
-        </div>
       </section>
     </main>
+
+    <!-- Rest of the website (README.md rendered below) -->
+    <article class="markdown-body" id="app">Loading…</article>
   </div>
 
+  <!-- Render README.md under the dashboard -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script>
-    /* util helpers */
-    const nfix = (x) => (x==null?NaN:+x);
-    const toMs = (x) => {
-      if (!x) return 0;
-      if (typeof x === 'number') return x;
-      if (/^\d+$/.test(x)) return +x;
-      const t = Date.parse(x); return Number.isFinite(t) ? t : 0;
-    };
-    const toCard=(d)=>{
-      if (!Number.isFinite(d)) return '--';
-      const dir = ((Math.round(d/22.5)%16)+16)%16;
-      return ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'][dir];
-    };
+    (async ()=>{ 
+      const container=document.getElementById('app');
+      try{
+        const res=await fetch('README.md', {cache:'no-store'}); 
+        if(!res.ok) throw 0;
+        container.innerHTML=marked.parse(await res.text());
+      }catch{ container.textContent=''; }
 
-    /* needle rotator with safe transform updates */
-    function needleRotator(el){
-      let last = 0;
-      return (deg)=>{
-        if (!Number.isFinite(deg)) return;
-        const d = ((deg%360)+360)%360;
-        const delta = Math.abs(d-last);
-        const short = delta > 180 ? (d>last?d-360:d+360) : d;
-        last = d;
-        el.style.transform = `rotate(${short}deg)`;
-        el.setAttribute('transform', `rotate(${short} 50 50)`);
-      };
-    }
+      // Tiny helper: make every image link open itself in a new tab
+      function enhanceImages(root){
+        root.querySelectorAll('img').forEach(img=>{
+          if (img.closest('.yt-embed')) return;
+          const link = img.closest('a');
+          const targetHref = img.currentSrc || img.src;
+          if (link){ link.href = targetHref; link.target = '_blank'; link.rel='noopener'; return; }
+          const a=document.createElement('a'); a.href=targetHref; a.target='_blank'; a.rel='noopener';
+          img.parentNode.insertBefore(a,img); a.appendChild(img);
+        });
+      }
 
-    /* link target helper */
-    function makePlotsLinksNewTab(root){
-      const heads = Array.from(root.querySelectorAll('h1,h2,h3,h4,h5,h6'))
-        .filter(h => /plots/i.test(h.textContent));
-      heads.forEach(h=>{
-        for (let el = h.nextElementSibling; el && !/^H[1-6]$/.test(el.tagName); el = el.nextElementSibling){
-          el.querySelectorAll('a[href]').forEach(a=>{
-            a.target = '_blank';
-            a.rel = 'noopener';
-          });
-        }
-      });
-    }
+      // Under each "Plots" heading, open links in new tabs
+      function makePlotsLinksNewTab(root){
+        const heads = Array.from(root.querySelectorAll('h1,h2,h3,h4,h5,h6')).filter(h => /plots/i.test(h.textContent));
+        heads.forEach(h=>{
+          for (let el = h.nextElementSibling; el && !/^H[1-6]$/.test(el.tagName); el = el.nextElementSibling){
+            el.querySelectorAll('a[href]').forEach(a=>{ a.target='_blank'; a.rel='noopener'; });
+          }
+        });
+      }
 
-    /* data/units + fetch engine */
+      try{
+        enhanceImages(container);
+        makePlotsLinksNewTab(container);
+      }catch(e){ console && console.warn && console.warn('README enhancement skipped:', e); }
+    })();
+  </script>
+
+  <!-- Live engine -->
+  <script>
     (() => {
       const API = "https://api.wxmanbran.com/latest";
       const conn = document.getElementById('wx-conn');
 
       const units = { temp:'F', dew:'F', slp:'mb', wind:'mph', rainrate:'inphr', rain:'in' };
 
-      function hasAnyData(d){
-        if (!d || typeof d!=='object') return false;
-        const keys = ['iss_temp_F','iss_rh','iss_dew_F','iss_slp_inHg','iss_rainrate_inphr','iss_raintoday_in','iss_solar_wm2','iss_uv','iss_wind_mph','iss_wdir_deg'];
-        return keys.some(k => Number.isFinite(+d[k]));
+      /* --- utilities --- */
+      const f2c=f=>(f-32)*5/9, inHg2hPa=i=>i*33.8638866667, in2mm=i=>i*25.4, mph2kt=m=>m*0.868976, mph2kmh=m=>m*1.609344, mph2mps=m=>m*0.44704;
+      const nfix = v => Number.isFinite(+v) ? +v : NaN;
+
+      function toMs(x){
+        if (x==null) return 0;
+        if (typeof x === 'number') return x < 1e12 ? x*1000 : x;
+        const asNum = /^\d+$/.test(x) ? +x : NaN;
+        if (Number.isFinite(asNum)) return asNum < 1e12 ? asNum*1000 : asNum;
+        const t = Date.parse(x);
+        return Number.isFinite(t) ? t : 0;
       }
-      function setStatusFromData(d){ conn.textContent = isStale() ? 'Status: Offline' : 'Status: Live (Polling)'; }
+      function bestStamp(d){
+        const cands = [d.ts, d.timestamp, d.time, d.mb_ts, d.mb_stamp, d.received_at, d.server_time];
+        return Math.max(...cands.map(toMs), 0);
+      }
 
       function bindUnitSelect(id,key){
         const s=document.getElementById(id); if(!s) return;
@@ -384,60 +354,40 @@
       bindUnitSelect('uRainCard','rain');
       bindUnitSelect('uWindCard','wind');
 
-      const f2c=f=>(f-32)*5/9, inHg2hPa=i=>i*33.8638866667, in2mm=i=>i*25.4, mph2kt=m=>m*0.868976, mph2kmh=m=>m*1.609344, mph2mps=m=>m*0.44704;
       const windNum = m => units.wind==='kt'?mph2kt(m):units.wind==='kmh'?mph2kmh(m):units.wind==='mps'?mph2mps(m):m;
       const windUnit= () => units.wind==='kt'?'kt':units.wind==='kmh'?'km/h':units.wind==='mps'?'m/s':'mph';
 
-      function fmtTemp(f, key){
-        const x = nfix(f);
-        if (!Number.isFinite(x)) return '--';
-        const out = units[key]==='C' ? f2c(x) : x;
-        return `${out.toFixed(1)} °${units[key]}`;
-      }
-      function fmtPress(inHg){
-        const x = nfix(inHg);
-        if (!Number.isFinite(x)) return '--';
-        if (units.slp==='inHg') return `${x.toFixed(2)} inHg`;
-        const hPa = inHg2hPa(x);
-        return `${Math.round(hPa)} ${units.slp==='hPa'?'hPa':'mb'}`;
-      }
-      function fmtRainRate(inphr){
-        const x = nfix(inphr);
-        if (!Number.isFinite(x)) return '--';
-        const v = units.rainrate==='mmphr' ? in2mm(x) : x;
-        return `${v.toFixed(2)} ${units.rainrate==='mmphr'?'mm/hr':'in/hr'}`;
-      }
-      function fmtRain(inches){
-        const x = nfix(inches);
-        if (!Number.isFinite(x)) return '--';
-        const v = units.rain==='mm' ? in2mm(x) : x;
-        return `${v.toFixed(2)} ${units.rain}`;
-      }
-      function fmtWind(mph){
-        const x = nfix(mph);
-        if (!Number.isFinite(x)) return '--';
-        const v = windNum(x);
-        return `${v.toFixed(1)} ${windUnit()}`;
-      }
+      const fmtTemp=(v,key)=>Number.isFinite(nfix(v))?(units[key]==='C'?`${(f2c(nfix(v))).toFixed(1)} °C`:`${nfix(v).toFixed(1)} °F`):'--';
+      const fmtPress=v=>Number.isFinite(nfix(v))?((units.slp==='hPa'||units.slp==='mb')?`${Math.round(inHg2hPa(nfix(v)))} ${units.slp}`:`${nfix(v).toFixed(3)} inHg`):'--';
+      const fmtRainRate=v=>Number.isFinite(nfix(v))?(units.rainrate==='mmphr'?`${in2mm(nfix(v)).toFixed(2)} mm/hr`:`${nfix(v).toFixed(2)} in/hr`):'--';
+      const fmtRain=v=>Number.isFinite(nfix(v))?(units.rain==='mm'?`${in2mm(nfix(v)).toFixed(2)} mm`:`${nfix(v).toFixed(2)} in`):'--';
+      const fmtWind=v=>Number.isFinite(nfix(v))?`${windNum(nfix(v)).toFixed(1)} ${windUnit()}`:'--';
+      const toCard = d=>['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'][Math.round((((nfix(d)%360)+360)%360)/22.5)%16];
 
-      /* wind compass rotation */
+      /* needle rotation */
+      function needleRotator(el){
+        let last=0;
+        return (deg)=>{
+          const d = ((deg%360)+360)%360;
+          const delta = Math.abs(d-last);
+          const short = delta>180 ? (d>last?d-360:d+360) : d;
+          last = d;
+          el.style.transform = `rotate(${short}deg)`;
+          el.setAttribute('transform',`rotate(${short} 50 50)`);
+        };
+      }
       const rotate1 = needleRotator(document.getElementById('wx-needle'));
-      const rotate2 = needleRotator(document.getElementById('wx-needle2'));
 
-      /* details/gear behavior */
+      /* toggle panels close on outside click/esc */
       (function(){
         const gears = () => Array.from(document.querySelectorAll('details.gear'));
-        document.addEventListener('click', (e)=>{ gears().forEach(d => { if (d.open && !d.contains(e.target)) d.removeAttribute('open'); }); });
-        document.addEventListener('keydown', (e)=>{
-          if (e.key === 'Escape') gears().forEach(d => d.removeAttribute('open'));
-        });
-        gears().forEach(d => d.addEventListener('toggle', () => {
-          if (d.open) gears().forEach(o => { if (o!==d) o.removeAttribute('open'); });
-        }));
+        document.addEventListener('click', e=>{ gears().forEach(d=>{ if(d.open && !d.contains(e.target)) d.removeAttribute('open'); }); });
+        document.addEventListener('keydown', e=>{ if (e.key==='Escape') gears().forEach(d=>d.removeAttribute('open')); });
+        gears().forEach(d=> d.addEventListener('toggle', ()=>{ if(d.open) gears().forEach(o=>{ if(o!==d) o.removeAttribute('open'); }); }));
       })();
 
-      /* Conditions visibility wiring */
-      (function wireCustomizeCond(){
+      /* Conditions visibility — keep original places & snake-fill when hidden */
+      (function(){
         const grid = document.getElementById('wx-values');
         if (!grid.__order) grid.__order = Array.from(grid.children).map(el=>el.id);
         const order = grid.__order;
@@ -460,43 +410,30 @@
         });
       })();
 
-      /* Wind stats buffers */
-      const windPeriodSel = document.getElementById('uWindPeriod');
-      function windPeriodMinutes(){ return +(windPeriodSel?.value||'1'); }
-      let windBuf1=[], windBuf2=[];
-      function pushWind(buf, mph){ const now = Date.now(); buf.push([now, +mph||0]); const cutoff = now - 15*60*1000; while (buf.length && buf[0][0] < cutoff) buf.shift(); }
-      function computeAvgAndGust(buf, mins){
-        const now=Date.now(), cutoff=now - mins*60*1000;
-        const arr = buf.filter(([t])=>t>=cutoff).map(([t,v])=>v);
-        const avg = arr.length ? arr.reduce((a,b)=>a+b,0)/arr.length : NaN;
-        const gust = arr.length ? Math.max(...arr) : NaN;
-        return { avg, gust };
-      }
+      /* Wind stats buffer/period */
+      const windPeriodSel = document.getElementById('windPeriodCard');
+      function windPeriodMinutes(){ const v = windPeriodSel?.value || '1'; return parseInt(v,10)||1; }
       windPeriodSel?.addEventListener('change', ()=> updateWindStats());
+      let windBuf1 = [];
+      function pushWind(buf, mph){ const now = Date.now(); buf.push({t:now, v:Number.isFinite(+mph)?+mph:0}); const cutoff = now - 60*60*1000; while(buf.length && buf[0].t < cutoff) buf.shift(); }
+      function computeAvgAndGust(buf, minutes){ const cutoff = Date.now() - minutes*60*1000; const win = buf.filter(s=>s.t>=cutoff); if (!win.length) return {avg:NaN, gust:NaN}; const avg = win.reduce((a,s)=>a+s.v,0)/win.length; const gust = win.reduce((m,s)=> s.v>m?s.v:m, 0); return {avg, gust}; }
 
-      function bestStamp(d){ return Math.max(toMs(d.ts), toMs(d.received_at)); }
+      function set(el,txt){ if(el && el.textContent !== txt) el.textContent = txt; }
+
+      const STALE_MS = 120000;  // 2 minutes
       let lastTs = 0, lastData = null;
-      const STALE_MS = 120000; // 2 minutes
-
-      function blankAll(){
-        [
-          'wx-temp','wx-slp','wx-dew','wx-rh',
-          'wx-rainrate','wx-raintoday','wx-solar','wx-uv',
-          'wx-wind-speed','wx-wind-cardinal','wx-wind-avg','wx-wind-gust',
-          'wx-wind2-speed','wx-wind2-cardinal','wx-wind2-avg','wx-wind2-gust'
-        ].forEach(id => { const el = document.getElementById(id); if (el) el.textContent = '--'; });
-      }
 
       function isStale(){ return !lastTs || (Date.now() - lastTs) > STALE_MS; }
+      function setStatus(){ conn.textContent = isStale() ? 'Status: Offline' : 'Status: Live (Polling)'; }
 
-      // Watchdog: flip to Offline and blank values when stale
-      setInterval(() => {
-        if (isStale()){
-          conn.textContent = 'Status: Offline';
-          blankAll();
-        }
-      }, 5000);
-      function set(el,txt){ if(el && el.textContent !== txt) el.textContent = txt; }
+      function blankAll(){
+        ['wx-temp','wx-slp','wx-dew','wx-rh','wx-rainrate','wx-raintoday','wx-solar','wx-uv',
+         'wx-wind-speed','wx-wind-cardinal','wx-wind-avg','wx-wind-gust'].forEach(id=>{
+          const el=document.getElementById(id); if(el) el.textContent='--';
+        });
+      }
+      // watchdog to flip offline & clear values when stale
+      setInterval(()=>{ if (isStale()){ blankAll(); setStatus(); } }, 5000);
 
       function render(d){
         if (!d || typeof d!=='object') return;
@@ -518,21 +455,10 @@
         set(document.getElementById('wx-wind-speed'), fmtWind(spd1));
         set(document.getElementById('wx-wind-cardinal'), Number.isFinite(dir1) ? `${toCard(dir1)} ${Math.round(((dir1%360)+360)%360)}°` : '--');
 
-        const hasAn2 = Number.isFinite(nfix(d.an2_wind_mph)) || Number.isFinite(nfix(d.an2_wdir_deg));
-        const an2Card = document.getElementById('wx-wind2');
-        if (an2Card) an2Card.style.display = hasAn2 ? '' : 'none';
-        if (hasAn2){
-          const dir2 = nfix(d.an2_wdir_deg), spd2 = nfix(d.an2_wind_mph);
-          if (Number.isFinite(dir2)) rotate2(dir2);
-          if (Number.isFinite(spd2)) pushWind(windBuf2, spd2);
-          set(document.getElementById('wx-wind2-speed'), fmtWind(spd2));
-          set(document.getElementById('wx-wind2-cardinal'), Number.isFinite(dir2) ? `${toCard(dir2)} ${Math.round(((dir2%360)+360)%360)}°` : '--');
-        }
-
         updateWindStats();
         set(document.getElementById('wx-asof'), new Date(lastTs || Date.now()).toLocaleString());
         lastData = d;
-        setStatusFromData(d);
+        setStatus();
       }
 
       function updateWindStats(){
@@ -541,97 +467,25 @@
         set(document.getElementById('wx-wind-avg'),  isNaN(a1.avg)?'--':`${windNum(a1.avg).toFixed(1)} ${windUnit()}`);
         set(document.getElementById('wx-wind-gust'), isNaN(a1.gust)?'--':`${windNum(a1.gust).toFixed(1)} ${windUnit()}`);
         set(document.getElementById('wx-wind-period'), `${mins} min`);
-        set(document.getElementById('wx-wind-period2'), `${mins} min`);
-
-        const an2Card = document.getElementById('wx-wind2');
-        if (an2Card){
-          const a2 = computeAvgAndGust(windBuf2, mins);
-          set(document.getElementById('wx-wind2-avg'),  isNaN(a2.avg)?'--':`${windNum(a2.avg).toFixed(1)} ${windUnit()}`);
-          set(document.getElementById('wx-wind2-gust'), isNaN(a2.gust)?'--':`${windNum(a2.gust).toFixed(1)} ${windUnit()}`);
-        }
       }
 
-      /* initial fetch+longpoll/poll */
-      let force = (new URL(location.href)).searchParams.get('mode'); // "poll" to force polling
-      let initialTried = false;
-
-      async function initialFetch(){
+      /* fetch cycle (simple polling; server also supports streaming) */
+      async function tick(){
         try{
-          const r = await fetch(API, { cache: "no-store" });
-          if (!r.ok) throw new Error('bad');
-          const d = await r.json();
-          render(d);
-          initialTried = true;
-        }catch(e){
-          conn.textContent = 'Status: Offline';
-          if (!initialTried) setTimeout(initialFetch, 1200);
-        }
+          const r = await fetch(API, {cache:'no-store'});
+          if (r.ok){ render(await r.json()); }
+          else setStatus();
+        }catch{ setStatus(); }
+        setTimeout(tick, 5000);
       }
-      initialFetch();
-
-      (function start(){
-        if (force === 'poll' || (!force && /iPad|iPhone|iPod/.test(navigator.userAgent))) startPolling();
-        else startLongPoll();
-      })();
-
-      function startPolling(){
-        const tick = async ()=>{
-          try{
-            const r = await fetch(API, { cache: "no-store" });
-            if (r.ok) render(await r.json());
-            else conn.textContent='Status: Offline';
-          }catch(e){
-            conn.textContent='Status: Offline';
-          }finally{
-            setTimeout(tick, 5000);
-          }
-        };
-        tick();
-      }
-
-      function startLongPoll(){
-        let failures = 0;
-        (async function loop(){
-          try{
-            const r = await fetch(API + '?stream=1', { cache: "no-store" });
-            if (!r.ok) throw new Error('bad');
-            const reader = r.body.getReader();
-            const decoder = new TextDecoder();
-            let buf = '';
-            for(;;){
-              const {value, done} = await reader.read();
-              if (done) break;
-              buf += decoder.decode(value, {stream:true});
-              const idx = buf.lastIndexOf("\n");
-              if (idx >= 0){
-                const chunk = buf.slice(0, idx);
-                buf = buf.slice(idx+1);
-                chunk.split(/\n+/).forEach(line=>{
-                  try{
-                    const d = JSON.parse(line);
-                    render(d);
-                  }catch(e){}
-                });
-              }
-            }
-            failures = 0;
-            setTimeout(loop, 0);
-          }catch(e){
-            failures++;
-            if (!force && failures >= 2){ startPolling(); return; }
-            setTimeout(loop, 500);
-          }
-        })();
-      }
+      tick();
 
       document.addEventListener('visibilitychange', () => {
         if (!document.hidden) fetch(API, { cache:"no-store" })
           .then(r => r.ok ? r.json() : null)
-          .then(d => { if (d) render(d); else conn.textContent='Status: Offline'; })
-          .catch(()=>{ conn.textContent='Status: Offline'; });
+          .then(d => { if (d) render(d); else setStatus(); })
+          .catch(()=> setStatus());
       });
-
-      makePlotsLinksNewTab(document.querySelector('.plots'));
     })();
   </script>
 </body>
