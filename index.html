@@ -618,12 +618,23 @@ function startPolling(){
 async function startStream(){
   try{
     usingStream = true;
-    // If your backend supports it, this endpoint should stream NDJSON lines.
     const resp = await fetch(API + '?stream=1', { cache: 'no-store' });
-    if (!resp.ok || !resp.body) throw new Error('no stream');
+    if (!resp.ok) throw new Error('bad status');
 
+    const ct = (resp.headers.get('content-type') || '').toLowerCase();
+
+    // If the server returned regular JSON (not a stream), render once and fall back.
+    if (!ct.includes('ndjson') && !ct.includes('x-ndjson') && !ct.includes('event-stream')) {
+      usingStream = false;
+      try { render(await resp.json()); } catch {}
+      startPolling();
+      return;
+    }
+
+    // NDJSON or SSE stream
     const reader  = resp.body.getReader();
     const decoder = new TextDecoder();
+    const isSSE   = ct.includes('event-stream');
     let buffer = '';
 
     for(;;){
@@ -631,16 +642,22 @@ async function startStream(){
       if (done) break;
       buffer += decoder.decode(value, { stream: true });
 
-      let idx;
-      while ((idx = buffer.indexOf('\n')) !== -1){
-        const line = buffer.slice(0, idx).trim();
-        buffer = buffer.slice(idx + 1);
+      let nl;
+      while ((nl = buffer.indexOf('\n')) !== -1){
+        let line = buffer.slice(0, nl); buffer = buffer.slice(nl + 1);
+        line = line.trim();
         if (!line) continue;
+
+        if (isSSE) {
+          // Only process SSE data lines
+          if (!line.startsWith('data:')) continue;
+          line = line.slice(5).trim();
+        }
         try { render(JSON.parse(line)); } catch {}
       }
     }
 
-    // Stream ended gracefully — try to restart shortly.
+    // Stream ended gracefully — try to restart.
     usingStream = false;
     setTimeout(startStream, 250);
   }catch(e){
@@ -649,6 +666,7 @@ async function startStream(){
     startPolling();
   }
 }
+
 
 // Start in streaming mode if possible; otherwise polling will take over.
 startStream();
