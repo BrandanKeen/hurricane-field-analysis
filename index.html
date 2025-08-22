@@ -393,7 +393,13 @@
       const windUnit= () => units.wind==='kt'?'kt':units.wind==='kmh'?'km/h':units.wind==='mps'?'m/s':'mph';
 
       const fmtTemp=(v,key)=>Number.isFinite(nfix(v))?(units[key]==='C'?`${(f2c(nfix(v))).toFixed(1)} °C`:`${nfix(v).toFixed(1)} °F`):'--';
-      const fmtPress=v=>Number.isFinite(nfix(v))?((units.slp==='hPa'||units.slp==='mb')?`${Math.round(inHg2hPa(nfix(v)))} ${units.slp}`:`${nfix(v).toFixed(3)} inHg`):'--';
+const fmtPress = v =>
+  Number.isFinite(nfix(v))
+    ? ((units.slp === 'hPa' || units.slp === 'mb')
+        ? `${(inHg2hPa(nfix(v))).toFixed(1)} ${units.slp}`   // ← exactly 1 decimal
+        : `${nfix(v).toFixed(3)} inHg`)
+    : '--';
+
       const fmtRainRate=v=>Number.isFinite(nfix(v))?(units.rainrate==='mmphr'?`${in2mm(nfix(v)).toFixed(2)} mm/hr`:`${nfix(v).toFixed(2)} in/hr`):'--';
       const fmtRain=v=>Number.isFinite(nfix(v))?(units.rain==='mm'?`${in2mm(nfix(v)).toFixed(2)} mm`:`${nfix(v).toFixed(2)} in`):'--';
       const fmtWind=v=>Number.isFinite(nfix(v))?`${windNum(nfix(v)).toFixed(1)} ${windUnit()}`:'--';
