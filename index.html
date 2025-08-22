@@ -596,12 +596,14 @@ async function computeWindowFromServer(minutes){
   set(document.getElementById('wx-wind-period2'), ptxt);
 }
 
-/* fetch cycle — prefer streaming/long-poll, fallback to 5s polling */
+// Faster fallback polling (1s when live, 3s when stale/offline)
+const POLL_MS_ACTIVE = 1000;
+const POLL_MS_STALE  = 3000;
+
 function startPolling(){
   usingStream = false;
   const tick = async ()=>{
-    // If streaming got enabled elsewhere, stop this polling loop.
-    if (usingStream) return;
+    if (usingStream) return; // streaming took over
     try{
       const r = await fetch(API, { cache: 'no-store' });
       if (r.ok) render(await r.json());
@@ -609,11 +611,13 @@ function startPolling(){
     }catch{
       setStatus();
     }finally{
-      setTimeout(tick, 5000);
+      const delay = isStale() ? POLL_MS_STALE : POLL_MS_ACTIVE;
+      setTimeout(tick, delay);
     }
   };
   tick();
 }
+
 
 async function startStream(){
   try{
