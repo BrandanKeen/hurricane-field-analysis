@@ -54,7 +54,7 @@
     .menu-grid label.total-right{grid-column:2}
 
     /* Conditions layout; “snake” order when items are hidden */
-    .cond-grid{display:grid;gap:32px 34px;grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-flow:row dense;direction:rtl;margin-top:22px}
+    .cond-grid{   display:grid;   gap:32px 34px;   grid-template-columns:repeat(2,minmax(0,1fr));   grid-auto-flow:row dense; /* keeps 1–8 row-major and fills gaps */   margin-top:22px; }
     .cond-item{direction:ltr}
     .cond-item .label{font-weight:800;font-size:clamp(15px,1.9vw,19px); color:var(--title-ink)}
     .cond-item .value{font-weight:800;letter-spacing:.2px;font-variant-numeric:tabular-nums;font-size:clamp(28px,4.4vw,40px)}
