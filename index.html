@@ -446,9 +446,38 @@
       })();
 
       /* Wind stats buffer/period */
-      const windPeriodSel = document.getElementById('windPeriodCard');
-      function windPeriodMinutes(){ const v = windPeriodSel?.value || '1'; return parseInt(v,10)||1; }
-      windPeriodSel?.addEventListener('change', ()=> updateWindStats());
+const windPeriodSel = document.getElementById('windPeriodCard');
+let _windPeriodMin = 1;
+
+// Read the committed value reliably on iOS Safari
+function readPeriodSelect(){
+  if (!windPeriodSel) return 1;
+  const opt = windPeriodSel.options[windPeriodSel.selectedIndex];
+  const v = (windPeriodSel.value || (opt && opt.value) || '1') + '';
+  const m = parseInt(v, 10);
+  return Number.isFinite(m) && m > 0 ? m : 1;
+}
+
+// Getter the rest of the code uses
+function windPeriodMinutes(){ return _windPeriodMin; }
+
+// Apply selection: update labels + recompute averages/gust
+function applyPeriod(){
+  _windPeriodMin = readPeriodSelect();
+  const txt = `${_windPeriodMin} min`;
+  const p1 = document.getElementById('wx-wind-period');  if (p1) p1.textContent = txt;
+  const p2 = document.getElementById('wx-wind-period2'); if (p2) p2.textContent = txt; // safe if missing
+  updateWindStats();
+}
+
+// On iPhone, fire after the picker closes/commits; desktop also fine
+['change','input','click','touchend','pointerup','blur'].forEach(ev=>{
+  windPeriodSel?.addEventListener(ev, () => { requestAnimationFrame(applyPeriod); }, { passive: true });
+});
+
+// Initialize once on load
+applyPeriod();
+
       let windBuf1 = [];
       function pushWind(buf, mph){ const now = Date.now(); buf.push({t:now, v:Number.isFinite(+mph)?+mph:0}); const cutoff = now - 60*60*1000; while(buf.length && buf[0].t < cutoff) buf.shift(); }
       function computeAvgAndGust(buf, minutes){ const cutoff = Date.now() - minutes*60*1000; const win = buf.filter(s=>s.t>=cutoff); if (!win.length) return {avg:NaN, gust:NaN}; const avg = win.reduce((a,s)=>a+s.v,0)/win.length; const gust = win.reduce((m,s)=> s.v>m?s.v:m, 0); return {avg, gust}; }
