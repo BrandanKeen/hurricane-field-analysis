@@ -396,7 +396,7 @@
 const fmtPress = v =>
   Number.isFinite(nfix(v))
     ? ((units.slp === 'hPa' || units.slp === 'mb')
-        ? `${(inHg2hPa(nfix(v))).toFixed(1)} ${units.slp}`   // ← exactly 1 decimal
+        ? `${(inHg2hPa(nfix(v))).toFixed(1)} ${units.slp}`   // 1 decimal for hPa/mb
         : `${nfix(v).toFixed(3)} inHg`)
     : '--';
 
@@ -404,6 +404,19 @@ const fmtPress = v =>
       const fmtRain=v=>Number.isFinite(nfix(v))?(units.rain==='mm'?`${in2mm(nfix(v)).toFixed(2)} mm`:`${nfix(v).toFixed(2)} in`):'--';
       const fmtWind=v=>Number.isFinite(nfix(v))?`${windNum(nfix(v)).toFixed(1)} ${windUnit()}`:'--';
       const toCard = d=>['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'][Math.round((((nfix(d)%360)+360)%360)/22.5)%16];
+
+      /* Prefer server-computed windows from /latest, with sensible fallbacks */
+      function serverFieldsFor(mins, d){
+        if (!d || typeof d !== 'object') return null;
+        const keyAvg  = `wind_avg_${mins}m_mph`;
+        const keyGust = `wind_gust_${mins}m_mph`;
+        let avg  = Number.isFinite(+d[keyAvg])  ? +d[keyAvg]  : NaN;
+        let gust = Number.isFinite(+d[keyGust]) ? +d[keyGust] : NaN;
+        // Legacy back-compat mirrors
+        if (mins === 1  && !Number.isFinite(avg)  && Number.isFinite(+d.iss_wavg_mph))     avg  = +d.iss_wavg_mph;
+        if (mins === 10 && !Number.isFinite(gust) && Number.isFinite(+d.iss_wgust10_mph))  gust = +d.iss_wgust10_mph;
+        return (Number.isFinite(avg) || Number.isFinite(gust)) ? { avg, gust } : null;
+      }
 
       /* needle rotation */
       function needleRotator(el){
@@ -592,6 +605,7 @@ async function computeWindowFromServer(minutes, endTsMs){
         updateWindStats();
         set(document.getElementById('wx-asof'), new Date(lastTs || Date.now()).toLocaleString());
         lastData = d;
+        window.lastData = d; // expose for serverFieldsFor() path
         setStatus();
       }
 
@@ -600,22 +614,35 @@ let _serverWinCache = { ts: 0, minutes: 0, stats: null };
 
 async function updateWindStats(){
   const mins = windPeriodMinutes();
-  let stats = null;
 
-  if (USE_SERVER_WINDOW){
-    const canReuse = (_serverWinCache.ts === lastTs && _serverWinCache.minutes === mins && _serverWinCache.stats);
-    if (canReuse){
-      stats = _serverWinCache.stats;
-    } else {
-      // base window on latest server timestamp (lastTs), not client clock
-      const s = await computeWindowFromServer(mins, lastTs);
-      if (s){ _serverWinCache = { ts: lastTs, minutes: mins, stats: s }; }
-      stats = s; // might still be null → fall back below
+  // 1) Prefer server-computed windows embedded in /latest
+  let stats = null;
+  if (typeof serverFieldsFor === 'function' && window.lastData) {
+    const sf = serverFieldsFor(mins, window.lastData);
+    if (sf){
+      stats = {
+        avg:  Number.isFinite(+sf.avg)  ? +sf.avg  : NaN,
+        gust: Number.isFinite(+sf.gust) ? +sf.gust : NaN
+      };
     }
   }
 
-  // Fallback if server not available OR returned unusable numbers
-  if (stats === null || (isNaN(stats.avg) && isNaN(stats.gust))){
+  // 2) Fallback: compute from API history (keeps page robust if server windows absent)
+  if (!stats || (isNaN(stats.avg) && isNaN(stats.gust))){
+    if (USE_SERVER_WINDOW){
+      const canReuse = (_serverWinCache.ts === lastTs && _serverWinCache.minutes === mins && _serverWinCache.stats);
+      if (canReuse){
+        stats = _serverWinCache.stats;
+      } else {
+        const s = await computeWindowFromServer(mins, lastTs);
+        if (s){ _serverWinCache = { ts: lastTs, minutes: mins, stats: s }; }
+        stats = s;
+      }
+    }
+  }
+
+  // 3) Last resort: local buffer
+  if (!stats || (isNaN(stats.avg) && isNaN(stats.gust))){
     stats = computeAvgAndGust(windBuf1, mins);
   }
 
