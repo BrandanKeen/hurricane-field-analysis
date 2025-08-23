@@ -68,20 +68,26 @@ Observations captured are presented below chronologically with the most recent h
 
 <h2 align="center" style="margin:0 0 2em">Hurricane Helene (September 26, 2024) – Perry, FL</h2>
 
-
-<div align="center" style="display:flex;justify-content:center;gap:12px;flex-wrap:wrap;">
-  <a href="Images/Helene/Helene_animated.gif" target="_blank" rel="noopener"
-     style="display:block;width:48%;min-width:320px">
+<!-- Stack like Milton; fixed max width so both look identical in size -->
+<p align="center" style="margin:0 0 12px">
+  <a href="Images/Helene/Helene_animated.gif" target="_blank" rel="noopener">
     <img src="Images/Helene/Helene_animated.gif" alt="Helene Radar Loop"
-         style="display:block;width:100%;height:auto">
+         style="display:block;max-width:420px;width:100%;height:auto;margin:0 auto;">
   </a>
+</p>
 
-  <a href="Images/Helene/Helene_eye_resize.png" target="_blank" rel="noopener"
-     style="display:block;width:48%;min-width:320px">
+<p align="center" style="margin:0 0 12px">
+  <a href="Images/Helene/Helene_eye_resize.png" target="_blank" rel="noopener">
     <img src="Images/Helene/Helene_eye_resize.png" alt="Helene Eye Photo"
-         style="display:block;width:100%;height:auto">
+         style="display:block;max-width:420px;width:100%;height:auto;margin:0 auto;">
   </a>
-</div>
+</p>
+
+<p align="center" style="font-size:smaller;">
+  <em><strong>Top:</strong> Reflectivity of Hurricane Helene during intercept; crosshairs mark vehicle location.
+  <strong>Bottom:</strong> Vehicle and station in the eye.</em>
+</p>
+
 
 
 <p align="center" style="font-size:smaller;"><em><strong>Top:</strong> Reflectivity of Hurricane Helene during intercept; crosshairs mark vehicle location. <strong>Bottom:</strong> Vehicle and station in the eye.</em></p>
