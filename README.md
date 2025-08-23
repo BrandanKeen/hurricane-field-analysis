@@ -115,15 +115,23 @@ Observations captured are presented below chronologically with the most recent h
 
 All observations were recorded using a Davis Vantage Pro 2 weather station mounted on a custom-built vehicle mount. Measurements were wirelessly transmitted to a data logging console connected to a computer running Davis WeatherLink software. This enables real-time monitoring and archival of the observations from inside the vehicle.
 
-<p align="center">
-  <a href="https://youtube.com/shorts/FWOdxVycSVQ?si=eooDoXEakciPfw9Q" target="_blank">
-    <img src="Images/logger_computer.png" alt="Watch Station Setup Video" width="250">
-  </a>
-  <br>
-  <em style="font-size:smaller;">Click to watch a short clip of the station and logging setup prior to Hurricane Milton.</em>
+<!-- Embedded video: Station & logging setup (Milton) -->
+<div align="center" class="yt-embed" style="max-width:720px;margin:8px auto 2px;">
+  <div style="position:relative;width:100%;padding-top:56.25%;">
+    <iframe
+      src="https://www.youtube.com/embed/FWOdxVycSVQ?rel=0"
+      title="Station & logging setup prior to Hurricane Milton"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      allowfullscreen
+      referrerpolicy="strict-origin-when-cross-origin"
+      style="position:absolute;inset:0;width:100%;height:100%;border:0;border-radius:10px;box-shadow:0 6px 16px rgba(0,0,0,.08);">
+    </iframe>
+  </div>
+</div>
+<p align="center" style="font-size:smaller;margin-top:6px;">
+  <em>Short clip of the station and logging setup prior to Hurricane Milton.
+  <a href="https://youtube.com/shorts/FWOdxVycSVQ?si=eooDoXEakciPfw9Q" target="_blank" rel="noopener">Watch on YouTube</a>.</em>
 </p>
-
-
 
 The instrumentation suite included:
 
@@ -147,19 +155,28 @@ Planned expansions and enhancements to this project are already underway, with s
 
      - ***Update — August 11, 2025***: All three VP2 stations and data logging hardware/shelters have been completed and are ready for deployment. See video below.
 
-  <p align="center">
-    <a href="https://youtube.com/shorts/5Y_rzp0XOUs?si=vvUOBHzTGN_1odu3" target="_blank" rel="noopener noreferrer">
-      <img src="Images/Deplyable_Station2.JPEG" alt="Watch Multi-Station VP2 readiness walk-through (Aug 2025)" width="300">
-    </a>
-    <br>
-    <em style="font-size:smaller;">Click to see an example of the VP2 station data logging hardware/shelter.</em>
+  <!-- Embedded video: Multi-station VP2 readiness (Aug 2025) -->
+  <div align="center" class="yt-embed" style="max-width:720px;margin:8px auto 2px;">
+    <div style="position:relative;width:100%;padding-top:56.25%;">
+      <iframe
+        src="https://www.youtube.com/embed/5Y_rzp0XOUs?rel=0"
+        title="Multi-station VP2 readiness walk-through (Aug 2025)"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        allowfullscreen
+        referrerpolicy="strict-origin-when-cross-origin"
+        style="position:absolute;inset:0;width:100%;height:100%;border:0;border-radius:10px;box-shadow:0 6px 16px rgba(0,0,0,.08);">
+      </iframe>
+    </div>
+  </div>
+  <p align="center" style="font-size:smaller;margin-top:6px;">
+    <em>Walk-through of the deployable VP2 station hardware/shelter.
+    <a href="https://youtube.com/shorts/5Y_rzp0XOUs?si=vvUOBHzTGN_1odu3" target="_blank" rel="noopener">Watch on YouTube</a>.</em>
   </p>
 
 <br><br>
 
 - **Adjustable Station Mount**:\
   Reinforced, height-adjustable mast raises the anemometer 10–40 ft (3–12.2 m), enabling WMO 10 m–standard wind measurements and improving peak wind/gust capture on the vehicle-based station.
-
 
 <p align="center">
   <img src="Images/new_station_mount.png" alt="Adjustable Station Mount" width="900">
@@ -184,3 +201,4 @@ Planned expansions and enhancements to this project are already underway, with s
 
 Figures and methodologies may be used for research and educational purposes with appropriate attribution.
 
+<br><br>
