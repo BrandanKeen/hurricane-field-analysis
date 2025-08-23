@@ -88,10 +88,6 @@ Observations captured are presented below chronologically with the most recent h
   <strong>Bottom:</strong> Vehicle and station in the eye.</em>
 </p>
 
-
-
-<p align="center" style="font-size:smaller;"><em><strong>Top:</strong> Reflectivity of Hurricane Helene during intercept; crosshairs mark vehicle location. <strong>Bottom:</strong> Vehicle and station in the eye.</em></p>
-
 ---
 
 ![Multi-Panel Summary](Images/Helene/Hurricane_Helene_MultiPanel.png)
