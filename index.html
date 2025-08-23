@@ -579,13 +579,32 @@ async function computeWindowFromServer(minutes, endTsMs){
           const el=document.getElementById(id); if(el) el.textContent='--';
         });
       }
-      // watchdog to flip offline & clear values when stale
-      setInterval(()=>{ if (isStale()){ blankAll(); setStatus(); } }, 5000);
+      // watchdog: blank once when we enter stale, restore on fresh data
+let _staleHold = false;
+setInterval(() => {
+  const stale = isStale();
+  if (stale && !_staleHold) {
+    blankAll();
+    _staleHold = true;   // prevent repeated blanking
+  }
+  if (!stale && _staleHold) {
+    _staleHold = false;  // fresh sample arrived, allow rendering again
+  }
+  setStatus();
+}, 1000);
 
       function render(d){
-        if (!d || typeof d!=='object') return;
-        const stamp = bestStamp(d);
-        if (stamp && stamp >= lastTs - 2000) lastTs = Math.max(lastTs, stamp);
+  if (!d || typeof d!=='object') return;
+  const stamp = bestStamp(d);
+  if (stamp && stamp >= lastTs - 2000) lastTs = Math.max(lastTs, stamp);
+
+  // Do not repaint values while stale — avoids flicker with watchdog blanking
+  if (isStale()){
+    set(document.getElementById('wx-asof'), new Date(lastTs || Date.now()).toLocaleString());
+    lastData = d;
+    setStatus();
+    return;
+  }
 
         set(document.getElementById('wx-temp'), fmtTemp(d.iss_temp_F, 'temp'));
         set(document.getElementById('wx-dew'),  fmtTemp(d.iss_dew_F,  'dew'));
